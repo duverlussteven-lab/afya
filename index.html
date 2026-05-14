@@ -59,6 +59,75 @@ nav{position:fixed;top:0;left:0;right:0;z-index:300;height:68px;display:flex;ali
 [data-theme="dark"] .dm-btn::after{transform:translateX(17px)}
 .nav-cta{background:var(--ink);color:white;padding:9px 20px;border-radius:6px;border:none;cursor:pointer;font-family:var(--ui);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;transition:background .2s,transform .15s}
 .nav-cta:hover{background:var(--sage);transform:translateY(-1px)}
+/* ═══ USER DROPDOWN MENU ═══ */
+.user-menu{
+  position:absolute;
+  top:calc(100% + 10px);
+  right:0;
+  background:white;
+  border:1px solid rgba(109,143,130,.18);
+  border-radius:14px;
+  padding:8px;
+  box-shadow:0 16px 48px rgba(29,43,58,.16);
+  z-index:999;
+  min-width:220px;
+  display:none;
+}
+.user-menu.open{display:block;animation:fadeUp .2s ease}
+.user-menu-header{
+  padding:14px 16px 12px;
+  border-bottom:1px solid var(--border);
+  margin-bottom:8px;
+}
+.user-menu-name{
+  font-family:var(--ui);
+  font-size:13px;
+  font-weight:700;
+  color:var(--ink);
+}
+.user-menu-email{
+  font-size:11px;
+  color:var(--ink3);
+  margin-top:2px;
+}
+.user-menu-item{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 14px;
+  border-radius:8px;
+  cursor:pointer;
+  font-family:var(--ui);
+  font-size:12px;
+  font-weight:600;
+  color:var(--ink2);
+  text-decoration:none;
+  transition:background .15s;
+}
+.user-menu-item:hover{
+  background:rgba(109,143,130,.08);
+  color:var(--sage);
+}
+.user-menu-icon{
+  font-size:14px;
+  width:18px;
+  text-align:center;
+}
+.user-menu-divider{
+  height:1px;
+  background:var(--border);
+  margin:6px 0;
+}
+.user-menu-signout{
+  color:var(--red);
+}
+.user-menu-signout:hover{
+  background:rgba(201,79,58,.08);
+  color:var(--red);
+}
+
+/* Le bouton parent doit être en position relative */
+.nav-right{position:relative}
 .lang-picker{position:relative}
 .lang-current{display:flex;align-items:center;gap:6px;background:transparent;border:1.5px solid rgba(109,143,130,.3);border-radius:8px;padding:7px 12px;cursor:pointer;font-family:var(--ui);font-size:12px;font-weight:600;color:#1D2B3A;transition:all .2s;white-space:nowrap}
 .lang-current:hover{border-color:var(--sage);background:rgba(109,143,130,.06)}
@@ -399,6 +468,42 @@ footer{background:var(--ink);padding:60px 52px 32px}
   <span id="toastMsg">Done!</span>
 </div>
 
+<!-- MODAL AUTHENTIFICATION -->
+<div class="modal-overlay" id="authModal" onclick="if(event.target===this)closeAuthModal()">
+  <div class="modal" style="max-width:440px">
+    <button class="modal-close" onclick="closeAuthModal()">✕</button>
+
+    <!-- Tabs Sign In / Sign Up -->
+    <div style="display:flex;gap:4px;background:var(--bg3);border-radius:10px;padding:4px;margin-bottom:24px">
+      <button id="tabSignIn" class="plan-tab active" onclick="switchAuthTab('signin')" style="flex:1">Sign In</button>
+      <button id="tabSignUp" class="plan-tab" onclick="switchAuthTab('signup')" style="flex:1">Sign Up</button>
+    </div>
+
+    <h2 class="modal-title" id="authTitle">Welcome back</h2>
+    <p class="modal-sub" id="authSub">Sign in to write reviews and save your trips.</p>
+
+    <!-- Champ prénom (Sign Up uniquement) -->
+    <div id="firstNameWrap" style="display:none">
+      <label>First Name</label>
+      <input type="text" id="authFirstName" placeholder="Steven">
+    </div>
+
+    <label>Email</label>
+    <input type="email" id="authEmail" placeholder="you@example.com">
+
+    <label>Password</label>
+    <input type="password" id="authPassword" placeholder="At least 6 characters">
+
+    <div id="authError" style="display:none;color:var(--red);font-size:12px;margin-bottom:12px;padding:10px;background:rgba(201,79,58,.1);border-radius:8px"></div>
+
+    <button class="submit-review" id="authSubmitBtn" onclick="handleAuth()">Sign In</button>
+
+    <p style="text-align:center;margin-top:16px;font-size:12px;color:var(--ink3);font-family:var(--ui)">
+      <span id="authSwitchText">Don't have an account?</span>
+      <a href="#" onclick="switchAuthTab(authMode==='signin'?'signup':'signin');return false" style="color:var(--sage);text-decoration:underline;cursor:pointer" id="authSwitchLink">Sign up</a>
+    </p>
+  </div>
+</div>
 <!-- MODAL AVIS -->
 <div class="modal-overlay" id="reviewModal" onclick="if(event.target===this)closeModal()">
   <div class="modal">
@@ -496,7 +601,30 @@ footer{background:var(--ink);padding:60px 52px 32px}
       </div>
     </div>
     <button class="dm-btn" onclick="toggleDark()" aria-label="Dark mode"></button>
-    <button class="nav-cta" onclick="document.getElementById('planner').scrollIntoView({behavior:'smooth'})">Try Free</button>
+    <button class="nav-cta" id="authBtn" onclick="handleAuthBtnClick()">Sign In</button>
+<div class="user-menu" id="userMenu">
+  <div class="user-menu-header">
+    <div class="user-menu-name" id="userMenuName">Steven</div>
+    <div class="user-menu-email" id="userMenuEmail">steven@example.com</div>
+  </div>
+  <a href="mon-espace.html" class="user-menu-item">
+    <span class="user-menu-icon">🏠</span>
+    <span>My Space</span>
+  </a>
+  <a href="parametres.html" class="user-menu-item">
+    <span class="user-menu-icon">⚙️</span>
+    <span>Settings</span>
+  </a>
+  <a href="contact.html" class="user-menu-item">
+    <span class="user-menu-icon">📞</span>
+    <span>Contact</span>
+  </a>
+  <div class="user-menu-divider"></div>
+  <a href="#" onclick="signOut();return false" class="user-menu-item user-menu-signout">
+    <span class="user-menu-icon">🚪</span>
+    <span>Sign Out</span>
+  </a>
+</div>
   </div>
 </nav>
 
@@ -804,6 +932,156 @@ const SUPABASE_URL = 'https://zryfceystyipimniarst.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_uI4dQX6KFlLcxtxqw52ewA_ujacVkch';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 console.log('✅ Supabase connected');
+// ═════════════════════ AUTHENTICATION ═════════════════════
+
+let currentUser = null;
+let authMode = 'signin'; // 'signin' ou 'signup'
+
+// Ouvre le modal d'auth
+function openAuthModal() {
+  document.getElementById('authModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeAuthModal() {
+  document.getElementById('authModal').classList.remove('open');
+  document.body.style.overflow = '';
+  document.getElementById('authError').style.display = 'none';
+}
+
+// Bascule entre Sign In et Sign Up
+function switchAuthTab(mode) {
+  authMode = mode;
+  const isSignIn = mode === 'signin';
+  document.getElementById('tabSignIn').classList.toggle('active', isSignIn);
+  document.getElementById('tabSignUp').classList.toggle('active', !isSignIn);
+  document.getElementById('authTitle').textContent = isSignIn ? 'Welcome back' : 'Create your account';
+  document.getElementById('authSub').textContent = isSignIn ? 'Sign in to write reviews and save your trips.' : 'Join AFYA and start planning amazing days.';
+  document.getElementById('firstNameWrap').style.display = isSignIn ? 'none' : '';
+  document.getElementById('authSubmitBtn').textContent = isSignIn ? 'Sign In' : 'Create Account';
+  document.getElementById('authSwitchText').textContent = isSignIn ? "Don't have an account?" : 'Already have an account?';
+  document.getElementById('authSwitchLink').textContent = isSignIn ? 'Sign up' : 'Sign in';
+  document.getElementById('authError').style.display = 'none';
+}
+
+// Soumission du formulaire
+async function handleAuth() {
+  const email = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPassword').value;
+  const firstName = document.getElementById('authFirstName').value.trim();
+  const errorEl = document.getElementById('authError');
+  errorEl.style.display = 'none';
+
+  if (!email || !password) {
+    showAuthError('Please fill all fields');
+    return;
+  }
+  if (authMode === 'signup' && password.length < 6) {
+    showAuthError('Password must be at least 6 characters');
+    return;
+  }
+
+  if (authMode === 'signup') {
+    // Inscription
+    const { data, error } = await sb.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { first_name: firstName }
+      }
+    });
+    if (error) {
+      showAuthError(error.message);
+      return;
+    }
+    // Met à jour le prénom dans la table profiles
+    if (data.user && firstName) {
+      await sb.from('profiles').update({ first_name: firstName }).eq('id', data.user.id);
+    }
+    toast(`🎉 Welcome ${firstName || 'aboard'}! Check your email to confirm.`);
+    closeAuthModal();
+  } else {
+    // Connexion
+    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+    if (error) {
+      showAuthError(error.message);
+      return;
+    }
+    toast(`👋 Welcome back!`);
+    closeAuthModal();
+    await refreshUserState();
+  }
+}
+
+function showAuthError(msg) {
+  const el = document.getElementById('authError');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+// Déconnexion
+async function signOut() {
+  await sb.auth.signOut();
+  currentUser = null;
+  refreshUserState();
+  toast('👋 See you soon!');
+}
+
+// Met à jour l'UI selon l'état de connexion
+async function refreshUserState() {
+  const { data: { user } } = await sb.auth.getUser();
+  const authBtn = document.getElementById('authBtn');
+  const userMenu = document.getElementById('userMenu');
+
+  if (user) {
+    // Récupère le profil avec le prénom
+    const { data: profile } = await sb.from('profiles').select('first_name, role').eq('id', user.id).single();
+    currentUser = { ...user, profile };
+    const displayName = profile?.first_name || user.email.split('@')[0];
+
+    authBtn.textContent = `👋 ${displayName}`;
+    authBtn.title = 'Click for menu';
+
+    // Met à jour le menu dropdown
+    document.getElementById('userMenuName').textContent = displayName;
+    document.getElementById('userMenuEmail').textContent = user.email;
+
+    console.log('✅ Logged in as:', user.email, '— Role:', profile?.role);
+  } else {
+    currentUser = null;
+    authBtn.textContent = 'Sign In';
+    authBtn.title = '';
+    userMenu.classList.remove('open');
+  }
+}
+
+// Gère le clic sur le bouton (ouvre modal OU menu selon état)
+function handleAuthBtnClick() {
+  if (currentUser) {
+    // Connecté → toggle menu dropdown
+    document.getElementById('userMenu').classList.toggle('open');
+  } else {
+    // Pas connecté → ouvre modal Sign In
+    openAuthModal();
+  }
+}
+
+// Ferme le menu si on clique en dehors
+document.addEventListener('click', (e) => {
+  const menu = document.getElementById('userMenu');
+  const btn = document.getElementById('authBtn');
+  if (menu && !menu.contains(e.target) && e.target !== btn) {
+    menu.classList.remove('open');
+  }
+});
+
+// Lance la vérif au démarrage
+refreshUserState();
+
+// Surveille les changements d'auth en temps réel
+sb.auth.onAuthStateChange((event, session) => {
+  refreshUserState();
+});
 // ═════════════════════ LOAD DATA FROM SUPABASE ═════════════════════
 
 // Charger les restaurants depuis Supabase
