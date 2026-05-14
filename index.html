@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AFYA — All for Your Activities</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ═══ TOKENS ═══ */
+:root{
+  --bg:#FDFCF9; --bg2:#F6F3EE; --bg3:#EEEAE2; --sur:#FFFFFF;
+  --ink:#1D2B3A; --ink2:#3B5068; --ink3:#7A93A8;
+  --sage:#6D8F82; --sage-l:#8BAD9E; --sage-p:#C8D8D2;
+  --gold:#D4A843; --green:#4A9E6F; --red:#C94F3A;
+  --border:rgba(109,143,130,.18); --border2:rgba(109,143,130,.3);
+  --shadow:rgba(29,43,58,.07); --shadow2:rgba(29,43,58,.14);
+  --disp:'Cormorant Garamond',serif; --ui:'Syne',sans-serif; --body:'DM Sans',sans-serif;
+  --r:16px; --r-sm:8px; --r-lg:20px;
+}
+[data-theme="dark"]{
+  --bg:#111A22; --bg2:#162028; --bg3:#1D2B3A; --sur:#1E2C3A;
+  --ink:#F0EDE8; --ink2:#A8BDC8; --ink3:#6B8A9A;
+  --border:rgba(139,173,158,.14); --border2:rgba(139,173,158,.24);
+  --shadow:rgba(0,0,0,.22); --shadow2:rgba(0,0,0,.38);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.65;overflow-x:hidden;transition:background .3s,color .3s}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit}
+section{padding:96px 48px}
+.inner{max-width:1140px;margin:0 auto}
+.eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--ui);font-size:9px;font-weight:700;letter-spacing:.32em;text-transform:uppercase;color:var(--sage);margin-bottom:16px}
+.eyebrow::before{content:'';display:block;width:20px;height:1px;background:var(--sage)}
+.sh2{font-family:var(--disp);font-size:clamp(34px,4vw,52px);font-weight:300;line-height:1.12;color:var(--ink);margin-bottom:14px}
+.sh2 em{font-style:italic;color:var(--sage)}
+.slead{font-size:14.5px;color:var(--ink2);line-height:1.8;max-width:520px;margin-bottom:32px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.85)}}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.reveal{opacity:0;transform:translateY(20px);transition:opacity .7s,transform .7s}
+.reveal.in{opacity:1;transform:translateY(0)}
+.spin{animation:spin 3s linear infinite}
+
+/* ═══ NAV ═══ */
+nav{position:fixed;top:0;left:0;right:0;z-index:300;height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 52px;background:rgba(255,255,255,.97);border-bottom:1px solid var(--border);backdrop-filter:blur(12px);transition:box-shadow .3s}
+[data-theme="dark"] nav{background:rgba(17,26,34,.97);border-bottom:1px solid rgba(139,173,158,.14)}
+[data-theme="dark"] .logo-light{display:none!important}
+[data-theme="dark"] .logo-dark{display:inline-block!important}
+[data-theme="dark"] nav .nav-links a{color:#A8BDC8}
+[data-theme="dark"] nav .nav-links a:hover{color:#8BAD9E}
+[data-theme="dark"] .lang-current{color:#F0EDE8;border-color:rgba(139,173,158,.24)}
+.nav-links{display:flex;align-items:center;gap:28px;list-style:none}
+.nav-links a{font-family:var(--ui);font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--ink2);transition:color .2s}
+.nav-links a:hover{color:var(--sage)}
+.nav-right{display:flex;align-items:center;gap:12px}
+.dm-btn{width:40px;height:23px;border-radius:100px;border:none;background:var(--border2);cursor:pointer;position:relative;flex-shrink:0;transition:background .3s}
+.dm-btn::after{content:'';position:absolute;top:3px;left:3px;width:17px;height:17px;border-radius:50%;background:var(--sage);transition:transform .3s}
+[data-theme="dark"] .dm-btn::after{transform:translateX(17px)}
+.nav-cta{background:var(--ink);color:white;padding:9px 20px;border-radius:6px;border:none;cursor:pointer;font-family:var(--ui);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;transition:background .2s,transform .15s}
+.nav-cta:hover{background:var(--sage);transform:translateY(-1px)}
+.lang-picker{position:relative}
+.lang-current{display:flex;align-items:center;gap:6px;background:transparent;border:1.5px solid rgba(109,143,130,.3);border-radius:8px;padding:7px 12px;cursor:pointer;font-family:var(--ui);font-size:12px;font-weight:600;color:#1D2B3A;transition:all .2s;white-space:nowrap}
+.lang-current:hover{border-color:var(--sage);background:rgba(109,143,130,.06)}
+.lang-flag{font-size:16px;line-height:1}
+.lang-code{font-size:11px;font-weight:700;letter-spacing:.06em}
+.lang-chev{color:rgba(29,43,58,.4);transition:transform .2s}
+.lang-menu{position:absolute;top:calc(100% + 10px);right:0;background:white;border:1px solid rgba(109,143,130,.18);border-radius:16px;padding:12px;box-shadow:0 16px 48px rgba(29,43,58,.16);z-index:999;width:300px;display:none}
+.lang-menu.open{display:block;animation:fadeUp .2s ease}
+.lang-menu-title{font-family:var(--ui);font-size:9px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:rgba(109,143,130,.7);padding:4px 8px 10px}
+.lang-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.lang-opt{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px;border-radius:10px;cursor:pointer;font-family:var(--ui);color:#1D2B3A;transition:background .15s;text-align:center;border:1.5px solid transparent}
+.lang-opt:hover{background:rgba(109,143,130,.1)}
+.lang-opt.active{background:rgba(109,143,130,.12);border-color:rgba(109,143,130,.35)}
+.lang-opt-flag{font-size:22px;line-height:1}
+.lang-opt-name{font-size:9px;font-weight:600;letter-spacing:.04em;color:#3B5068}
+
+/* ═══ HERO ═══ */
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:110px 24px 80px;position:relative;overflow:hidden}
+.hero-bg{position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:56px 56px;opacity:.45}
+.hero-vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 80% 70% at 50% 50%,transparent 20%,var(--bg) 100%)}
+.hero-content{position:relative;z-index:2;max-width:860px}
+.hero-logo{margin-bottom:28px;opacity:0;animation:fadeUp .9s ease .1s forwards}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:var(--sur);border:1px solid var(--border);border-radius:100px;padding:6px 16px 6px 10px;font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--sage);margin-bottom:22px;box-shadow:0 2px 12px var(--shadow);opacity:0;animation:fadeUp .9s ease .2s forwards}
+.hero-badge-dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s ease-in-out infinite}
+.hero-h1{font-family:var(--disp);font-size:clamp(48px,7vw,86px);font-weight:300;line-height:1.05;color:var(--ink);margin-bottom:22px;opacity:0;animation:fadeUp .9s ease .35s forwards}
+.hero-h1 em{font-style:italic;color:var(--sage)}
+.hero-p{font-size:16px;color:var(--ink2);line-height:1.8;max-width:580px;margin:0 auto 40px;opacity:0;animation:fadeUp .9s ease .5s forwards}
+.hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;opacity:0;animation:fadeUp .9s ease .65s forwards}
+.btn-primary{background:var(--ink);color:white;padding:15px 36px;border:none;border-radius:6px;cursor:pointer;font-family:var(--ui);font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;text-decoration:none;display:inline-block;transition:background .25s,transform .15s}
+.btn-primary:hover{background:var(--sage);transform:translateY(-2px)}
+.btn-ghost{background:transparent;color:var(--ink);border:1.5px solid var(--border2);padding:15px 36px;border-radius:6px;cursor:pointer;font-family:var(--ui);font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;text-decoration:none;display:inline-block;transition:all .25s}
+.btn-ghost:hover{border-color:var(--sage);color:var(--sage);transform:translateY(-2px)}
+.hero-trust{display:flex;align-items:center;justify-content:center;gap:28px;margin-top:48px;padding-top:36px;border-top:1px solid var(--border);opacity:0;animation:fadeUp .9s ease .8s forwards;position:relative;z-index:2;flex-wrap:wrap}
+.trust-num{font-family:var(--ui);font-size:20px;font-weight:800;color:var(--ink);text-align:center}
+.trust-stars{display:flex;gap:2px;margin:3px 0;justify-content:center}
+.star-y{color:var(--gold);font-size:14px}
+.trust-label{font-size:11px;color:var(--ink3);font-family:var(--ui)}
+.trust-div{width:1px;height:32px;background:var(--border)}
+
+/* TP BAND */
+.tp-band{background:var(--ink);padding:18px 48px;display:flex;align-items:center;justify-content:center;gap:32px;flex-wrap:wrap}
+[data-theme="dark"] .tp-band{background:#0D1820}
+.tp-logo{display:flex;align-items:center;gap:8px;font-family:var(--ui);font-size:13px;font-weight:700;color:white}
+.tp-stars{display:flex;gap:3px}
+.tp-star{width:22px;height:22px;background:#00B67A;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:13px;color:white}
+.tp-score{font-family:var(--ui);font-size:22px;font-weight:800;color:white}
+.tp-count{font-size:12px;color:rgba(255,255,255,.5);font-family:var(--ui)}
+.tp-badge{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:6px 14px;font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.6)}
+
+/* ═══ PLANNER ═══ */
+.planner-sec{background:var(--bg2)}
+.plan-tabs{display:flex;gap:4px;background:var(--bg3);border-radius:10px;padding:4px;margin-bottom:32px;width:fit-content}
+.plan-tab{padding:11px 24px;border:none;background:transparent;font-family:var(--ui);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink2);cursor:pointer;border-radius:7px;transition:all .2s}
+.plan-tab.active{background:var(--sur);color:var(--ink);box-shadow:0 1px 8px var(--shadow)}
+.planner-card{background:var(--sur);border-radius:var(--r-lg);box-shadow:0 8px 48px var(--shadow);overflow:hidden}
+.planner-head{background:var(--ink);padding:22px 32px;display:flex;align-items:center;justify-content:space-between}
+[data-theme="dark"] .planner-head{background:#0D1820}
+.planner-title{font-family:var(--ui);font-size:13px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:white}
+.planner-sub{font-size:11px;color:rgba(255,255,255,.35);margin-top:2px;font-family:var(--ui)}
+.planner-body{padding:32px}
+.section-divider{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.section-divider span{font-family:var(--ui);font-size:9px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--sage);white-space:nowrap}
+.section-divider::before,.section-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.who-pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px}
+.who-pill{display:flex;align-items:center;gap:7px;border:1.5px solid var(--border);border-radius:100px;padding:9px 18px;cursor:pointer;font-family:var(--ui);font-size:11px;font-weight:600;color:var(--ink2);background:var(--bg2);transition:all .2s;user-select:none}
+.who-pill:hover{border-color:var(--sage);color:var(--sage)}
+.who-pill.on{background:var(--ink);border-color:var(--ink);color:white}
+[data-theme="dark"] .who-pill.on{background:var(--sage);border-color:var(--sage)}
+.form-group{display:flex;flex-direction:column;gap:7px}
+.form-group label{font-family:var(--ui);font-size:9px;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--sage)}
+input[type="time"],input[type="date"],input[type="number"],input[type="text"],select,textarea{width:100%;appearance:none;-webkit-appearance:none;background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r-sm);padding:11px 14px;font-family:var(--ui);font-size:13px;font-weight:500;color:var(--ink);outline:none;cursor:pointer;transition:border-color .2s}
+input:focus,select:focus,textarea:focus{border-color:var(--sage)}
+.form-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px}
+.form-grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:24px}
+.date-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px}
+.budget-row{display:flex;align-items:center;gap:10px}
+.budget-input{flex:1;text-align:center}
+.budget-unit{background:var(--sage);color:white;padding:11px 12px;border-radius:var(--r-sm);font-family:var(--ui);font-size:12px;font-weight:700;flex-shrink:0}
+.budget-sep{font-size:13px;color:var(--ink3);font-family:var(--ui);flex-shrink:0}
+.nights-badge{background:var(--sage);color:white;border-radius:var(--r-sm);padding:11px 14px;text-align:center;font-family:var(--ui);font-size:12px;font-weight:700;letter-spacing:.1em}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px}
+.chip{display:flex;align-items:center;gap:6px;border:1.5px solid var(--border);border-radius:var(--r-sm);padding:9px 15px;cursor:pointer;font-family:var(--ui);font-size:11px;font-weight:500;color:var(--ink2);background:var(--bg2);transition:all .2s;user-select:none}
+.chip:hover{border-color:var(--sage)}
+.chip.on{background:var(--sage);border-color:var(--sage);color:white}
+.gen-btn{width:100%;padding:16px;background:var(--ink);color:white;border:none;border-radius:10px;cursor:pointer;font-family:var(--ui);font-size:12px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .25s}
+.gen-btn:hover{background:var(--sage);transform:translateY(-2px)}
+
+/* RESULTS */
+.results{display:none;margin-top:32px;border-top:1px solid var(--border);padding-top:32px}
+.results.show{display:block;animation:fadeUp .5s ease forwards}
+.ai-summary{background:linear-gradient(135deg,var(--ink) 0%,#2A4055 100%);border-radius:14px;padding:28px 32px;margin-bottom:28px;position:relative;overflow:hidden}
+[data-theme="dark"] .ai-summary{background:linear-gradient(135deg,#0D1820 0%,#162028 100%)}
+.ai-summary::before{content:'';position:absolute;top:-40px;right:-40px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(109,143,130,.2),transparent 70%)}
+.ai-sum-head{display:flex;align-items:center;gap:10px;margin-bottom:16px;position:relative}
+.ai-sum-icon{width:32px;height:32px;background:var(--sage);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ai-sum-label{font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.5)}
+.ai-sum-text{font-family:var(--disp);font-size:18px;font-weight:300;font-style:italic;line-height:1.6;color:rgba(255,255,255,.92);position:relative}
+.results-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.results-title{font-family:var(--disp);font-size:26px;font-weight:400;color:var(--ink)}
+.results-title em{font-style:italic;color:var(--sage)}
+.cal-all-btn{display:flex;align-items:center;gap:8px;background:var(--sage);color:white;border:none;border-radius:var(--r-sm);padding:11px 20px;cursor:pointer;font-family:var(--ui);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;transition:all .2s}
+.cal-all-btn:hover{background:var(--ink);transform:translateY(-1px)}
+.day-tabs{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap}
+.day-tab{padding:8px 18px;border:1.5px solid var(--border);border-radius:100px;background:transparent;cursor:pointer;font-family:var(--ui);font-size:11px;font-weight:700;color:var(--ink2);transition:all .2s}
+.day-tab.active{background:var(--sage);border-color:var(--sage);color:white}
+.timeline{display:flex;flex-direction:column}
+.tl-item{display:flex;opacity:0;transform:translateY(10px);transition:all .4s}
+.tl-item.show{opacity:1;transform:translateY(0)}
+.tl-time-col{width:76px;flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;padding-right:18px;padding-top:18px}
+.tl-time{font-family:var(--ui);font-size:12px;font-weight:700;color:var(--sage);letter-spacing:.06em}
+.tl-dur{font-size:10px;color:var(--ink3);margin-top:1px;font-family:var(--ui)}
+.tl-dot-col{display:flex;flex-direction:column;align-items:center;padding-top:22px;width:22px;flex-shrink:0}
+.tl-dot{width:10px;height:10px;border-radius:50%;border:2px solid var(--sage);background:var(--bg);flex-shrink:0;z-index:1}
+.tl-dot.fill{background:var(--sage)}
+.tl-conn{width:1.5px;flex:1;background:var(--border);min-height:16px}
+.depart-notice{margin:0 0 6px 16px;display:flex;align-items:center;gap:6px;font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--sage)}
+.tl-card{flex:1;margin:8px 0 8px 14px;background:var(--bg2);border-radius:12px;padding:16px 18px;display:flex;align-items:flex-start;gap:14px;border:1px solid transparent;transition:all .2s;cursor:pointer}
+.tl-card:hover{border-color:var(--sage-p);transform:translateX(4px)}
+.tl-emoji{width:40px;height:40px;border-radius:10px;background:var(--sur);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;box-shadow:0 1px 6px var(--shadow)}
+.tl-info{flex:1;min-width:0}
+.tl-name{font-family:var(--ui);font-size:13px;font-weight:700;color:var(--ink);margin-bottom:3px}
+.tl-desc{font-size:12px;color:var(--ink2);line-height:1.5}
+.tl-tag{font-family:var(--ui);font-size:8px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--sage);background:rgba(109,143,130,.12);padding:3px 8px;border-radius:100px;white-space:nowrap;flex-shrink:0}
+.tl-price{font-family:var(--ui);font-size:12px;font-weight:700;color:var(--sage);white-space:nowrap;flex-shrink:0;background:rgba(109,143,130,.1);border-radius:6px;padding:4px 9px}
+.tl-price.free{color:var(--green);background:rgba(74,158,111,.1)}
+.add1-btn{background:none;border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-family:var(--ui);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2);cursor:pointer;flex-shrink:0;transition:all .2s}
+.add1-btn:hover{background:var(--ink);color:white;border-color:var(--ink)}
+.added-badge{display:none;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:white;background:var(--sage);padding:3px 9px;border-radius:100px;flex-shrink:0}
+.added-badge.show{display:block}
+.hotel-card{background:var(--sur);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin:10px 0 10px 14px;display:flex;align-items:center;gap:16px;transition:border-color .2s;cursor:pointer}
+.hotel-card:hover{border-color:var(--sage)}
+.hotel-emoji{font-size:24px;flex-shrink:0}
+.hotel-info{flex:1}
+.hotel-name{font-family:var(--ui);font-size:13px;font-weight:700;color:var(--ink);margin-bottom:3px}
+.hotel-detail{font-size:12px;color:var(--ink2)}
+.hotel-price{font-family:var(--ui);font-size:14px;font-weight:800;color:var(--sage);text-align:right;flex-shrink:0}
+.hotel-price span{display:block;font-size:9px;font-weight:500;color:var(--ink3);letter-spacing:.08em}
+.cost-total-bar{margin:16px 0 4px 90px;background:var(--sur);border:1.5px solid var(--border);border-radius:12px;overflow:hidden}
+.cost-total-inner{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;gap:12px;flex-wrap:wrap}
+.cost-total-left{display:flex;align-items:center;gap:8px;font-family:var(--ui);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2)}
+.cost-total-amount{font-family:var(--ui);font-size:18px;font-weight:800;color:var(--sage)}
+
+/* ═══ ACTIVITIES SECTION ═══ */
+.act-sec{background:var(--bg)}
+.filters-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px}
+.filter-btn{padding:8px 18px;border:1.5px solid var(--border);border-radius:100px;background:transparent;font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2);cursor:pointer;transition:all .2s}
+.filter-btn:hover,.filter-btn.active{background:var(--sage);border-color:var(--sage);color:white}
+.act-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.act-card{background:var(--sur);border-radius:var(--r);overflow:hidden;border:1px solid var(--border);transition:all .25s;cursor:pointer}
+.act-card:hover{transform:translateY(-4px);box-shadow:0 16px 48px var(--shadow2)}
+.act-img{height:120px;display:flex;align-items:center;justify-content:center;font-size:44px}
+.act-body{padding:16px}
+.act-name{font-family:var(--ui);font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px}
+.act-desc{font-size:12px;color:var(--ink2);line-height:1.5;margin-bottom:10px}
+.act-foot{display:flex;align-items:center;justify-content:space-between}
+.act-price{font-family:var(--ui);font-size:13px;font-weight:700;color:var(--sage)}
+.act-rating-row{display:flex;align-items:center;gap:3px}
+.act-star{color:var(--gold);font-size:11px}
+.act-rcount{font-size:10px;color:var(--ink3);font-family:var(--ui)}
+.act-add-btn{width:100%;margin-top:12px;padding:9px;background:var(--bg2);color:var(--ink);border:1px solid var(--border);border-radius:var(--r-sm);font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.act-add-btn:hover{background:var(--ink);color:white;border-color:var(--ink)}
+.act-add-btn.added{background:var(--sage);color:white;border-color:var(--sage)}
+
+/* ═══ RESTAURANTS ═══ */
+.resto-sec{background:var(--bg2)}
+.resto-filters{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;background:var(--sur);border-radius:var(--r);padding:20px;border:1px solid var(--border);margin-bottom:24px}
+.budget-pair{display:flex;align-items:center;gap:6px}
+.budget-pair input{text-align:center}
+.sort-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px}
+.sort-label{font-family:var(--ui);font-size:11px;color:var(--ink2)}
+.sort-btns{display:flex;gap:6px;flex-wrap:wrap}
+.sort-btn{padding:6px 14px;border:1px solid var(--border);border-radius:100px;background:transparent;font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--ink2);cursor:pointer;transition:all .2s}
+.sort-btn.active,.sort-btn:hover{background:var(--sage);border-color:var(--sage);color:white}
+.resto-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.resto-card{background:var(--sur);border-radius:var(--r);overflow:hidden;border:1px solid var(--border);transition:all .25s;cursor:pointer}
+.resto-card:hover{transform:translateY(-3px);box-shadow:0 12px 36px var(--shadow2)}
+.resto-img{height:130px;display:flex;align-items:center;justify-content:center;font-size:52px}
+.resto-body{padding:16px}
+.resto-name{font-family:var(--ui);font-size:14px;font-weight:700;color:var(--ink);margin-bottom:2px}
+.resto-cuisine{font-size:11px;color:var(--ink3);margin-bottom:8px;font-family:var(--ui)}
+.r-stars-row{display:flex;align-items:center;gap:2px;margin-bottom:6px}
+.r-star-f{color:var(--gold);font-size:13px}
+.r-star-e{color:var(--border2);font-size:13px}
+.r-score{font-family:var(--ui);font-size:11px;font-weight:700;color:var(--ink2);margin-left:4px}
+.r-count{font-family:var(--ui);font-size:10px;color:var(--ink3)}
+.resto-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.resto-dist{font-size:11px;color:var(--ink3);font-family:var(--ui)}
+.resto-price{background:rgba(109,143,130,.1);font-family:var(--ui);font-size:11px;font-weight:700;color:var(--sage);padding:3px 10px;border-radius:100px}
+.resto-review-snip{margin-top:10px;padding:10px 12px;background:var(--bg2);border-radius:var(--r-sm);border-left:3px solid var(--sage)}
+.resto-review-snip-text{font-size:11px;color:var(--ink2);font-style:italic;line-height:1.5}
+.resto-review-snip-by{font-family:var(--ui);font-size:9px;font-weight:700;color:var(--ink3);margin-top:4px}
+.resto-add-btn{width:100%;margin-top:12px;padding:10px;background:var(--ink);color:white;border:none;border-radius:var(--r-sm);font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:background .2s}
+.resto-add-btn:hover{background:var(--sage)}
+.resto-add-btn.added{background:var(--sage)}
+
+/* ═══ REVIEWS ═══ */
+.reviews-sec{background:var(--bg)}
+.reviews-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:36px;flex-wrap:wrap;gap:20px}
+.write-btn{display:inline-flex;align-items:center;gap:6px;background:var(--ink);color:white;padding:12px 22px;border:none;border-radius:var(--r-sm);cursor:pointer;font-family:var(--ui);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;transition:all .2s;white-space:nowrap}
+.write-btn:hover{background:var(--sage);transform:translateY(-1px)}
+.rating-summary{display:grid;grid-template-columns:auto 1fr auto;gap:40px;align-items:center;background:var(--sur);border-radius:var(--r-lg);padding:36px 40px;border:1px solid var(--border);box-shadow:0 4px 24px var(--shadow);margin-bottom:36px}
+.rating-big{text-align:center}
+.rating-num-big{font-family:var(--disp);font-size:72px;font-weight:600;line-height:1;color:var(--ink)}
+.rating-stars-big{display:flex;gap:4px;justify-content:center;margin:8px 0 4px}
+.star-big{font-size:16px;color:var(--gold)}
+.star-big.e{filter:grayscale(1);opacity:.35}
+.rating-count-big{font-size:12px;color:var(--ink3);font-family:var(--ui)}
+.rating-bars{display:flex;flex-direction:column;gap:8px}
+.rbar-row{display:flex;align-items:center;gap:10px}
+.rbar-label{font-family:var(--ui);font-size:11px;font-weight:700;color:var(--ink2);width:10px;text-align:right}
+.rbar-track{flex:1;height:7px;background:var(--bg3);border-radius:100px;overflow:hidden}
+.rbar-fill{height:100%;border-radius:100px;background:var(--gold);transition:width .8s ease}
+.rbar-pct{font-family:var(--ui);font-size:10px;font-weight:700;color:var(--ink3);width:30px;text-align:right}
+.rating-actions{display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+.ext-link{display:flex;align-items:center;gap:6px;font-family:var(--ui);font-size:10px;color:var(--ink3);transition:color .2s}
+.ext-link:hover{color:var(--ink)}
+.tp-mini-stars{display:flex;gap:2px}
+.tp-mini-star{width:14px;height:14px;background:#00B67A;border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:9px;color:white}
+.reviews-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.review-card{background:var(--sur);border-radius:var(--r);padding:24px;border:1px solid var(--border);transition:all .25s;position:relative}
+.review-card:hover{transform:translateY(-3px);box-shadow:0 12px 36px var(--shadow2)}
+.review-card.tp-card{border-top:3px solid #00B67A}
+.review-card.featured{border:2px solid var(--sage);background:rgba(109,143,130,.04)}
+.rc-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
+.rc-user{display:flex;align-items:center;gap:10px}
+.rc-avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--ui);font-size:13px;font-weight:800;flex-shrink:0;color:white}
+.rc-name{font-family:var(--ui);font-size:13px;font-weight:700;color:var(--ink);margin-bottom:1px}
+.rc-meta{font-size:11px;color:var(--ink3)}
+.rc-stars{display:flex;gap:2px}
+.rc-star-f{color:var(--gold);font-size:12px}
+.rc-star-e{color:var(--border2);font-size:12px}
+.source-tp{font-family:var(--ui);font-size:8px;font-weight:700;letter-spacing:.12em;background:#00B67A;color:white;padding:2px 7px;border-radius:4px;text-transform:uppercase}
+.source-afya{font-family:var(--ui);font-size:8px;font-weight:700;letter-spacing:.12em;background:var(--sage);color:white;padding:2px 7px;border-radius:4px;text-transform:uppercase}
+.source-g{font-family:var(--ui);font-size:8px;font-weight:700;letter-spacing:.12em;background:#4285F4;color:white;padding:2px 7px;border-radius:4px;text-transform:uppercase}
+.rc-title{font-family:var(--ui);font-size:13px;font-weight:700;color:var(--ink);margin:10px 0 8px}
+.rc-body{font-size:13px;color:var(--ink2);line-height:1.7}
+.rc-footer{display:flex;align-items:center;justify-content:space-between;margin-top:16px;padding-top:14px;border-top:1px solid var(--border)}
+.rc-date{font-size:11px;color:var(--ink3);font-family:var(--ui)}
+.rc-helpful{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ink3);cursor:pointer;background:none;border:none;font-family:var(--ui);transition:color .2s}
+.rc-helpful:hover{color:var(--sage)}
+.rc-trip{font-family:var(--ui);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--sage);background:rgba(109,143,130,.1);padding:3px 9px;border-radius:100px}
+
+/* ═══ FEATURES ═══ */
+.feat-sec{background:var(--ink)}
+[data-theme="dark"] .feat-sec{background:#0D1820}
+.feat-sec .eyebrow{color:var(--sage-l)}
+.feat-sec .eyebrow::before{background:var(--sage-l)}
+.feat-sec .sh2{color:white}
+.feat-sec .sh2 em{color:var(--sage-l)}
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:52px}
+.feat-card{background:rgba(255,255,255,.04);padding:36px 28px;transition:background .3s}
+.feat-card:hover{background:rgba(255,255,255,.07)}
+.feat-ic{width:44px;height:44px;border:1px solid rgba(109,143,130,.35);border-radius:9px;display:flex;align-items:center;justify-content:center;margin-bottom:20px}
+.feat-card h3{font-family:var(--ui);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:white;margin-bottom:10px}
+.feat-card p{font-size:13.5px;color:rgba(255,255,255,.42);line-height:1.8}
+
+/* ═══ CTA + FOOTER ═══ */
+.cta-band{background:var(--sage);padding:88px 48px;text-align:center;position:relative;overflow:hidden}
+.cta-band::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px);background-size:48px 48px}
+.cta-inner{position:relative;z-index:1}
+.cta-band h2{font-family:var(--disp);font-size:clamp(38px,5vw,62px);font-weight:300;color:white;margin-bottom:14px}
+.cta-band h2 em{font-style:italic}
+.cta-band p{font-size:14px;color:rgba(255,255,255,.7);margin-bottom:32px}
+.cta-band .btn-primary{background:white;color:var(--sage)}
+.cta-band .btn-primary:hover{background:var(--bg)}
+footer{background:var(--ink);padding:60px 52px 32px}
+[data-theme="dark"] footer{background:#0D1820}
+.foot-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:52px;padding-bottom:44px;border-bottom:1px solid rgba(255,255,255,.07);margin-bottom:28px}
+.foot-brand p{font-size:13px;color:rgba(255,255,255,.38);line-height:1.8;margin-top:14px;max-width:260px}
+.fc h4{font-family:var(--ui);font-size:9px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:14px}
+.fc ul{list-style:none}
+.fc li{margin-bottom:9px}
+.fc a{font-size:13px;color:rgba(255,255,255,.5);transition:color .2s}
+.fc a:hover{color:white}
+.foot-bot{display:flex;justify-content:space-between;align-items:center}
+.foot-copy{font-size:11px;color:rgba(255,255,255,.18);letter-spacing:.05em}
+.socials{display:flex;gap:10px}
+.soc{width:34px;height:34px;border:1px solid rgba(255,255,255,.1);border-radius:5px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .2s}
+.soc:hover{border-color:var(--sage-l)}
+
+/* ═══ TOAST + MODAL ═══ */
+.toast{position:fixed;bottom:28px;right:28px;z-index:999;background:var(--ink);color:white;border-radius:12px;padding:14px 20px;display:flex;align-items:center;gap:10px;font-family:var(--ui);font-size:12px;font-weight:600;box-shadow:0 8px 32px var(--shadow2);transform:translateY(80px);opacity:0;transition:all .4s}
+[data-theme="dark"] .toast{background:#0D1820;border:1px solid var(--border)}
+.toast.show{transform:translateY(0);opacity:1}
+.toast-icon{width:22px;height:22px;background:var(--sage);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .3s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--sur);border-radius:var(--r-lg);padding:40px;max-width:560px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,.2);transform:translateY(20px);transition:transform .3s;position:relative;max-height:90vh;overflow-y:auto}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-close{position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink2);font-size:16px}
+.modal-close:hover{background:var(--bg2)}
+.modal-title{font-family:var(--disp);font-size:28px;font-weight:400;color:var(--ink);margin-bottom:6px}
+.modal-title em{font-style:italic;color:var(--sage)}
+.modal-sub{font-size:13px;color:var(--ink2);margin-bottom:28px}
+.modal-section-label{font-family:var(--ui);font-size:9px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:var(--sage);margin-bottom:10px}
+.star-picker{display:flex;gap:8px;margin-bottom:4px}
+.sp-star{font-size:32px;cursor:pointer;transition:transform .15s;filter:grayscale(1);opacity:.4;color:var(--gold);user-select:none}
+.sp-star.lit{filter:none;opacity:1;transform:scale(1.1)}
+.sp-star:hover{transform:scale(1.2)}
+.star-label{font-family:var(--ui);font-size:11px;font-weight:700;color:var(--ink2);margin-bottom:24px;height:16px}
+.modal label{font-family:var(--ui);font-size:9px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:var(--sage);display:block;margin-bottom:7px}
+.modal input,.modal textarea{width:100%;background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r-sm);padding:11px 14px;font-family:var(--body);font-size:14px;color:var(--ink);outline:none;margin-bottom:18px}
+.modal input:focus,.modal textarea:focus{border-color:var(--sage)}
+.modal textarea{resize:vertical;min-height:100px}
+.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.trip-tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.trip-tag{padding:7px 14px;border:1.5px solid var(--border);border-radius:100px;background:transparent;font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2);cursor:pointer;transition:all .2s}
+.trip-tag.sel{background:var(--ink);border-color:var(--ink);color:white}
+.submit-review{width:100%;padding:14px;background:var(--ink);color:white;border:none;border-radius:10px;font-family:var(--ui);font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;transition:all .25s}
+.submit-review:hover{background:var(--sage);transform:translateY(-1px)}
+
+/* ═══ RESPONSIVE ═══ */
+@media(max-width:900px){
+  nav{padding:0 20px}.nav-links{display:none}
+  section{padding:64px 20px}
+  .form-grid-3,.form-grid-2,.date-grid,.resto-filters{grid-template-columns:1fr 1fr}
+  .act-grid,.resto-grid,.reviews-grid,.feat-grid{grid-template-columns:1fr}
+  .rating-summary{grid-template-columns:1fr;text-align:center}
+  .rating-actions{align-items:center}
+  .foot-top{grid-template-columns:1fr 1fr;gap:28px}
+  .tp-band{padding:16px 20px;gap:16px}
+}
+@media(max-width:560px){
+  .form-grid-3,.form-grid-2,.date-grid,.resto-filters{grid-template-columns:1fr}
+  .modal-grid{grid-template-columns:1fr}
+  .foot-top{grid-template-columns:1fr}
+  .cost-total-bar{margin-left:0}
+  .tl-time-col{width:58px;padding-right:12px}
+}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div class="toast-icon"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+  <span id="toastMsg">Done!</span>
+</div>
+
+<!-- MODAL AVIS -->
+<div class="modal-overlay" id="reviewModal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h2 class="modal-title">Share your <em>experience</em></h2>
+    <p class="modal-sub">Your honest review helps others discover the best activities.</p>
+    <p class="modal-section-label">Your Rating</p>
+    <div class="star-picker" id="starPicker">
+      <span class="sp-star" data-v="1" onclick="setStar(1)">★</span>
+      <span class="sp-star" data-v="2" onclick="setStar(2)">★</span>
+      <span class="sp-star" data-v="3" onclick="setStar(3)">★</span>
+      <span class="sp-star" data-v="4" onclick="setStar(4)">★</span>
+      <span class="sp-star" data-v="5" onclick="setStar(5)">★</span>
+    </div>
+    <p class="star-label" id="starLabel">Select a rating</p>
+    <div class="modal-grid">
+      <div><label>First Name</label><input type="text" id="revName" placeholder="Sophie"></div>
+      <div><label>City</label><input type="text" id="revCity" placeholder="Paris"></div>
+    </div>
+    <label>Review Title</label><input type="text" id="revTitle" placeholder="One unforgettable day in Lisbon…">
+    <label>Your Review</label><textarea id="revBody" placeholder="Tell us about your experience…"></textarea>
+    <label>Trip Type</label>
+    <div class="trip-tags">
+      <button type="button" class="trip-tag" onclick="toggleTrip(this)">👫 Friends</button>
+      <button type="button" class="trip-tag" onclick="toggleTrip(this)">❤️ Couple</button>
+      <button type="button" class="trip-tag" onclick="toggleTrip(this)">🏠 Family</button>
+      <button type="button" class="trip-tag" onclick="toggleTrip(this)">💼 Business</button>
+      <button type="button" class="trip-tag" onclick="toggleTrip(this)">🎒 Solo</button>
+    </div>
+    <button class="submit-review" onclick="submitReview()">Publish My Review</button>
+  </div>
+</div>
+
+<!-- LOGO REUSABLE — chargé via JS -->
+<template id="logoTemplate">
+  <svg viewBox="0 0 480 195" fill="none">
+    <line x1="10" y1="86" x2="370" y2="86" stroke="#6D8F82" stroke-width="1.6"/>
+    <line x1="310" y1="86" x2="370" y2="86" stroke="#6D8F82" stroke-width="1.6" stroke-dasharray="5.5 4.5"/>
+    <path d="M42 86 C41 74 41 62 43 48" stroke="#6D8F82" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <path d="M43 49 C34 45 22 43 10 46" stroke="#6D8F82" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+    <path d="M43 49 C36 40 28 30 22 20" stroke="#6D8F82" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+    <path d="M43 49 C40 37 38 25 39 14" stroke="#6D8F82" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+    <path d="M43 49 C46 37 50 25 51 14" stroke="#6D8F82" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+    <path d="M43 49 C50 40 60 32 68 24" stroke="#6D8F82" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+    <path d="M43 49 C52 47 64 46 76 50" stroke="#6D8F82" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+    <path d="M43 49 C54 52 66 56 74 64" stroke="#6D8F82" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+    <path d="M94 86 L94 68 L108 68 L108 86" stroke="#6D8F82" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <path d="M112 86 L112 50 L118 50 L118 40 L126 40 L126 50 L132 50 L132 86" stroke="#6D8F82" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <path d="M136 86 L136 60 L150 60 L150 86" stroke="#6D8F82" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <path d="M154 86 L154 70 L166 70 L166 86" stroke="#6D8F82" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <path d="M170 86 L170 56 L184 56 L184 86" stroke="#6D8F82" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <path d="M200 86 L238 42 L276 86" stroke="#6D8F82" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <path d="M248 86 L280 34 L312 86" stroke="#6D8F82" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <path d="M270 48 L280 34 L290 48" stroke="#6D8F82" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <path class="logo-pin-path" d="M378 86 C378 86 364 72 364 60 C364 50 370 44 378 44 C386 44 392 50 392 60 C392 72 378 86 378 86Z" stroke="#1D2B3A" stroke-width="2" fill="none"/>
+    <circle class="logo-pin-circle" cx="378" cy="59" r="5.5" stroke="#1D2B3A" stroke-width="1.8" fill="none"/>
+    <line class="logo-wm" x1="12" y1="160" x2="46" y2="106" stroke="#1D2B3A" stroke-width="2.6" stroke-linecap="round"/>
+    <line class="logo-wm" x1="46" y1="106" x2="80" y2="160" stroke="#1D2B3A" stroke-width="2.6" stroke-linecap="round"/>
+    <line class="logo-wm" x1="24" y1="144" x2="68" y2="144" stroke="#1D2B3A" stroke-width="2.6" stroke-linecap="round"/>
+    <line class="logo-wm" x1="102" y1="106" x2="102" y2="160" stroke="#1D2B3A" stroke-width="2.6" stroke-linecap="round"/>
+    <line class="logo-wm" x1="102" y1="106" x2="140" y2="106" stroke="#1D2B3A" stroke-width="2.6" stroke-linecap="round"/>
+    <line class="logo-wm" x1="102" y1="131" x2="136" y2="131" stroke="#1D2B3A" stroke-width="2.6" stroke-linecap="round"/>
+    <line class="logo-wm" x1="162" y1="106" x2="192" y2="136" stroke="#1D2B3A" stroke-width="2.6" stroke-linecap="round"/>
+    <line class="logo-wm" x1="222" y1="106" x2="192" y2="136" stroke="#1D2B3A" stroke-width="2.6" stroke-linecap="round"/>
+    <line class="logo-wm" x1="192" y1="136" x2="192" y2="160" stroke="#1D2B3A" stroke-width="2.6" stroke-linecap="round"/>
+    <line class="logo-wm" x1="214" y1="160" x2="248" y2="106" stroke="#1D2B3A" stroke-width="2.6" stroke-linecap="round"/>
+    <line class="logo-wm" x1="248" y1="106" x2="282" y2="160" stroke="#1D2B3A" stroke-width="2.6" stroke-linecap="round"/>
+    <line class="logo-wm" x1="226" y1="144" x2="270" y2="144" stroke="#1D2B3A" stroke-width="2.6" stroke-linecap="round"/>
+  </svg>
+</template>
+
+<!-- ═══ NAV ═══ -->
+<nav id="nav">
+  <<a href="#top" style="line-height:0">
+<img src="LogositeAFYA.png" alt="AFYA" class="logo-light" style="height: 50px;px;width:auto">
+<img src="LogositeAFYAdark.png" alt="AFYA" class="logo-dark" style="height:50px;width:auto;display:none">
+</a>
+  <ul class="nav-links">
+    <li><a href="#planner">Plan</a></li>
+    <li><a href="#activities">Activities</a></li>
+    <li><a href="#restaurants">Restaurants</a></li>
+    <li><a href="#reviews">Reviews</a></li>
+    <li><a href="#features">Features</a></li>
+  </ul>
+  <div class="nav-right">
+    <div class="lang-picker" id="langPicker">
+      <button class="lang-current" onclick="toggleLangMenu()">
+        <span class="lang-flag" id="langFlag">🇬🇧</span>
+        <span class="lang-code" id="langCode">EN</span>
+        <svg class="lang-chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="lang-menu" id="langMenu">
+        <div class="lang-menu-title">🌍 Select language</div>
+        <div class="lang-grid" id="langGrid"></div>
+      </div>
+    </div>
+    <button class="dm-btn" onclick="toggleDark()" aria-label="Dark mode"></button>
+    <button class="nav-cta" onclick="document.getElementById('planner').scrollIntoView({behavior:'smooth'})">Try Free</button>
+  </div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero" id="top">
+  <div class="hero-bg"></div>
+  <div class="hero-vig"></div>
+  <div class="hero-content">
+    <div class="hero-logo">
+<img src="LogositeAFYA.png" alt="AFYA" class="logo-light" style="max-width:600px;width:100%;height:auto">
+<img src="LogositeAFYAdark.png" alt="AFYA" class="logo-dark" style="max-width:600px;width:100%;height:auto;display:none">
+</div>
+    <div class="hero-badge"><div class="hero-badge-dot"></div><span data-i18n="hero_badge">Now with AI-powered planning</span></div>
+    <h1 class="hero-h1"><span data-i18n="hero_h1">Your entire schedule</span><br><em data-i18n="hero_h1_em">all in one place !</em></h1>
+    <p class="hero-p" data-i18n="hero_p">Plan your day or your trip with AI, discover activities reviewed by a community of real travellers, and sync everything to your calendar.</p>
+    <div class="hero-btns">
+      <button class="btn-primary" onclick="document.getElementById('planner').scrollIntoView({behavior:'smooth'})" data-i18n="hero_cta1">Plan My Day</button>
+      <a href="#activities" class="btn-ghost" data-i18n="hero_cta2">Browse Activities</a>
+    </div>
+    <div class="hero-trust">
+      <div><div class="trust-num">4.8</div><div class="trust-stars"><span class="star-y">★</span><span class="star-y">★</span><span class="star-y">★</span><span class="star-y">★</span><span class="star-y">★</span></div><div class="trust-label" data-i18n="trust_rating">Average rating</div></div>
+      <div class="trust-div"></div>
+      <div><div class="trust-num" id="totalReviewCount">2,847</div><div class="trust-label" data-i18n="trust_reviews">Verified reviews</div></div>
+      <div class="trust-div"></div>
+      <div><div class="trust-num">98%</div><div class="trust-label" data-i18n="trust_recommend">Would recommend</div></div>
+      <div class="trust-div"></div>
+      <div><div class="trust-num">45+</div><div class="trust-label" data-i18n="trust_cities">Cities covered</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- TRUSTPILOT BAND -->
+<div class="tp-band">
+  <div class="tp-logo"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="#00B67A"/></svg>Trustpilot</div>
+  <div class="tp-stars"><div class="tp-star">★</div><div class="tp-star">★</div><div class="tp-star">★</div><div class="tp-star">★</div><div class="tp-star">★</div></div>
+  <div class="tp-score">4.8</div>
+  <div class="tp-count">1,204 reviews on Trustpilot</div>
+  <div class="tp-badge">Excellent</div>
+</div>
+
+<!-- ═══ PLANNER ═══ -->
+<section class="planner-sec" id="planner">
+  <div class="inner">
+    <div class="reveal">
+      <div class="eyebrow" data-i18n="planner_eye">AI Day Planner</div>
+      <h2 class="sh2"><span data-i18n="planner_h2">Build your perfect</span> <em data-i18n="planner_h2_em">schedule</em></h2>
+      <p class="slead" data-i18n="planner_lead">One day or a full week — AFYA plans every moment with departure times and syncs to your calendar.</p>
+    </div>
+    <div class="plan-tabs reveal">
+      <button class="plan-tab active" onclick="switchTab('day',this)" data-i18n="tab_day">📅 Single Day</button>
+      <button class="plan-tab" onclick="switchTab('multi',this)" data-i18n="tab_multi">🗺️ Multi-Day Trip</button>
+    </div>
+    <div class="planner-card reveal">
+      <div class="planner-head">
+        <div><div class="planner-title" id="plannerTitle">Day Planner</div><div class="planner-sub">Powered by AFYA AI</div></div>
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      </div>
+      <div class="planner-body">
+
+        <div class="section-divider"><span data-i18n="label_who">Who are you going with?</span></div>
+        <div class="who-pills" id="whoPills">
+          <div class="who-pill on" data-who="friends" onclick="toggleWho(this)">👫 <span data-i18n="who_friends">Friends</span></div>
+          <div class="who-pill" data-who="partner" onclick="toggleWho(this)">❤️ <span data-i18n="who_partner">Partner</span></div>
+          <div class="who-pill" data-who="family" onclick="toggleWho(this)">🏠 <span data-i18n="who_family">Family</span></div>
+          <div class="who-pill" data-who="business" onclick="toggleWho(this)">💼 <span data-i18n="who_business">Business</span></div>
+          <div class="who-pill" data-who="solo" onclick="toggleWho(this)">🎒 <span data-i18n="who_solo">Solo</span></div>
+        </div>
+
+        <div class="section-divider"><span data-i18n="label_date">Date & Time</span></div>
+        <div class="date-grid">
+          <div class="form-group"><label data-i18n="flabel_startdate">Start Date</label><input type="date" id="startDate"></div>
+          <div class="form-group" id="endDateWrap" style="display:none"><label data-i18n="flabel_enddate">End Date</label><input type="date" id="endDate"></div>
+          <div class="form-group" id="nightsBadgeWrap" style="display:none"><label data-i18n="flabel_nights">Duration</label><div class="nights-badge" id="nightsBadge">— nights</div></div>
+          <div class="form-group"><label data-i18n="flabel_leave">Leave Home At</label><input type="time" id="leaveTime" value="09:00"></div>
+          <div class="form-group"><label data-i18n="flabel_return">Return By</label><input type="time" id="returnTime" value="22:00"></div>
+        </div>
+
+        <div class="section-divider"><span data-i18n="label_prefs">Preferences</span></div>
+        <div class="form-grid-3">
+          <div class="form-group"><label data-i18n="flabel_city">City</label>
+            <select id="citySel"><option>New York, USA</option><option>Paris, France</option><option>London, UK</option><option>Tokyo, Japan</option><option>Barcelona, Spain</option><option>Lisbon, Portugal</option><option>Rome, Italy</option><option>Berlin, Germany</option></select>
+          </div>
+          <div class="form-group"><label data-i18n="flabel_radius">Radius</label>
+            <select id="radiusSel"><option value="1">1 km — Walking only</option><option value="5">5 km — Neighbourhood</option><option value="15" selected>15 km — City wide</option><option value="30">30 km — Greater area</option><option value="50">50 km — Day trip</option></select>
+          </div>
+          <div class="form-group"><label data-i18n="flabel_pace">Pace</label>
+            <select id="paceSel"><option value="relaxed">Relaxed — 3–4 acts</option><option value="balanced" selected>Balanced — 5–6 acts</option><option value="packed">Packed — 7+ acts</option></select>
+          </div>
+        </div>
+
+        <div class="section-divider"><span data-i18n="label_budget">Budget (per person, per day)</span></div>
+        <div class="form-grid-2">
+          <div class="form-group"><label data-i18n="flabel_min">Minimum</label>
+            <div class="budget-row"><span class="budget-unit">$</span><input type="number" id="budgetMin" value="0" min="0" class="budget-input"></div>
+          </div>
+          <div class="form-group"><label data-i18n="flabel_max">Maximum</label>
+            <div class="budget-row"><span class="budget-unit">$</span><input type="number" id="budgetMax" value="200" min="0" class="budget-input"></div>
+          </div>
+        </div>
+
+        <div class="section-divider"><span data-i18n="label_acts">What activities?</span></div>
+        <div class="chips" id="actChips">
+          <div class="chip on" data-tag="Food" onclick="toggleChip(this)">🍽 Food</div>
+          <div class="chip" data-tag="Outdoors" onclick="toggleChip(this)">🌿 Outdoors</div>
+          <div class="chip on" data-tag="Culture" onclick="toggleChip(this)">🏛 Culture</div>
+          <div class="chip" data-tag="Sports" onclick="toggleChip(this)">⚽ Sports</div>
+          <div class="chip on" data-tag="Sightseeing" onclick="toggleChip(this)">📸 Sightseeing</div>
+          <div class="chip" data-tag="Nightlife" onclick="toggleChip(this)">🎶 Nightlife</div>
+          <div class="chip" data-tag="Wellness" onclick="toggleChip(this)">🧘 Wellness</div>
+          <div class="chip" data-tag="Shopping" onclick="toggleChip(this)">🛍 Shopping</div>
+          <div class="chip" data-tag="Shows" onclick="toggleChip(this)">🎭 Shows</div>
+        </div>
+
+        <div id="hotelSection" style="display:none">
+          <div class="section-divider"><span data-i18n="label_hotel">Hotel Preferences</span></div>
+          <div class="form-grid-3">
+            <div class="form-group"><label>Category</label>
+              <select id="hotelCat"><option>Budget</option><option selected>Mid-range</option><option>Luxury</option><option>Boutique</option><option>Apartment</option></select>
+            </div>
+            <div class="form-group"><label>Max per night ($)</label><input type="number" id="hotelMax" value="250"></div>
+            <div class="form-group"><label>Location</label>
+              <select id="hotelLoc"><option>City centre</option><option>Near attractions</option><option>Quiet area</option></select>
+            </div>
+          </div>
+        </div>
+
+        <button class="gen-btn" onclick="generate()">
+          <svg class="spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+          <span data-i18n="gen_btn">Generate My Schedule</span>
+        </button>
+
+        <div class="results" id="results">
+          <div class="ai-summary">
+            <div class="ai-sum-head">
+              <div class="ai-sum-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+              <span class="ai-sum-label" id="aiSumLabel">AFYA AI — Your Trip Summary</span>
+            </div>
+            <div class="ai-sum-text" id="aiSummary"></div>
+          </div>
+          <div class="results-head">
+            <div class="results-title" id="resTitle">Your Day in <em>New York</em></div>
+            <button class="cal-all-btn" onclick="addAll()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <span data-i18n="add_all">Add All to Calendar</span>
+            </button>
+          </div>
+          <div class="day-tabs" id="dayTabs"></div>
+          <div class="timeline" id="timeline"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ ACTIVITIES ═══ -->
+<section class="act-sec" id="activities">
+  <div class="inner">
+    <div class="reveal">
+      <div class="eyebrow">Top Rated Activities</div>
+      <h2 class="sh2">Loved by<br><em>our community</em></h2>
+      <p class="slead">Hand-picked by AI and validated by thousands of real travellers.</p>
+    </div>
+    <div class="filters-row reveal" id="actFilters">
+      <button class="filter-btn active" onclick="filterActs('all',this)">All</button>
+      <button class="filter-btn" onclick="filterActs('Culture',this)">🏛 Culture</button>
+      <button class="filter-btn" onclick="filterActs('Outdoors',this)">🌿 Outdoors</button>
+      <button class="filter-btn" onclick="filterActs('Food',this)">🍽 Food</button>
+      <button class="filter-btn" onclick="filterActs('Nightlife',this)">🎶 Nightlife</button>
+      <button class="filter-btn" onclick="filterActs('Sports',this)">⚽ Sports</button>
+      <button class="filter-btn" onclick="filterActs('Shows',this)">🎭 Shows</button>
+    </div>
+    <div class="act-grid reveal" id="actGrid"></div>
+  </div>
+</section>
+
+<!-- ═══ RESTAURANTS ═══ -->
+<section class="resto-sec" id="restaurants">
+  <div class="inner">
+    <div class="reveal">
+      <div class="eyebrow">Restaurant Explorer</div>
+      <h2 class="sh2">Find the<br><em>perfect table</em></h2>
+      <p class="slead">Browse, filter, read real guest reviews and add to your schedule.</p>
+    </div>
+    <div class="resto-filters reveal">
+      <div class="form-group"><label>Cuisine</label>
+        <select id="cuisineF" onchange="filterRestos()"><option value="">All cuisines</option><option>French</option><option>Italian</option><option>Japanese</option><option>American</option><option>Mediterranean</option><option>Asian</option></select>
+      </div>
+      <div class="form-group"><label>Max Distance</label>
+        <select id="distF" onchange="filterRestos()"><option value="99">Any</option><option value="0.5">Under 500m</option><option value="1">Under 1km</option><option value="3">Under 3km</option><option value="5">Under 5km</option></select>
+      </div>
+      <div class="form-group"><label>Min Rating</label>
+        <select id="ratingF" onchange="filterRestos()"><option value="0">Any</option><option value="3">3★+</option><option value="4">4★+</option><option value="4.5">4.5★+</option></select>
+      </div>
+      <div class="form-group"><label>Budget ($)</label>
+        <div class="budget-pair"><input type="number" id="bMin" value="0" min="0" oninput="filterRestos()"><span class="budget-sep">–</span><input type="number" id="bMax" value="300" min="0" oninput="filterRestos()"></div>
+      </div>
+    </div>
+    <div class="sort-bar reveal">
+      <span class="sort-label" id="restoCountLabel">Showing 9 restaurants</span>
+      <div class="sort-btns">
+        <button class="sort-btn active" onclick="sortRestos('rating',this)">⭐ Top</button>
+        <button class="sort-btn" onclick="sortRestos('dist',this)">📍 Near</button>
+        <button class="sort-btn" onclick="sortRestos('price-asc',this)">💰 ↑</button>
+        <button class="sort-btn" onclick="sortRestos('price-desc',this)">💰 ↓</button>
+        <button class="sort-btn" onclick="sortRestos('reviews',this)">💬 Most</button>
+      </div>
+    </div>
+    <div class="resto-grid reveal" id="restoGrid"></div>
+  </div>
+</section>
+
+<!-- ═══ REVIEWS ═══ -->
+<section class="reviews-sec" id="reviews">
+  <div class="inner">
+    <div class="reviews-header reveal">
+      <div><div class="eyebrow">Community Reviews</div><h2 class="sh2">What travellers<br><em>are saying</em></h2></div>
+      <button class="write-btn" onclick="openModal()">✏️ Write a Review</button>
+    </div>
+    <div class="rating-summary reveal">
+      <div class="rating-big">
+        <div class="rating-num-big">4.8</div>
+        <div class="rating-stars-big" id="mainStars"></div>
+        <div class="rating-count-big" id="mainCount">Based on 2,847 reviews</div>
+      </div>
+      <div class="rating-bars" id="ratingBars"></div>
+      <div class="rating-actions">
+        <button class="write-btn" onclick="openModal()">✏️ Write a Review</button>
+        <a href="https://www.trustpilot.com" target="_blank" rel="noopener" class="ext-link">
+          <div class="tp-mini-stars"><div class="tp-mini-star">★</div><div class="tp-mini-star">★</div><div class="tp-mini-star">★</div><div class="tp-mini-star">★</div><div class="tp-mini-star">★</div></div>
+          <span>See on Trustpilot</span>
+        </a>
+        <a href="https://www.google.com/maps" target="_blank" rel="noopener" class="ext-link">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="#4285F4"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+          <span>See on Google Maps</span>
+        </a>
+      </div>
+    </div>
+    <div class="filters-row reveal" id="revFilter">
+      <button class="filter-btn active" onclick="filterReviews('all',this)">All</button>
+      <button class="filter-btn" onclick="filterReviews('5',this)">★★★★★</button>
+      <button class="filter-btn" onclick="filterReviews('4',this)">★★★★</button>
+      <button class="filter-btn" onclick="filterReviews('afya',this)">AFYA</button>
+      <button class="filter-btn" onclick="filterReviews('trustpilot',this)">Trustpilot</button>
+      <button class="filter-btn" onclick="filterReviews('google',this)">Google</button>
+      <button class="filter-btn" onclick="filterReviews('friends',this)">👫 Friends</button>
+      <button class="filter-btn" onclick="filterReviews('couple',this)">❤️ Couples</button>
+      <button class="filter-btn" onclick="filterReviews('family',this)">🏠 Family</button>
+    </div>
+    <div class="reviews-grid reveal" id="reviewsGrid"></div>
+    <div style="text-align:center;margin-top:36px" class="reveal">
+      <button class="btn-ghost" onclick="loadMoreReviews()" id="loadMoreBtn">Load more reviews</button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FEATURES ═══ -->
+<section class="feat-sec" id="features">
+  <div class="inner">
+    <div class="reveal"><div class="eyebrow">Why AFYA</div><h2 class="sh2">Everything in<br><em>one place</em></h2></div>
+    <div class="feat-grid reveal">
+      <div class="feat-card"><div class="feat-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8BAD9E" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div><h3>AI Planning</h3><p>Context-aware AI builds full-day schedules tailored to your group, budget and interests.</p></div>
+      <div class="feat-card"><div class="feat-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8BAD9E" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><h3>Real Reviews</h3><p>Thousands of verified reviews from AFYA users, Trustpilot, and Google Maps.</p></div>
+      <div class="feat-card"><div class="feat-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8BAD9E" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg></div><h3>Calendar Sync</h3><p>Every activity syncs to your phone's calendar with departure reminders.</p></div>
+      <div class="feat-card"><div class="feat-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8BAD9E" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><h3>Budget Control</h3><p>Set precise min/max budgets — AFYA only shows what fits.</p></div>
+      <div class="feat-card"><div class="feat-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8BAD9E" stroke-width="1.5"><circle cx="12" cy="10" r="3"/><path d="M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7z"/></svg></div><h3>Radius Filters</h3><p>From 500m walks to 50km day trips — total control of your range.</p></div>
+      <div class="feat-card"><div class="feat-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8BAD9E" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div><h3>Hotel Packages</h3><p>Multi-day trips include curated hotel suggestions per night.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CTA ═══ -->
+<div class="cta-band">
+  <div class="cta-inner reveal">
+    <h2>Join 50,000+ people<br><em>planning better days</em></h2>
+    <p>Free to start. No credit card required.</p>
+    <button class="btn-primary" onclick="document.getElementById('planner').scrollIntoView({behavior:'smooth'})">Start Planning Free</button>
+  </div>
+</div>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <div class="inner">
+    <div class="foot-top">
+      <div class="foot-brand">
+        <img src="LogositeAFYAdark.png" alt="AFYA" style="height:100px;width:auto">
+        <p>AI-powered day planning with real community reviews.</p>
+      </div>
+      <div class="fc"><h4>Product</h4><ul><li><a href="#planner">Day Planner</a></li><li><a href="#activities">Activities</a></li><li><a href="#restaurants">Restaurants</a></li><li><a href="#features">Features</a></li></ul></div>
+      <div class="fc"><h4>Community</h4><ul><li><a href="#" onclick="openModal();return false">Write a Review</a></li><li><a href="#reviews">All Reviews</a></li><li><a href="#">Blog</a></li></ul></div>
+      <div class="fc"><h4>Company</h4><ul><li><a href="#">About</a></li><li><a href="#">Careers</a></li><li><a href="#">Privacy</a></li><li><a href="#">Terms</a></li></ul></div>
+    </div>
+    <div class="foot-bot">
+      <div class="foot-copy">© 2026 AFYA — All for Your Activities</div>
+      <div class="socials">
+        <a href="#" class="soc"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/></svg></a>
+        <a href="#" class="soc"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="1.8"><path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"/></svg></a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ═════════════════════ LOGO MOUNT ═════════════════════
+function mountLogos(){
+  const tpl = document.getElementById('logoTemplate');
+  document.querySelectorAll('.logo-mount').forEach(slot=>{
+    const clone = tpl.content.cloneNode(true);
+    const svg = clone.querySelector('svg');
+    svg.setAttribute('width', slot.dataset.w || 130);
+    svg.setAttribute('height', slot.dataset.h || 42);
+    if(slot.classList.contains('logo-white')){
+      svg.querySelectorAll('[stroke="#1D2B3A"]').forEach(el=>el.setAttribute('stroke','white'));
+    }
+    if(slot.dataset.tag){
+      const ns = 'http://www.w3.org/2000/svg';
+      const txt = document.createElementNS(ns,'text');
+      txt.setAttribute('x','147');txt.setAttribute('y','188');txt.setAttribute('text-anchor','middle');
+      txt.setAttribute('font-family',"'Syne',sans-serif");txt.setAttribute('font-size','10');
+      txt.setAttribute('font-weight','600');txt.setAttribute('letter-spacing','5');
+      txt.setAttribute('fill','#1D2B3A');txt.setAttribute('opacity','0.4');
+      txt.textContent='ALL FOR YOUR ACTIVITIES';
+      svg.appendChild(txt);
+    }
+    slot.appendChild(clone);
+  });
+}
+
+// ═════════════════════ DARK MODE ═════════════════════
+function toggleDark(){
+  const h = document.documentElement;
+  h.setAttribute('data-theme', h.getAttribute('data-theme')==='dark'?'light':'dark');
+}
+window.addEventListener('scroll', ()=>{
+  document.getElementById('nav').style.boxShadow = window.scrollY>20?'0 2px 20px rgba(29,43,58,.08)':'none';
+});
+
+// ═════════════════════ LANGUAGES ═════════════════════
+const langMeta = {
+  en:{flag:'🇬🇧',code:'EN',name:'English'},
+  fr:{flag:'🇫🇷',code:'FR',name:'Français'},
+  es:{flag:'🇪🇸',code:'ES',name:'Español'},
+  de:{flag:'🇩🇪',code:'DE',name:'Deutsch'},
+  it:{flag:'🇮🇹',code:'IT',name:'Italiano'},
+  pt:{flag:'🇵🇹',code:'PT',name:'Português'},
+  ja:{flag:'🇯🇵',code:'JA',name:'日本語'},
+  zh:{flag:'🇨🇳',code:'ZH',name:'中文'},
+  ko:{flag:'🇰🇷',code:'KO',name:'한국어'},
+  ru:{flag:'🇷🇺',code:'RU',name:'Русский'},
+  nl:{flag:'🇳🇱',code:'NL',name:'Nederlands'},
+  ar:{flag:'🇸🇦',code:'AR',name:'العربية'},
+};
+const translations = {
+  en:{hero_badge:'Now with AI-powered planning',hero_h1:'Your entire schedule',hero_h1_em:'all in one place !',hero_p:'Plan your day or your trip with AI, discover activities reviewed by a community of real travellers, and sync everything to your calendar.',hero_cta1:'Plan My Day',hero_cta2:'Browse Activities',trust_rating:'Average rating',trust_reviews:'Verified reviews',trust_recommend:'Would recommend',trust_cities:'Cities covered',planner_eye:'AI Day Planner',planner_h2:'Build your perfect',planner_h2_em:'schedule',planner_lead:'One day or a full week — AFYA plans every moment with departure times and syncs to your calendar.',tab_day:'📅 Single Day',tab_multi:'🗺️ Multi-Day Trip',label_who:'Who are you going with?',label_date:'Date & Time',label_prefs:'Preferences',label_budget:'Budget (per person, per day)',label_acts:'What activities?',label_hotel:'Hotel Preferences',who_friends:'Friends',who_partner:'Partner',who_family:'Family',who_business:'Business',who_solo:'Solo',flabel_startdate:'Start Date',flabel_enddate:'End Date',flabel_nights:'Duration',flabel_leave:'Leave Home At',flabel_return:'Return By',flabel_city:'City',flabel_radius:'Radius',flabel_pace:'Pace',flabel_min:'Minimum',flabel_max:'Maximum',gen_btn:'Generate My Schedule',add_all:'Add All to Calendar',sum_label:'AFYA AI — Your Trip Summary'},
+  fr:{hero_badge:'Maintenant avec planification IA',hero_h1:'Ton programme complet',hero_h1_em:'réuni en un seul endroit !',hero_p:'Planifiez votre journée ou votre séjour avec l\'IA, découvrez des activités notées par de vrais voyageurs.',hero_cta1:'Planifier ma journée',hero_cta2:'Voir les activités',trust_rating:'Note moyenne',trust_reviews:'Avis vérifiés',trust_recommend:'Recommanderaient',trust_cities:'Villes',planner_eye:'Planificateur IA',planner_h2:'Construisez votre',planner_h2_em:'planning idéal',planner_lead:'Une journée ou une semaine — AFYA planifie chaque moment.',tab_day:'📅 Jour unique',tab_multi:'🗺️ Multi-jours',label_who:'Avec qui partez-vous ?',label_date:'Date et heure',label_prefs:'Préférences',label_budget:'Budget (par personne, par jour)',label_acts:'Quelles activités ?',label_hotel:'Hôtel',who_friends:'Amis',who_partner:'Partenaire',who_family:'Famille',who_business:'Affaires',who_solo:'Solo',flabel_startdate:'Début',flabel_enddate:'Fin',flabel_nights:'Durée',flabel_leave:'Départ',flabel_return:'Retour',flabel_city:'Ville',flabel_radius:'Rayon',flabel_pace:'Rythme',flabel_min:'Minimum',flabel_max:'Maximum',gen_btn:'Générer mon planning',add_all:'Tout ajouter à l\'agenda',sum_label:'AFYA IA — Résumé du séjour'},
+};
+let currentLang = 'en';
+function t(key){ return (translations[currentLang]&&translations[currentLang][key]) || translations.en[key] || key; }
+function renderLangGrid(){
+  const html = Object.entries(langMeta).map(([k,m])=>
+    `<div class="lang-opt ${k===currentLang?'active':''}" onclick="setLang('${k}')"><div class="lang-opt-flag">${m.flag}</div><div class="lang-opt-name">${m.name}</div></div>`
+  ).join('');
+  document.getElementById('langGrid').innerHTML = html;
+}
+function toggleLangMenu(close){
+  const m = document.getElementById('langMenu');
+  if(close) m.classList.remove('open');
+  else m.classList.toggle('open');
+}
+function setLang(lang){
+  if(!langMeta[lang]) return;
+  currentLang = lang;
+  document.getElementById('langFlag').textContent = langMeta[lang].flag;
+  document.getElementById('langCode').textContent = langMeta[lang].code;
+  document.body.dir = lang==='ar'?'rtl':'ltr';
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const k = el.getAttribute('data-i18n');
+    const txt = t(k);
+    if(txt && txt !== k) el.textContent = txt;
+  });
+  toggleLangMenu(true);
+  renderLangGrid();
+}
+document.addEventListener('click',e=>{
+  if(!document.getElementById('langPicker').contains(e.target)) toggleLangMenu(true);
+});
+
+// ═════════════════════ SCROLL REVEAL ═════════════════════
+const obs = new IntersectionObserver(entries=>{
+  entries.forEach((e,i)=>{ if(e.isIntersecting) setTimeout(()=>e.target.classList.add('in'),i*70); });
+},{threshold:.08,rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+// ═════════════════════ TOAST ═════════════════════
+function toast(msg){
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// ═════════════════════ MODAL ═════════════════════
+let selectedStar = 0, selectedTrip = '';
+function openModal(){ document.getElementById('reviewModal').classList.add('open'); document.body.style.overflow='hidden'; }
+function closeModal(){ document.getElementById('reviewModal').classList.remove('open'); document.body.style.overflow=''; }
+function setStar(n){
+  selectedStar = n;
+  const labels = ['','Terrible','Poor','Average','Good','Excellent'];
+  document.getElementById('starLabel').textContent = labels[n];
+  document.querySelectorAll('.sp-star').forEach(s=>s.classList.toggle('lit', parseInt(s.dataset.v)<=n));
+}
+function toggleTrip(el){
+  document.querySelectorAll('.trip-tag').forEach(t=>t.classList.remove('sel'));
+  el.classList.add('sel');
+  selectedTrip = el.textContent.trim();
+}
+function submitReview(){
+  const name = document.getElementById('revName').value.trim();
+  const title = document.getElementById('revTitle').value.trim();
+  const body = document.getElementById('revBody').value.trim();
+  const city = document.getElementById('revCity').value.trim();
+  if(!name||!title||!body||selectedStar===0){ toast('Please fill all fields ⚠️'); return; }
+  const newR = { id:Date.now(),name,city:city||'Unknown',title,body,stars:selectedStar,date:'Just now',source:'afya',trip:selectedTrip||'🌍 Traveller',helpful:0,avatar:name.substring(0,2).toUpperCase(),color:avatarColors[Math.floor(Math.random()*avatarColors.length)],featured:selectedStar===5 };
+  allReviews.unshift(newR);
+  totalReviews++;
+  document.getElementById('totalReviewCount').textContent = totalReviews.toLocaleString();
+  document.getElementById('mainCount').textContent = `Based on ${totalReviews.toLocaleString()} reviews`;
+  renderReviews(currentFilter);
+  closeModal();
+  toast(`🎉 Thanks ${name}! Your review is published.`);
+  selectedStar=0; selectedTrip='';
+  ['revName','revTitle','revBody','revCity'].forEach(id=>document.getElementById(id).value='');
+  document.querySelectorAll('.sp-star').forEach(s=>s.classList.remove('lit'));
+  document.querySelectorAll('.trip-tag').forEach(t=>t.classList.remove('sel'));
+  document.getElementById('starLabel').textContent='Select a rating';
+}
+
+// ═════════════════════ PLANNER DATA ═════════════════════
+const actData = {
+  friends:[
+    {emoji:'🍳',name:'Brunch at The Smith',desc:'Lively spot — eggs benedict & mimosas.',tag:'Food',dur:90,cost:35},
+    {emoji:'🎨',name:'MoMA Highlights Tour',desc:'World-class modern art.',tag:'Culture',dur:120,cost:25},
+    {emoji:'☕',name:'Blue Bottle Coffee',desc:'Best flat white in the area.',tag:'Food',dur:45,cost:8},
+    {emoji:'🛍️',name:'SoHo Shopping',desc:'Independent boutiques on Prince Street.',tag:'Shopping',dur:90,cost:60},
+    {emoji:'🍝',name:'Dinner at Carbone',desc:'Legendary Italian-American.',tag:'Food',dur:120,cost:80},
+    {emoji:'🎶',name:'Village Vanguard Jazz',desc:'Iconic jazz club, 9pm show.',tag:'Nightlife',dur:120,cost:30},
+    {emoji:'🎳',name:'Brooklyn Bowl',desc:'Bowling + live music.',tag:'Sports',dur:120,cost:40},
+    {emoji:'🌉',name:'Brooklyn Bridge Walk',desc:'Iconic NYC walk to DUMBO.',tag:'Outdoors',dur:75,cost:0},
+    {emoji:'🍸',name:'Rooftop Bar 230 Fifth',desc:'Empire State views at golden hour.',tag:'Nightlife',dur:90,cost:50},
+    {emoji:'🎭',name:'Comedy Cellar Night',desc:'World-famous comedy club.',tag:'Shows',dur:90,cost:30},
+    {emoji:'🚤',name:'East River Ferry',desc:'Skyline views from the water.',tag:'Sightseeing',dur:45,cost:4},
+    {emoji:'🖼️',name:'Whitney Museum',desc:'Cutting-edge art with terrace.',tag:'Culture',dur:90,cost:25},
+  ],
+  partner:[
+    {emoji:'🌅',name:'Sunrise in Central Park',desc:'Coffee and stroll as the city wakes.',tag:'Outdoors',dur:60,cost:5},
+    {emoji:'🏛️',name:'The Met Museum',desc:'Egyptian Wing & Impressionism.',tag:'Culture',dur:150,cost:30},
+    {emoji:'🥗',name:'Lunch at Balthazar',desc:'Iconic French brasserie.',tag:'Food',dur:90,cost:60},
+    {emoji:'🚂',name:'High Line Stroll',desc:'Elevated park with views.',tag:'Sightseeing',dur:90,cost:0},
+    {emoji:'🍸',name:'Employees Only Cocktails',desc:'Award-winning speakeasy.',tag:'Nightlife',dur:60,cost:40},
+    {emoji:'🍣',name:'Omakase at Shoji',desc:'12 sublime Japanese courses.',tag:'Food',dur:120,cost:180},
+    {emoji:'🚣',name:'Row Boat Central Park',desc:'Rent a boat on The Lake.',tag:'Outdoors',dur:60,cost:15},
+    {emoji:'🧖',name:'Aire Ancient Baths',desc:'Thermal baths, pure relaxation.',tag:'Wellness',dur:120,cost:110},
+    {emoji:'🎻',name:'Lincoln Center Concert',desc:'NY Philharmonic.',tag:'Shows',dur:120,cost:70},
+    {emoji:'🌃',name:'One World Observatory',desc:'Manhattan at sunset from 1,776ft.',tag:'Sightseeing',dur:90,cost:44},
+    {emoji:'🫖',name:'Afternoon Tea The Plaza',desc:'Palm Court elegance.',tag:'Food',dur:90,cost:75},
+    {emoji:'🌿',name:'Brooklyn Botanic Garden',desc:'16,000 plant species.',tag:'Outdoors',dur:90,cost:20},
+  ],
+  family:[
+    {emoji:'🦁',name:'Central Park Zoo',desc:'Sea lions and snow leopards.',tag:'Outdoors',dur:120,cost:20},
+    {emoji:'🍕',name:"Lombardi's Pizza",desc:"America's first pizzeria.",tag:'Food',dur:60,cost:25},
+    {emoji:'🗽',name:'Staten Island Ferry',desc:'Free Statue of Liberty views.',tag:'Sightseeing',dur:90,cost:0},
+    {emoji:'🎡',name:'LEGO Store NY',desc:'Times Square fun.',tag:'Shopping',dur:60,cost:40},
+    {emoji:'🍦',name:'Serendipity 3',desc:'Famous frozen hot chocolate.',tag:'Food',dur:60,cost:20},
+    {emoji:'🎭',name:'Broadway Matinee',desc:'Family-friendly show.',tag:'Shows',dur:150,cost:85},
+    {emoji:'🚁',name:'Intrepid Museum',desc:'Aircraft carrier and space shuttle.',tag:'Culture',dur:150,cost:36},
+    {emoji:'🌊',name:'NY Aquarium',desc:'Sharks and walruses.',tag:'Outdoors',dur:180,cost:28},
+    {emoji:'🎪',name:'Natural History Museum',desc:'Dinosaurs and blue whale.',tag:'Culture',dur:150,cost:23},
+    {emoji:'⛸️',name:'Bryant Park Skating',desc:'Beautiful winter rink.',tag:'Sports',dur:90,cost:10},
+    {emoji:'🧁',name:'Magnolia Bakery',desc:'Famous cupcake stop.',tag:'Food',dur:30,cost:12},
+    {emoji:'🚀',name:'Space Exhibit',desc:'Touch a real meteorite.',tag:'Culture',dur:90,cost:20},
+  ],
+  business:[
+    {emoji:'☕',name:'Working Breakfast Ace',desc:'Quiet booths, great WiFi.',tag:'Food',dur:60,cost:20},
+    {emoji:'🏙️',name:'Empire State Building',desc:'Impress clients with the view.',tag:'Sightseeing',dur:90,cost:45},
+    {emoji:'🥩',name:'Business Lunch Quality Meats',desc:'Refined steakhouse.',tag:'Food',dur:120,cost:90},
+    {emoji:'🏛️',name:'Whitney Museum',desc:'Cultural sophistication.',tag:'Culture',dur:90,cost:25},
+    {emoji:'🍹',name:'Drinks The Standard',desc:'Best Meatpacking views.',tag:'Nightlife',dur:90,cost:60},
+    {emoji:'🍽️',name:'Dinner Le Bernardin',desc:'Three Michelin stars.',tag:'Food',dur:150,cost:250},
+    {emoji:'🎯',name:'TopGolf Midtown',desc:'Client bonding over golf.',tag:'Sports',dur:120,cost:65},
+    {emoji:'🚁',name:'Helicopter Tour',desc:'Ultimate wow factor.',tag:'Sightseeing',dur:60,cost:220},
+    {emoji:'🍾',name:'Whisky Brandy Library',desc:'Expert tasting, 1,000+ bottles.',tag:'Food',dur:90,cost:95},
+    {emoji:'🎨',name:'MoMA Private Evening',desc:'Culture without crowds.',tag:'Culture',dur:90,cost:30},
+    {emoji:'🥂',name:'Champagne The Plaza',desc:'Palm Court service.',tag:'Food',dur:60,cost:120},
+    {emoji:'🤝',name:'Networking Wing Soho',desc:'Premium co-working booths.',tag:'Culture',dur:120,cost:40},
+  ],
+  solo:[
+    {emoji:'🌅',name:'Sunrise Brooklyn Bridge',desc:'Magical light, zero crowds.',tag:'Sightseeing',dur:60,cost:0},
+    {emoji:'📚',name:'NY Public Library',desc:'Stunning Rose Reading Room.',tag:'Culture',dur:90,cost:0},
+    {emoji:'🥐',name:'Solo Brunch at Buvette',desc:'Intimate French bistro.',tag:'Food',dur:60,cost:22},
+    {emoji:'🎧',name:'Brooklyn Museum',desc:'Rarely crowded, world-class.',tag:'Culture',dur:120,cost:16},
+    {emoji:'🌿',name:'Prospect Park',desc:"Brooklyn's backyard.",tag:'Outdoors',dur:90,cost:0},
+    {emoji:'🍜',name:'Momofuku Noodle Bar',desc:'David Chang\'s original.',tag:'Food',dur:60,cost:28},
+    {emoji:'🎭',name:'Half-Price Broadway',desc:'TKTS queue for same-day.',tag:'Shows',dur:150,cost:55},
+    {emoji:'🏃',name:'Run Central Park Reservoir',desc:'1.58 miles of peace.',tag:'Sports',dur:45,cost:0},
+    {emoji:'🌆',name:'Sunset at The Vessel',desc:'Honeycomb structure climb.',tag:'Sightseeing',dur:60,cost:10},
+    {emoji:'🍺',name:'Brooklyn Brewery Tour',desc:'Williamsburg classic.',tag:'Food',dur:75,cost:18},
+    {emoji:'🧘',name:'Bryant Park Yoga',desc:'Free morning sessions.',tag:'Wellness',dur:60,cost:0},
+    {emoji:'🖋️',name:'The Strand Bookstore',desc:'18 miles of books.',tag:'Shopping',dur:60,cost:20},
+  ],
+};
+const summaries = {
+  friends:"Get ready for a day you'll be talking about for weeks. Brunch, world-class art, hidden coffee gems, and live jazz that'll have everyone wanting to stay till midnight. The city at its finest — spontaneous, electric, unforgettable.",
+  partner:"Imagine waking up to a golden sunrise before losing yourselves in centuries of art and a long, lingering French lunch. As the city glows amber, stroll hand in hand before a cocktail that whispers of secret speakeasies — then dinner that turns a meal into a memory.",
+  family:"A day built for smiles and shared wonder — from playful park visits to legendary pizza, free harbour cruises and ice cream that's been famous for decades. Pure magic for every age.",
+  business:"From a sharp working breakfast to iconic views, every moment is designed to impress. Power lunch, cultural interlude, sunset rooftop cocktails — and for dinner, Michelin stars. This isn't just a schedule. It's a statement.",
+  solo:"Your city, your pace. A sunrise walk when the world is asleep, the grandeur of a great library, a croissant at a zinc bar, and an afternoon lost in art. Tonight, ramen at the counter where the food revolution began.",
+};
+const multiSummaries = {
+  friends:"A multi-day adventure that builds momentum with every sunrise. Each day has its own flavour but the through-line is the same: great company, great food, and moments that make ordinary weekends feel extraordinary.",
+  partner:"A trip designed for two, moving at the rhythm of slow mornings and spontaneous discoveries. Every day opens with something beautiful and closes with something romantic.",
+  family:"A few days packed with the kind of magic that children remember for a lifetime. Comfortable hotels, sensible timings, and a plan that actually works for everyone.",
+  business:"A seamlessly orchestrated trip where every moment serves a purpose. Premium hotels, strategic locations, and zero wasted time.",
+  solo:"Your trip, your rules. A thoughtfully crafted sequence of experiences that match exactly who you are.",
+};
+const hotels = {
+  'New York, USA':[{emoji:'🏨',name:'The Ludlow Hotel',area:'Lower East Side',rating:'4.6',price:189},{emoji:'🏩',name:'NoMad Hotel',area:'Flatiron',rating:'4.8',price:320},{emoji:'🛎️',name:'Pod 39',area:'Midtown East',rating:'4.2',price:115}],
+  'Paris, France':[{emoji:'🏨',name:'Hôtel du Petit Moulin',area:'Le Marais',rating:'4.7',price:210},{emoji:'🏩',name:'Le Cinq Codet',area:'7ème',rating:'4.9',price:450},{emoji:'🛎️',name:'Generator Paris',area:'Canal Saint-Martin',rating:'4.1',price:75}],
+  default:[{emoji:'🏨',name:'City Boutique Hotel',area:'Central',rating:'4.5',price:160},{emoji:'🏩',name:'Luxury Grand Hotel',area:'Prime district',rating:'4.9',price:380},{emoji:'🛎️',name:'Budget Inn & Suites',area:'Near transport',rating:'4.0',price:85}],
+};
+
+// ═════════════════════ PLANNER LOGIC ═════════════════════
+let planMode = 'day';
+function switchTab(mode, el){
+  planMode = mode;
+  document.querySelectorAll('.plan-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  const multi = mode==='multi';
+  document.getElementById('plannerTitle').textContent = multi?'Multi-Day Trip Planner':'Day Planner';
+  document.getElementById('endDateWrap').style.display = multi?'':'none';
+  document.getElementById('nightsBadgeWrap').style.display = multi?'':'none';
+  document.getElementById('hotelSection').style.display = multi?'':'none';
+}
+document.getElementById('startDate').value = new Date().toISOString().split('T')[0];
+document.getElementById('endDate').addEventListener('change',updateNights);
+document.getElementById('startDate').addEventListener('change',updateNights);
+function updateNights(){
+  const s = new Date(document.getElementById('startDate').value);
+  const e = new Date(document.getElementById('endDate').value);
+  if(s&&e&&e>s){
+    const n = Math.round((e-s)/86400000);
+    document.getElementById('nightsBadge').textContent = n+(n===1?' night':' nights');
+  }
+}
+function toggleWho(el){ document.querySelectorAll('.who-pill').forEach(p=>p.classList.remove('on')); el.classList.add('on'); }
+function toggleChip(el){ el.classList.toggle('on'); }
+function timeToMins(t){ const [h,m]=t.split(':').map(Number); return h*60+m; }
+function minsToTime(m){ return `${String(Math.floor(m/60)%24).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`; }
+
+function generate(){
+  const who = document.querySelector('.who-pill.on')?.dataset.who||'friends';
+  const city = document.getElementById('citySel').value;
+  const cityName = city.split(',')[0];
+  const leave = document.getElementById('leaveTime').value||'09:00';
+  const returnT = document.getElementById('returnTime').value||'22:00';
+  const bMin = parseFloat(document.getElementById('budgetMin').value)||0;
+  const bMax = parseFloat(document.getElementById('budgetMax').value)||9999;
+  const multi = planMode==='multi';
+
+  if(timeToMins(leave)>=timeToMins(returnT)){ alert('Return time must be after leave time'); return; }
+
+  const activeTags = [];
+  document.querySelectorAll('.chip.on').forEach(c=>activeTags.push(c.dataset.tag));
+  const tags = activeTags.length>0?activeTags:['Food','Culture','Outdoors','Sightseeing','Sports','Nightlife','Wellness','Shopping','Shows'];
+
+  const pace = document.getElementById('paceSel').value;
+  const count = pace==='relaxed'?4:pace==='packed'?8:6;
+
+  const all = actData[who]||actData.friends;
+  let filtered = all.filter(a=>tags.includes(a.tag)&&a.cost>=bMin&&a.cost<=bMax);
+  if(filtered.length<2) filtered = all.filter(a=>tags.includes(a.tag));
+  if(filtered.length<2) filtered = all;
+  const shuffled = [...filtered].sort(()=>Math.random()-0.5).slice(0,count);
+  const order = {Outdoors:0,Sightseeing:1,Culture:2,Sports:3,Food:4,Shopping:5,Wellness:5,Shows:6,Nightlife:7};
+  shuffled.sort((a,b)=>(order[a.tag]||5)-(order[b.tag]||5));
+
+  document.getElementById('resTitle').innerHTML = multi?`Your Trip to <em>${cityName}</em>`:`Your Day in <em>${cityName}</em>`;
+  document.getElementById('aiSummary').textContent = (multi?multiSummaries:summaries)[who]||summaries.friends;
+  document.getElementById('aiSumLabel').textContent = t('sum_label');
+
+  if(multi){
+    const sV = document.getElementById('startDate').value;
+    const eV = document.getElementById('endDate').value;
+    let nights = 3;
+    if(sV&&eV){ const d = Math.round((new Date(eV)-new Date(sV))/86400000); if(d>0) nights=d; }
+    nights = Math.max(1,Math.min(nights,7));
+    buildMulti(shuffled, city, leave, returnT, nights);
+  } else {
+    buildSingle(shuffled, leave, returnT);
+  }
+  const r = document.getElementById('results');
+  r.classList.add('show');
+  setTimeout(()=>r.scrollIntoView({behavior:'smooth',block:'start'}),200);
+}
+
+function buildSingle(acts, leave, returnT){
+  const tl = document.getElementById('timeline');
+  const dt = document.getElementById('dayTabs');
+  tl.innerHTML=''; dt.innerHTML='';
+  const returnMins = timeToMins(returnT);
+  let cur = timeToMins(leave);
+  const travelMins = 20;
+  let total = 0, shownCount = 0;
+
+  acts.forEach((act,i)=>{
+    if(cur+act.dur>returnMins) return;
+    const startTime = minsToTime(cur);
+    const endTime = minsToTime(cur+act.dur);
+    const departTime = minsToTime(cur+act.dur+travelMins);
+    const hasNext = i<acts.length-1 && (cur+act.dur+travelMins+acts[i+1].dur<=returnMins);
+    total += act.cost;
+    shownCount++;
+
+    const item = document.createElement('div');
+    item.className='tl-item';
+    item.innerHTML = `
+      <div class="tl-time-col"><div class="tl-time">${startTime}</div><div class="tl-dur">${act.dur>=60?Math.floor(act.dur/60)+'h'+(act.dur%60||''):act.dur+'min'}</div></div>
+      <div class="tl-dot-col"><div class="tl-dot ${i===0?'fill':''}"></div>${hasNext?'<div class="tl-conn"></div>':''}</div>
+      <div style="flex:1">
+        <div class="tl-card">
+          <div class="tl-emoji">${act.emoji}</div>
+          <div class="tl-info"><div class="tl-name">${act.name}</div><div class="tl-desc">${act.desc} · Until ${endTime}</div></div>
+          <div class="tl-tag">${act.tag}</div>
+          <div class="tl-price ${act.cost===0?'free':''}">${act.cost===0?'🆓 Free':'$'+act.cost}</div>
+          <button class="add1-btn" onclick="addOne(this,'${act.name.replace(/'/g,"\\'")}')">+ Cal</button>
+          <div class="added-badge">✓ Added</div>
+        </div>
+        ${hasNext?`<div class="depart-notice"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Leave by ${departTime} for your next activity</div>`:''}
+      </div>`;
+    tl.appendChild(item);
+    setTimeout(()=>item.classList.add('show'), i*120+80);
+    cur += act.dur+travelMins;
+  });
+
+  const totalBar = document.createElement('div');
+  totalBar.className='cost-total-bar';
+  totalBar.innerHTML = `<div class="cost-total-inner">
+    <div class="cost-total-left">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+      Estimated total per person
+    </div>
+    <div class="cost-total-amount">${total===0?'🆓 Free day!':'$'+total}</div>
+  </div>`;
+  tl.appendChild(totalBar);
+}
+
+function buildMulti(acts, city, leave, returnT, nights){
+  const tl = document.getElementById('timeline');
+  const dt = document.getElementById('dayTabs');
+  tl.innerHTML=''; dt.innerHTML='';
+  for(let d=0;d<nights;d++){
+    const btn = document.createElement('button');
+    btn.className='day-tab'+(d===0?' active':'');
+    btn.textContent=`Day ${d+1}`;
+    btn.onclick=()=>{
+      document.querySelectorAll('.day-tab').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      renderMultiDay(d, acts, city, leave, returnT, d<nights-1);
+    };
+    dt.appendChild(btn);
+  }
+  renderMultiDay(0, acts, city, leave, returnT, nights>1);
+}
+
+function renderMultiDay(idx, acts, city, leave, returnT, showHotel){
+  const tl = document.getElementById('timeline');
+  tl.innerHTML='';
+  const cityH = hotels[city]||hotels.default;
+  const offset = idx*2;
+  const dayActs = [...acts.slice(offset%acts.length), ...acts.slice(0, offset%acts.length)];
+  const returnMins = timeToMins(returnT);
+  let cur = timeToMins(leave);
+  let total = 0;
+
+  dayActs.forEach((act,i)=>{
+    if(cur+act.dur>returnMins) return;
+    const startTime = minsToTime(cur);
+    const endTime = minsToTime(cur+act.dur);
+    const departTime = minsToTime(cur+act.dur+20);
+    const hasNext = (cur+act.dur+20)<returnMins;
+    total += act.cost;
+    const item = document.createElement('div');
+    item.className='tl-item';
+    item.innerHTML = `
+      <div class="tl-time-col"><div class="tl-time">${startTime}</div><div class="tl-dur">${act.dur>=60?Math.floor(act.dur/60)+'h':act.dur+'m'}</div></div>
+      <div class="tl-dot-col"><div class="tl-dot ${i===0?'fill':''}"></div><div class="tl-conn"></div></div>
+      <div style="flex:1">
+        <div class="tl-card">
+          <div class="tl-emoji">${act.emoji}</div>
+          <div class="tl-info"><div class="tl-name">${act.name}</div><div class="tl-desc">${act.desc} · Until ${endTime}</div></div>
+          <div class="tl-tag">${act.tag}</div>
+          <div class="tl-price ${act.cost===0?'free':''}">${act.cost===0?'🆓 Free':'$'+act.cost}</div>
+          <button class="add1-btn" onclick="addOne(this,'${act.name.replace(/'/g,"\\'")}')">+ Cal</button>
+          <div class="added-badge">✓ Added</div>
+        </div>
+        ${hasNext?`<div class="depart-notice"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Leave by ${departTime} for your next activity</div>`:''}
+      </div>`;
+    tl.appendChild(item);
+    setTimeout(()=>item.classList.add('show'), i*100+60);
+    cur += act.dur+20;
+  });
+
+  if(showHotel){
+    const h = cityH[idx%cityH.length];
+    const hi = document.createElement('div');
+    hi.className='tl-item show';
+    hi.innerHTML = `
+      <div class="tl-time-col"><div class="tl-time">Tonight</div></div>
+      <div class="tl-dot-col"><div class="tl-dot" style="border-color:var(--sage-l)"></div></div>
+      <div style="flex:1">
+        <div class="hotel-card" onclick="toast('Hotel added to trip!')">
+          <div class="hotel-emoji">${h.emoji}</div>
+          <div class="hotel-info"><div class="hotel-name">${h.name}</div><div class="hotel-detail">⭐ ${h.rating} · ${h.area}</div></div>
+          <div class="hotel-price">$${h.price}<span>per night</span></div>
+        </div>
+      </div>`;
+    tl.appendChild(hi);
+  }
+}
+
+function addOne(btn, name){
+  btn.style.display='none';
+  btn.nextElementSibling.classList.add('show');
+  toast(`"${name}" added to calendar`);
+}
+function addAll(){
+  document.querySelectorAll('.add1-btn').forEach(b=>b.style.display='none');
+  document.querySelectorAll('.added-badge').forEach(b=>b.classList.add('show'));
+  toast('All activities synced! 🗓️');
+}
+
+// ═════════════════════ ACTIVITIES SECTION ═════════════════════
+const activities = [
+  {id:1,emoji:'🎨',name:'MoMA Highlights Tour',desc:'Modern art masterpieces.',tag:'Culture',price:25,rating:4.8,reviews:342,bg:'#E8E0D4'},
+  {id:2,emoji:'🌉',name:'Brooklyn Bridge Walk',desc:'Iconic NYC walk.',tag:'Outdoors',price:0,rating:4.9,reviews:1240,bg:'#D4E0E8'},
+  {id:3,emoji:'🎶',name:'Village Vanguard Jazz',desc:'Iconic jazz club.',tag:'Nightlife',price:30,rating:4.9,reviews:567,bg:'#2A3A4A'},
+  {id:4,emoji:'🏛️',name:'Met Museum',desc:'35,000 works of art.',tag:'Culture',price:30,rating:4.7,reviews:4200,bg:'#E4DDD4'},
+  {id:5,emoji:'🧖',name:'Aire Ancient Baths',desc:'Thermal baths in historic building.',tag:'Outdoors',price:110,rating:4.9,reviews:289,bg:'#D4E4E0'},
+  {id:6,emoji:'🎭',name:'Comedy Cellar',desc:'World-famous comedy.',tag:'Shows',price:30,rating:4.8,reviews:723,bg:'#E8D4C4'},
+  {id:7,emoji:'⛸️',name:'Bryant Park Skating',desc:'Beautiful winter rink.',tag:'Sports',price:10,rating:4.6,reviews:891,bg:'#D4DCE8'},
+  {id:8,emoji:'🌿',name:'Prospect Park',desc:"Brooklyn's backyard.",tag:'Outdoors',price:0,rating:4.7,reviews:456,bg:'#D4E8D8'},
+  {id:9,emoji:'🚤',name:'East River Ferry',desc:'Skyline views from water.',tag:'Outdoors',price:4,rating:4.5,reviews:234,bg:'#D8E4EC'},
+  {id:10,emoji:'🎪',name:'Natural History Museum',desc:'Dinosaurs and blue whale.',tag:'Culture',price:23,rating:4.8,reviews:2100,bg:'#ECE4D8'},
+  {id:11,emoji:'🎳',name:'Brooklyn Bowl',desc:'Bowling + live music.',tag:'Sports',price:40,rating:4.6,reviews:389,bg:'#E4D8EC'},
+  {id:12,emoji:'🌃',name:'One World Observatory',desc:'Manhattan at sunset.',tag:'Outdoors',price:44,rating:4.7,reviews:1560,bg:'#2A3848'},
+];
+let actFilter = 'all';
+function filterActs(tag, btn){
+  actFilter = tag;
+  document.querySelectorAll('#actFilters .filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderActivities();
+}
+function renderActivities(){
+  const list = actFilter==='all'?activities:activities.filter(a=>a.tag===actFilter);
+  document.getElementById('actGrid').innerHTML = list.map(a=>`
+    <div class="act-card">
+      <div class="act-img" style="background:${a.bg}">${a.emoji}</div>
+      <div class="act-body">
+        <div class="act-name">${a.name}</div>
+        <div class="act-desc">${a.desc}</div>
+        <div class="act-foot">
+          <div class="act-price">${a.price===0?'🆓 Free':'$'+a.price}</div>
+          <div class="act-rating-row">${[1,2,3,4,5].map(n=>`<span class="act-star">${n<=Math.round(a.rating)?'★':'☆'}</span>`).join('')}<span class="act-rcount">${a.rating} (${a.reviews.toLocaleString()})</span></div>
+        </div>
+        <button class="act-add-btn" onclick="addAct(this,'${a.name.replace(/'/g,"\\'")}')">+ Add to schedule</button>
+      </div>
+    </div>`).join('');
+}
+function addAct(btn,name){ btn.textContent='✓ Added'; btn.classList.add('added'); btn.disabled=true; toast(`"${name}" added!`); }
+
+// ═════════════════════ RESTAURANTS ═════════════════════
+const restos = [
+  {id:1,emoji:'🥐',name:'Le Bernardin',cuisine:'French',rating:4.9,reviews:1840,dist:0.8,priceMin:120,priceMax:280,bg:'#E8DDD4',topReview:{text:'The most refined dining experience of my life.',by:'Sophie L., Paris'}},
+  {id:2,emoji:'🍝',name:'Carbone',cuisine:'Italian',rating:4.8,reviews:2350,dist:1.2,priceMin:60,priceMax:140,bg:'#D9CFC8',topReview:{text:'Legendary meatballs. Worth every penny.',by:'Marco V., Milan'}},
+  {id:3,emoji:'🍣',name:'Masa',cuisine:'Japanese',rating:4.9,reviews:980,dist:0.6,priceMin:200,priceMax:400,bg:'#CDD9D4',topReview:{text:'The omakase of a lifetime.',by:'Ryo N., Tokyo'}},
+  {id:4,emoji:'🍔',name:'J.G. Melon',cuisine:'American',rating:4.5,reviews:3100,dist:2.1,priceMin:20,priceMax:50,bg:'#D4D0C8',topReview:{text:'Best burger in NYC.',by:'Tom B., Sydney'}},
+  {id:5,emoji:'🥗',name:'Balthazar',cuisine:'French',rating:4.7,reviews:4200,dist:1.5,priceMin:45,priceMax:95,bg:'#DDD8CF',topReview:{text:'A long Saturday lunch here is one of NY\'s great pleasures.',by:'Emma R., London'}},
+  {id:6,emoji:'🍜',name:'Momofuku Noodle Bar',cuisine:'Asian',rating:4.6,reviews:5600,dist:0.9,priceMin:18,priceMax:45,bg:'#C8D2D6',topReview:{text:'Life-changing ramen.',by:'Amira T., Dubai'}},
+  {id:7,emoji:'🍕',name:"Roberta's Pizza",cuisine:'Italian',rating:4.7,reviews:7800,dist:3.2,priceMin:15,priceMax:40,bg:'#D6CEC8',topReview:{text:'Worth every minute of the subway ride.',by:'Chloe M., Amsterdam'}},
+  {id:8,emoji:'🥩',name:'Peter Luger Steakhouse',cuisine:'American',rating:4.8,reviews:2900,dist:4.1,priceMin:80,priceMax:180,bg:'#CFC8C0',topReview:{text:'Cash only, no frills, legendary steak.',by:'James K., New York'}},
+  {id:9,emoji:'🍱',name:'Nobu',cuisine:'Japanese',rating:4.6,reviews:3400,dist:1.8,priceMin:60,priceMax:150,bg:'#C8CFD4',topReview:{text:'Yellowtail jalapeño changed my life.',by:'Isabella C., Rome'}},
+];
+let restoSort = 'rating';
+function sortRestos(key, btn){
+  restoSort = key;
+  document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  filterRestos();
+}
+function filterRestos(){
+  const cu = document.getElementById('cuisineF').value;
+  const d = parseFloat(document.getElementById('distF').value);
+  const r = parseFloat(document.getElementById('ratingF').value);
+  const bMin = parseFloat(document.getElementById('bMin').value)||0;
+  const bMax = parseFloat(document.getElementById('bMax').value)||9999;
+  let list = restos.filter(x=>(!cu||x.cuisine===cu)&&x.dist<=d&&x.rating>=r&&x.priceMax>=bMin&&x.priceMin<=bMax);
+  list.sort((a,b)=>{
+    if(restoSort==='rating') return b.rating-a.rating;
+    if(restoSort==='dist') return a.dist-b.dist;
+    if(restoSort==='price-asc') return a.priceMin-b.priceMin;
+    if(restoSort==='price-desc') return b.priceMax-a.priceMax;
+    if(restoSort==='reviews') return b.reviews-a.reviews;
+    return 0;
+  });
+  document.getElementById('restoCountLabel').textContent = `Showing ${list.length} restaurant${list.length!==1?'s':''}`;
+  document.getElementById('restoGrid').innerHTML = list.map(x=>`
+    <div class="resto-card">
+      <div class="resto-img" style="background:${x.bg}">${x.emoji}</div>
+      <div class="resto-body">
+        <div class="resto-name">${x.name}</div>
+        <div class="resto-cuisine">${x.cuisine}</div>
+        <div class="r-stars-row">${[1,2,3,4,5].map(n=>`<span class="r-star-${n<=Math.floor(x.rating)?'f':'e'}">★</span>`).join('')}<span class="r-score">${x.rating}</span><span class="r-count">(${x.reviews.toLocaleString()})</span></div>
+        <div class="resto-meta"><span class="resto-dist">📍 ${x.dist}km</span><span class="resto-price">$${x.priceMin}–$${x.priceMax}</span></div>
+        <div class="resto-review-snip"><div class="resto-review-snip-text">"${x.topReview.text}"</div><div class="resto-review-snip-by">— ${x.topReview.by}</div></div>
+        <button class="resto-add-btn" onclick="addResto(this,'${x.name.replace(/'/g,"\\'")}')">+ Add to schedule</button>
+      </div>
+    </div>`).join('');
+}
+function addResto(btn,name){ btn.textContent='✓ Added'; btn.classList.add('added'); btn.disabled=true; toast(`"${name}" added!`); }
+
+// ═════════════════════ REVIEWS ═════════════════════
+const avatarColors = ['#6D8F82','#3B5068','#C94F3A','#D4A843','#4A9E6F','#7A5C8A','#4A7AB5'];
+let totalReviews = 2847;
+let currentFilter = 'all';
+let reviewPage = 1;
+const allReviews = [
+  {id:1,name:'Sophie L.',city:'Paris',title:'Transformed how I travel',body:'AFYA planned our 3-day Barcelona trip from scratch. Every activity was perfectly timed, the budget was spot on. The departure time alerts saved us multiple times.',stars:5,date:'March 12, 2026',source:'trustpilot',trip:'👫 Friends',helpful:142,avatar:'SL',color:'#6D8F82',featured:true},
+  {id:2,name:'Marco V.',city:'Milan',title:'The AI summary was surprisingly accurate',body:'Planned a romantic weekend in Lisbon. The AI summary genuinely captured the mood — poetic, warm, and spot on. My girlfriend cried reading it.',stars:5,date:'March 8, 2026',source:'afya',trip:'❤️ Couple',helpful:89,avatar:'MV',color:'#C94F3A',featured:true},
+  {id:3,name:'Emma R.',city:'London',title:'Great for families',body:'Three kids and a husband who hates museums. AFYA somehow satisfied everyone. The Family mode really understands what works for mixed age groups.',stars:5,date:'Feb 28, 2026',source:'google',trip:'🏠 Family',helpful:67,avatar:'ER',color:'#D4A843',featured:false},
+  {id:4,name:'James K.',city:'New York',title:'Used it for a client day',body:'Business mode is surprisingly refined. The restaurant choices were Michelin-level and the pacing was perfect for a full day of client entertainment.',stars:5,date:'Feb 20, 2026',source:'trustpilot',trip:'💼 Business',helpful:211,avatar:'JK',color:'#3B5068',featured:false},
+  {id:5,name:'Amira T.',city:'Dubai',title:'Multi-day planning is flawless',body:'Used the multi-day planner for 5 days in Kyoto. Hotel suggestions were well-priced and perfectly located. Must-use for any Japan trip.',stars:5,date:'Feb 14, 2026',source:'afya',trip:'🎒 Solo',helpful:94,avatar:'AT',color:'#4A9E6F',featured:true},
+  {id:6,name:'Lucas P.',city:'São Paulo',title:'Good but sometimes generic',body:'Really love the concept and the UI is beautiful. 4 stars because some activity suggestions felt more touristy than I hoped. But the planning engine is genuinely useful.',stars:4,date:'Feb 10, 2026',source:'google',trip:'🎒 Solo',helpful:38,avatar:'LP',color:'#7A5C8A',featured:false},
+  {id:7,name:'Chloe M.',city:'Amsterdam',title:'Perfect for weekend plans',body:'Saturday morning, no plans. Opened AFYA, set parameters. Had a full day itinerary in 3 seconds. We followed it and had one of the best days ever.',stars:5,date:'Feb 5, 2026',source:'trustpilot',trip:'👫 Friends',helpful:178,avatar:'CM',color:'#6D8F82',featured:false},
+  {id:8,name:'Ryo N.',city:'Tokyo',title:'Departure feature is genius',body:'The "leave by X:XX" notice between activities is the best feature. I used to always lose track of time. Now every transition is perfectly planned.',stars:5,date:'Jan 30, 2026',source:'afya',trip:'👫 Friends',helpful:55,avatar:'RN',color:'#C94F3A',featured:false},
+  {id:9,name:'Fatima A.',city:'Casablanca',title:'Budget filters actually work',body:'Set max $60 per person for Paris. AFYA found real quality activities within budget — free museums on Sunday, market picnic, cheap excellent bistro.',stars:5,date:'Jan 24, 2026',source:'trustpilot',trip:'👫 Friends',helpful:73,avatar:'FA',color:'#D4A843',featured:false},
+  {id:10,name:'Tom B.',city:'Sydney',title:'Needs more local gems',body:'Obvious tourist spots are great but I want hidden gems. Restaurant suggestions leaned heavily towards chains rather than independent spots.',stars:3,date:'Jan 18, 2026',source:'google',trip:'🎒 Solo',helpful:22,avatar:'TB',color:'#4A7AB5',featured:false},
+  {id:11,name:'Yuki S.',city:'Osaka',title:'Used it every day',body:'10 days in Japan with 4 friends and different interests. AFYA handled everything — temples, street food, shopping. Each day had something for everyone.',stars:5,date:'Jan 12, 2026',source:'afya',trip:'👫 Friends',helpful:130,avatar:'YS',color:'#4A9E6F',featured:true},
+  {id:12,name:'Isabella C.',city:'Rome',title:'Couple mode is pure magic',body:'Surprise trip to Amalfi using couple mode. The AI summary made us both emotional — it described our trip as if it had already happened. Then we went and it matched perfectly.',stars:5,date:'Jan 8, 2026',source:'trustpilot',trip:'❤️ Couple',helpful:98,avatar:'IC',color:'#C94F3A',featured:true},
+];
+const ratingDist = {5:71,4:18,3:6,2:3,1:2};
+function renderRatingBars(){
+  document.getElementById('ratingBars').innerHTML = [5,4,3,2,1].map(n=>`
+    <div class="rbar-row"><span class="rbar-label">${n}</span><div class="rbar-track"><div class="rbar-fill" style="width:${ratingDist[n]}%"></div></div><span class="rbar-pct">${ratingDist[n]}%</span></div>
+  `).join('');
+}
+function renderMainStars(){
+  document.getElementById('mainStars').innerHTML = [1,2,3,4,5].map(n=>`<span class="star-big ${n<=4?'':'e'}">★</span>`).join('');
+}
+function starsHtml(n){ return [1,2,3,4,5].map(i=>`<span class="rc-star-${i<=n?'f':'e'}">★</span>`).join(''); }
+function filterReviews(type,btn){
+  document.querySelectorAll('#revFilter .filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderReviews(type,1);
+}
+function renderReviews(filter='all', page=1){
+  currentFilter = filter; reviewPage = page;
+  let list = [...allReviews];
+  if(['5','4','3','2','1'].includes(filter)) list = list.filter(r=>r.stars===parseInt(filter));
+  else if(['afya','trustpilot','google'].includes(filter)) list = list.filter(r=>r.source===filter);
+  else if(filter==='friends') list = list.filter(r=>r.trip.includes('Friend'));
+  else if(filter==='couple') list = list.filter(r=>r.trip.includes('Couple'));
+  else if(filter==='family') list = list.filter(r=>r.trip.includes('Family'));
+  const autoTp = list.filter(r=>r.source==='afya').length<3 && !['trustpilot','google'].includes(filter);
+  const perPage = 9;
+  const shown = list.slice(0, page*perPage);
+  const hasMore = list.length > page*perPage;
+  const labels = {afya:'<span class="source-afya">AFYA</span>',trustpilot:'<span class="source-tp">Trustpilot</span>',google:'<span class="source-g">Google</span>'};
+  document.getElementById('reviewsGrid').innerHTML = shown.map(r=>`
+    <div class="review-card ${r.source==='trustpilot'?'tp-card':''} ${r.featured?'featured':''}">
+      <div class="rc-top">
+        <div class="rc-user"><div class="rc-avatar" style="background:${r.color}">${r.avatar}</div><div><div class="rc-name">${r.name}</div><div class="rc-meta">${r.city} · ${r.trip}</div></div></div>
+        <div>${labels[r.source]||''}</div>
+      </div>
+      <div class="rc-stars">${starsHtml(r.stars)}</div>
+      <div class="rc-title">${r.title}</div>
+      <div class="rc-body">${r.body}</div>
+      <div class="rc-footer">
+        <div class="rc-date">${r.date}</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="rc-trip">${r.trip}</span>
+          <button class="rc-helpful" onclick="markHelpful(${r.id},this)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3H14z"/></svg>Helpful (${r.helpful})</button>
+        </div>
+      </div>
+    </div>`).join('') + (autoTp?'<div style="grid-column:1/-1;text-align:center;padding:12px;font-size:12px;color:var(--ink3);font-family:var(--ui)">Showing Trustpilot reviews to supplement community reviews. <a href="https://trustpilot.com" target="_blank" style="color:var(--sage)">See all on Trustpilot →</a></div>':'');
+  document.getElementById('loadMoreBtn').style.display = hasMore?'':'none';
+}
+function markHelpful(id, btn){
+  const r = allReviews.find(x=>x.id===id);
+  if(r){ r.helpful++; btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3H14z"/></svg>Helpful (${r.helpful})`; }
+}
+function loadMoreReviews(){ renderReviews(currentFilter, reviewPage+1); }
+
+// ═════════════════════ INIT ═════════════════════
+mountLogos();
+renderLangGrid();
+renderMainStars();
+renderRatingBars();
+renderReviews('all',1);
+renderActivities();
+filterRestos();
+</script>
+</body>
+</html>
