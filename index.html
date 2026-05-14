@@ -389,6 +389,7 @@ footer{background:var(--ink);padding:60px 52px 32px}
   .tl-time-col{width:58px;padding-right:12px}
 }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -798,6 +799,83 @@ footer{background:var(--ink);padding:60px 52px 32px}
 </footer>
 
 <script>
+  // ═════════════════════ SUPABASE CONFIG ═════════════════════
+const SUPABASE_URL = 'https://zryfceystyipimniarst.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_uI4dQX6KFlLcxtxqw52ewA_ujacVkch';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+console.log('✅ Supabase connected');
+// ═════════════════════ LOAD DATA FROM SUPABASE ═════════════════════
+
+// Charger les restaurants depuis Supabase
+async function loadRestosFromSupabase() {
+  const { data, error } = await sb.from('restaurants').select('*');
+
+  if (error) {
+    console.error('❌ Error loading restaurants:', error);
+    return;
+  }
+
+  console.log('✅ Restaurants loaded from Supabase:', data);
+
+  // Convertit le format Supabase vers le format attendu par le site
+  if (data && data.length > 0) {
+    restos.length = 0; // vide le tableau actuel
+    data.forEach(r => {
+      restos.push({
+        id: r.id,
+        emoji: r.emoji,
+        name: r.name,
+        cuisine: r.cuisine,
+        rating: parseFloat(r.rating),
+        reviews: r.reviews_count,
+        dist: parseFloat(r.distance_km),
+        priceMin: parseFloat(r.price_min),
+        priceMax: parseFloat(r.price_max),
+        bg: r.bg_color || '#E8DDD4',
+        topReview: {
+          text: r.top_review_text || 'Great place!',
+          by: r.top_review_author || 'A guest'
+        }
+      });
+    });
+    filterRestos(); // rafraîchit l'affichage
+  }
+}
+
+// Lance le chargement au démarrage du site
+// Charger les activités depuis Supabase
+async function loadActivitiesFromSupabase() {
+  const { data, error } = await sb.from('activities').select('*');
+
+  if (error) {
+    console.error('❌ Error loading activities:', error);
+    return;
+  }
+
+  console.log('✅ Activities loaded from Supabase:', data);
+
+  if (data && data.length > 0) {
+    activities.length = 0; // vide le tableau actuel
+    data.forEach(a => {
+      activities.push({
+        id: a.id,
+        emoji: a.emoji,
+        name: a.name,
+        desc: a.description,
+        tag: a.tag,
+        price: parseFloat(a.price),
+        rating: parseFloat(a.rating),
+        reviews: a.reviews_count,
+        bg: a.bg_color || '#E8E0D4'
+      });
+    });
+    renderActivities(); // rafraîchit l'affichage
+  }
+}
+
+// Lance le chargement
+loadActivitiesFromSupabase();
+loadRestosFromSupabase();
 // ═════════════════════ LOGO MOUNT ═════════════════════
 function mountLogos(){
   const tpl = document.getElementById('logoTemplate');
