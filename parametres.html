@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Settings — AFYA</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+/* TOKENS */
+:root{
+  --bg:#FDFCF9; --bg2:#F6F3EE; --bg3:#EEEAE2; --sur:#FFFFFF;
+  --ink:#1D2B3A; --ink2:#3B5068; --ink3:#7A93A8;
+  --sage:#6D8F82; --sage-l:#8BAD9E; --sage-p:#C8D8D2;
+  --gold:#D4A843; --green:#4A9E6F; --red:#C94F3A;
+  --border:rgba(109,143,130,.18); --border2:rgba(109,143,130,.3);
+  --shadow:rgba(29,43,58,.07); --shadow2:rgba(29,43,58,.14);
+  --disp:'Cormorant Garamond',serif; --ui:'Syne',sans-serif; --body:'DM Sans',sans-serif;
+  --r:16px; --r-sm:8px; --r-lg:20px;
+}
+[data-theme="dark"]{
+  --bg:#111A22; --bg2:#162028; --bg3:#1D2B3A; --sur:#1E2C3A;
+  --ink:#F0EDE8; --ink2:#A8BDC8; --ink3:#6B8A9A;
+  --border:rgba(139,173,158,.14); --border2:rgba(139,173,158,.24);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.65}
+a{color:inherit;text-decoration:none}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:300;height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 52px;background:rgba(255,255,255,.97);border-bottom:1px solid var(--border);backdrop-filter:blur(12px)}
+[data-theme="dark"] nav{background:rgba(255,255,255,.97)}
+.back-link{font-family:var(--ui);font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--ink2);display:flex;align-items:center;gap:6px}
+.back-link:hover{color:var(--sage)}
+
+/* PAGE */
+.page{padding:120px 48px 80px;max-width:760px;margin:0 auto}
+.page-eye{display:inline-flex;align-items:center;gap:10px;font-family:var(--ui);font-size:9px;font-weight:700;letter-spacing:.32em;text-transform:uppercase;color:var(--sage);margin-bottom:16px}
+.page-eye::before{content:'';display:block;width:20px;height:1px;background:var(--sage)}
+.page-title{font-family:var(--disp);font-size:clamp(40px,5vw,60px);font-weight:300;line-height:1.05;color:var(--ink);margin-bottom:12px}
+.page-title em{font-style:italic;color:var(--sage)}
+.page-lead{font-size:14px;color:var(--ink2);line-height:1.7;margin-bottom:40px}
+
+/* SECTION BLOCKS */
+.block{background:var(--sur);border-radius:var(--r-lg);padding:32px;border:1px solid var(--border);margin-bottom:20px}
+.block-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.block-title{font-family:var(--disp);font-size:24px;font-weight:400;color:var(--ink)}
+.block-title em{font-style:italic;color:var(--sage)}
+.block-sub{font-size:13px;color:var(--ink3);margin-bottom:24px}
+
+/* FORM */
+.form-group{margin-bottom:16px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+label{display:block;font-family:var(--ui);font-size:9px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:var(--sage);margin-bottom:7px}
+input{
+  width:100%;
+  background:var(--bg2);
+  border:1.5px solid var(--border);
+  border-radius:var(--r-sm);
+  padding:11px 14px;
+  font-family:var(--body);
+  font-size:14px;
+  color:var(--ink);
+  outline:none;
+  transition:border-color .2s;
+}
+input:focus{border-color:var(--sage)}
+input:disabled{opacity:.5;cursor:not-allowed}
+
+.field-hint{font-size:11px;color:var(--ink3);margin-top:4px;font-family:var(--ui)}
+
+/* BUTTONS */
+.btn-primary{background:var(--ink);color:white;padding:11px 24px;border:none;border-radius:var(--r-sm);cursor:pointer;font-family:var(--ui);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;transition:background .25s,transform .15s}
+.btn-primary:hover{background:var(--sage);transform:translateY(-1px)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+.btn-danger{background:var(--red);color:white;padding:11px 24px;border:none;border-radius:var(--r-sm);cursor:pointer;font-family:var(--ui);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+.btn-danger:hover{background:#A03D2B}
+
+.btn-ghost{background:transparent;color:var(--ink2);padding:11px 24px;border:1.5px solid var(--border);border-radius:var(--r-sm);cursor:pointer;font-family:var(--ui);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+.btn-ghost:hover{border-color:var(--ink2)}
+
+/* AVATAR */
+.avatar-wrap{display:flex;align-items:center;gap:24px;margin-bottom:24px}
+.avatar-circle{
+  width:96px;
+  height:96px;
+  border-radius:50%;
+  background:linear-gradient(135deg,var(--sage),var(--sage-l));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family:var(--ui);
+  font-size:32px;
+  font-weight:800;
+  color:white;
+  flex-shrink:0;
+  background-size:cover;
+  background-position:center;
+}
+.avatar-actions{display:flex;flex-direction:column;gap:8px}
+.avatar-input{display:none}
+
+/* MESSAGES */
+.alert{padding:12px 16px;border-radius:8px;font-size:13px;margin-top:12px;display:none}
+.alert.error{background:rgba(201,79,58,.1);color:var(--red);display:block}
+.alert.success{background:rgba(74,158,111,.1);color:var(--green);display:block}
+
+/* DANGER ZONE */
+.danger-block{border:2px solid rgba(201,79,58,.3);background:rgba(201,79,58,.03)}
+.danger-block .block-title em{color:var(--red)}
+.danger-warning{background:rgba(201,79,58,.08);border:1px solid rgba(201,79,58,.2);border-radius:8px;padding:14px;margin-bottom:16px;font-size:13px;color:var(--ink2);line-height:1.6}
+
+/* MODAL CONFIRM SUPPRESSION */
+.confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+.confirm-overlay.open{display:flex}
+.confirm-modal{background:var(--sur);border-radius:var(--r-lg);padding:32px;max-width:420px;width:100%;text-align:center}
+.confirm-modal h3{font-family:var(--disp);font-size:24px;font-weight:400;margin-bottom:10px;color:var(--ink)}
+.confirm-modal p{font-size:13px;color:var(--ink2);margin-bottom:18px;line-height:1.7}
+.confirm-modal input{margin-bottom:18px;text-align:center;letter-spacing:.1em;font-weight:700}
+.confirm-actions{display:flex;gap:10px}
+.confirm-actions button{flex:1}
+
+/* RESPONSIVE */
+@media(max-width:680px){
+  nav{padding:0 20px}
+  .page{padding:100px 20px 60px}
+  .block{padding:24px}
+  .form-row{grid-template-columns:1fr}
+  .avatar-wrap{flex-direction:column;align-items:flex-start}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="back-link">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+    Back to AFYA
+  </a>
+  <div style="font-family:var(--ui);font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--ink2)">⚙️ Settings</div>
+</nav>
+
+<div class="page">
+
+  <!-- LOADING -->
+  <div id="loading" style="text-align:center;padding:80px;color:var(--ink3);font-family:var(--ui);font-size:13px">Loading your settings...</div>
+
+  <!-- CONTENT -->
+  <div id="content" style="display:none">
+
+    <div class="page-eye">Settings</div>
+    <h1 class="page-title">Manage your <em>account</em></h1>
+    <p class="page-lead">Update your personal information, manage your password, and customize your experience.</p>
+
+    <!-- ════════ AVATAR ════════ -->
+    <div class="block">
+      <div class="block-head">
+        <h2 class="block-title">Profile <em>Photo</em></h2>
+      </div>
+      <div class="block-sub">Click your avatar to upload a new photo. Max 2MB.</div>
+
+      <div class="avatar-wrap">
+        <div class="avatar-circle" id="avatarCircle" onclick="document.getElementById('avatarInput').click()" style="cursor:pointer">S</div>
+        <input type="file" id="avatarInput" class="avatar-input" accept="image/*" onchange="uploadAvatar(event)">
+        <div class="avatar-actions">
+          <button class="btn-primary" onclick="document.getElementById('avatarInput').click()">Upload new photo</button>
+          <button class="btn-ghost" onclick="removeAvatar()" id="removeAvatarBtn" style="display:none">Remove photo</button>
+        </div>
+      </div>
+      <div class="alert" id="alertAvatar"></div>
+    </div>
+
+    <!-- ════════ PROFIL ════════ -->
+    <div class="block">
+      <div class="block-head">
+        <h2 class="block-title">Personal <em>Information</em></h2>
+      </div>
+      <div class="block-sub">Your basic profile details.</div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>First Name</label>
+          <input type="text" id="inputFirstName" placeholder="Steven">
+        </div>
+        <div class="form-group">
+          <label>Phone</label>
+          <input type="tel" id="inputPhone" placeholder="+33 6 12 34 56 78">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="inputEmail" placeholder="you@example.com">
+        <div class="field-hint">⚠️ Changing email requires confirmation via the new address.</div>
+      </div>
+
+      <button class="btn-primary" onclick="saveProfile()">Save profile</button>
+      <div class="alert" id="alertProfile"></div>
+    </div>
+
+    <!-- ════════ ADRESSE ════════ -->
+    <div class="block">
+      <div class="block-head">
+        <h2 class="block-title">Home <em>Address</em></h2>
+      </div>
+      <div class="block-sub">Used for calculating travel times to activities (coming soon).</div>
+
+      <div class="form-group">
+        <label>Street address</label>
+        <input type="text" id="inputStreet" placeholder="12 rue de la Paix">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Postcode</label>
+          <input type="text" id="inputPostcode" placeholder="75002">
+        </div>
+        <div class="form-group">
+          <label>City</label>
+          <input type="text" id="inputCity" placeholder="Paris">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Country</label>
+        <input type="text" id="inputCountry" placeholder="France">
+      </div>
+
+      <button class="btn-primary" onclick="saveAddress()">Save address</button>
+      <div class="alert" id="alertAddress"></div>
+    </div>
+
+    <!-- ════════ MOT DE PASSE ════════ -->
+    <div class="block">
+      <div class="block-head">
+        <h2 class="block-title">Change <em>Password</em></h2>
+      </div>
+      <div class="block-sub">Use a strong password to keep your account secure.</div>
+
+      <div class="form-group">
+        <label>Current password</label>
+        <input type="password" id="inputCurrentPwd" placeholder="Your current password">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>New password</label>
+          <input type="password" id="inputNewPwd" placeholder="At least 6 characters">
+        </div>
+        <div class="form-group">
+          <label>Confirm new password</label>
+          <input type="password" id="inputConfirmPwd" placeholder="Type it again">
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="changePassword()">Update password</button>
+      <div class="alert" id="alertPwd"></div>
+    </div>
+
+    <!-- ════════ ZONE DANGER ════════ -->
+    <div class="block danger-block">
+      <div class="block-head">
+        <h2 class="block-title">Danger <em>Zone</em></h2>
+      </div>
+      <div class="danger-warning">
+        ⚠️ Deleting your account is <strong>permanent and irreversible</strong>. All your data, reviews, saved trips and settings will be lost forever.
+      </div>
+      <button class="btn-danger" onclick="openDeleteConfirm()">Delete my account permanently</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL CONFIRM SUPPRESSION -->
+<div class="confirm-overlay" id="confirmOverlay" onclick="if(event.target===this)closeDeleteConfirm()">
+  <div class="confirm-modal">
+    <h3>Are you absolutely sure?</h3>
+    <p>This will permanently delete your AFYA account. Type <strong>DELETE</strong> below to confirm.</p>
+    <input type="text" id="deleteConfirmInput" placeholder="Type DELETE">
+    <div class="alert" id="alertDelete"></div>
+    <div class="confirm-actions">
+      <button class="btn-ghost" onclick="closeDeleteConfirm()">Cancel</button>
+      <button class="btn-danger" onclick="deleteAccount()">Delete forever</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://zryfceystyipimniarst.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_uI4dQX6KFlLcxtxqw52ewA_ujacVkch';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null;
+let currentProfile = null;
+
+// ════════ INIT ════════
+async function init() {
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) {
+    alert('Please sign in to access settings');
+    window.location.href = 'index.html';
+    return;
+  }
+  currentUser = user;
+
+  const { data: profile } = await sb.from('profiles').select('*').eq('id', user.id).single();
+  currentProfile = profile || {};
+
+  // Remplit les champs
+  document.getElementById('inputFirstName').value = profile?.first_name || '';
+  document.getElementById('inputEmail').value = user.email || '';
+  document.getElementById('inputPhone').value = profile?.phone || '';
+  document.getElementById('inputStreet').value = profile?.address_street || '';
+  document.getElementById('inputPostcode').value = profile?.address_postcode || '';
+  document.getElementById('inputCity').value = profile?.address_city || '';
+  document.getElementById('inputCountry').value = profile?.address_country || '';
+
+  // Avatar
+  const avatar = document.getElementById('avatarCircle');
+  if (profile?.avatar_url) {
+    avatar.style.backgroundImage = `url(${profile.avatar_url})`;
+    avatar.textContent = '';
+    document.getElementById('removeAvatarBtn').style.display = '';
+  } else {
+    avatar.textContent = (profile?.first_name || user.email)[0].toUpperCase();
+  }
+
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('content').style.display = 'block';
+
+  console.log('✅ Settings loaded for:', user.email);
+}
+
+function showAlert(id, text, type='error') {
+  const el = document.getElementById(id);
+  el.textContent = text;
+  el.className = 'alert ' + type;
+  setTimeout(() => { if (type==='success') el.className = 'alert'; }, 4000);
+}
+
+// ════════ AVATAR ════════
+async function uploadAvatar(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  if (file.size > 2 * 1024 * 1024) {
+    showAlert('alertAvatar', 'File too large (max 2MB)', 'error');
+    return;
+  }
+
+  const ext = file.name.split('.').pop();
+  const path = `${currentUser.id}/avatar.${ext}`;
+
+  const { error: uploadError } = await sb.storage
+    .from('avatars')
+    .upload(path, file, { upsert: true });
+
+  if (uploadError) {
+    showAlert('alertAvatar', uploadError.message, 'error');
+    return;
+  }
+
+  const { data: urlData } = sb.storage.from('avatars').getPublicUrl(path);
+  const publicUrl = urlData.publicUrl + '?t=' + Date.now();
+
+  await sb.from('profiles').update({ avatar_url: publicUrl }).eq('id', currentUser.id);
+
+  const avatar = document.getElementById('avatarCircle');
+  avatar.style.backgroundImage = `url(${publicUrl})`;
+  avatar.textContent = '';
+  document.getElementById('removeAvatarBtn').style.display = '';
+
+  showAlert('alertAvatar', '✅ Photo updated!', 'success');
+}
+
+async function removeAvatar() {
+  if (!confirm('Remove your profile photo?')) return;
+
+  await sb.from('profiles').update({ avatar_url: null }).eq('id', currentUser.id);
+
+  const avatar = document.getElementById('avatarCircle');
+  avatar.style.backgroundImage = '';
+  avatar.textContent = (currentProfile.first_name || currentUser.email)[0].toUpperCase();
+  document.getElementById('removeAvatarBtn').style.display = 'none';
+
+  showAlert('alertAvatar', '✅ Photo removed', 'success');
+}
+
+// ════════ PROFIL ════════
+async function saveProfile() {
+  const firstName = document.getElementById('inputFirstName').value.trim();
+  const phone = document.getElementById('inputPhone').value.trim();
+  const newEmail = document.getElementById('inputEmail').value.trim();
+
+  // Update profile (first_name, phone)
+  const { error: profileError } = await sb.from('profiles').update({
+    first_name: firstName,
+    phone: phone
+  }).eq('id', currentUser.id);
+
+  if (profileError) {
+    showAlert('alertProfile', profileError.message, 'error');
+    return;
+  }
+
+  // Si email changé, déclenche la confirmation Supabase
+  if (newEmail !== currentUser.email) {
+    const { error: emailError } = await sb.auth.updateUser({ email: newEmail });
+    if (emailError) {
+      showAlert('alertProfile', emailError.message, 'error');
+      return;
+    }
+    showAlert('alertProfile', '✅ Profile saved. Check your new email to confirm the change.', 'success');
+    return;
+  }
+
+  showAlert('alertProfile', '✅ Profile saved!', 'success');
+}
+
+// ════════ ADRESSE ════════
+async function saveAddress() {
+  const street = document.getElementById('inputStreet').value.trim();
+  const postcode = document.getElementById('inputPostcode').value.trim();
+  const city = document.getElementById('inputCity').value.trim();
+  const country = document.getElementById('inputCountry').value.trim();
+
+  const { error } = await sb.from('profiles').update({
+    address_street: street,
+    address_postcode: postcode,
+    address_city: city,
+    address_country: country
+  }).eq('id', currentUser.id);
+
+  if (error) {
+    showAlert('alertAddress', error.message, 'error');
+    return;
+  }
+  showAlert('alertAddress', '✅ Address saved!', 'success');
+}
+
+// ════════ MOT DE PASSE ════════
+async function changePassword() {
+  const currentPwd = document.getElementById('inputCurrentPwd').value;
+  const newPwd = document.getElementById('inputNewPwd').value;
+  const confirmPwd = document.getElementById('inputConfirmPwd').value;
+
+  if (!currentPwd || !newPwd || !confirmPwd) {
+    showAlert('alertPwd', 'Please fill all 3 fields', 'error');
+    return;
+  }
+  if (newPwd.length < 6) {
+    showAlert('alertPwd', 'New password must be at least 6 characters', 'error');
+    return;
+  }
+  if (newPwd !== confirmPwd) {
+    showAlert('alertPwd', 'New passwords do not match', 'error');
+    return;
+  }
+
+  // Re-vérifier l'ancien mot de passe en se reconnectant
+  const { error: signInError } = await sb.auth.signInWithPassword({
+    email: currentUser.email,
+    password: currentPwd
+  });
+  if (signInError) {
+    showAlert('alertPwd', 'Current password is incorrect', 'error');
+    return;
+  }
+
+  // Update password
+  const { error } = await sb.auth.updateUser({ password: newPwd });
+  if (error) {
+    showAlert('alertPwd', error.message, 'error');
+    return;
+  }
+
+  document.getElementById('inputCurrentPwd').value = '';
+  document.getElementById('inputNewPwd').value = '';
+  document.getElementById('inputConfirmPwd').value = '';
+  showAlert('alertPwd', '✅ Password updated successfully!', 'success');
+}
+
+// ════════ SUPPRESSION COMPTE ════════
+function openDeleteConfirm() {
+  document.getElementById('confirmOverlay').classList.add('open');
+  document.getElementById('deleteConfirmInput').value = '';
+  document.getElementById('alertDelete').className = 'alert';
+}
+function closeDeleteConfirm() {
+  document.getElementById('confirmOverlay').classList.remove('open');
+}
+
+async function deleteAccount() {
+  const typed = document.getElementById('deleteConfirmInput').value.trim();
+  if (typed !== 'DELETE') {
+    showAlert('alertDelete', 'You must type DELETE in capital letters', 'error');
+    return;
+  }
+
+  // Supprime le profil (cascade vers reviews etc grâce aux FK)
+  await sb.from('profiles').delete().eq('id', currentUser.id);
+
+  // Supprime l'avatar si présent
+  if (currentProfile.avatar_url) {
+    await sb.storage.from('avatars').remove([`${currentUser.id}/avatar.jpg`, `${currentUser.id}/avatar.png`, `${currentUser.id}/avatar.jpeg`]);
+  }
+
+  // Se déconnecte (le user reste dans auth.users mais sans profile il ne pourra plus rien faire)
+  await sb.auth.signOut();
+
+  alert('Your account has been deleted. Goodbye!');
+  window.location.href = 'index.html';
+}
+
+init();
+</script>
+</body>
+</html>

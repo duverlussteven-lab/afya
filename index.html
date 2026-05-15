@@ -497,7 +497,27 @@ footer{background:var(--ink);padding:60px 52px 32px}
     <div id="authError" style="display:none;color:var(--red);font-size:12px;margin-bottom:12px;padding:10px;background:rgba(201,79,58,.1);border-radius:8px"></div>
 
     <button class="submit-review" id="authSubmitBtn" onclick="handleAuth()">Sign In</button>
+<!-- Lien Forgot Password (visible uniquement en mode Sign In) -->
+    <p id="forgotPasswordWrap" style="text-align:center;margin-top:14px;font-size:12px;font-family:var(--ui)">
+      <a href="#" onclick="openForgotPassword();return false" style="color:var(--sage);text-decoration:underline;cursor:pointer">Forgot password?</a>
+    </p>
+    <!-- VUE FORGOT PASSWORD (cachée par défaut) -->
+    <div id="forgotPasswordView" style="display:none">
+      <h2 class="modal-title">Forgot your <em>password</em>?</h2>
+      <p class="modal-sub">Enter your email and we'll send you a reset link.</p>
 
+      <label>Email</label>
+      <input type="email" id="forgotEmail" placeholder="you@example.com">
+
+      <div id="forgotError" style="display:none;color:var(--red);font-size:12px;margin-bottom:12px;padding:10px;background:rgba(201,79,58,.1);border-radius:8px"></div>
+      <div id="forgotSuccess" style="display:none;color:var(--green);font-size:12px;margin-bottom:12px;padding:10px;background:rgba(74,158,111,.1);border-radius:8px"></div>
+
+      <button class="submit-review" onclick="sendForgotPassword()" id="forgotSubmitBtn">Send reset email</button>
+
+      <p style="text-align:center;margin-top:14px;font-size:12px;font-family:var(--ui)">
+        <a href="#" onclick="closeForgotPassword();return false" style="color:var(--sage);text-decoration:underline;cursor:pointer">← Back to sign in</a>
+      </p>
+    </div>
     <p style="text-align:center;margin-top:16px;font-size:12px;color:var(--ink3);font-family:var(--ui)">
       <span id="authSwitchText">Don't have an account?</span>
       <a href="#" onclick="switchAuthTab(authMode==='signin'?'signup':'signin');return false" style="color:var(--sage);text-decoration:underline;cursor:pointer" id="authSwitchLink">Sign up</a>
@@ -962,6 +982,88 @@ function switchAuthTab(mode) {
   document.getElementById('authSwitchText').textContent = isSignIn ? "Don't have an account?" : 'Already have an account?';
   document.getElementById('authSwitchLink').textContent = isSignIn ? 'Sign up' : 'Sign in';
   document.getElementById('authError').style.display = 'none';
+}
+// Ouvre la vue Forgot Password
+function openForgotPassword() {
+  // Cache les vues Sign In / Sign Up
+  document.getElementById('tabSignIn').parentElement.style.display = 'none';
+  document.getElementById('authTitle').style.display = 'none';
+  document.getElementById('authSub').style.display = 'none';
+  document.getElementById('firstNameWrap').style.display = 'none';
+  document.querySelectorAll('#authModal label').forEach(l => {
+    if (!l.closest('#forgotPasswordView')) l.style.display = 'none';
+  });
+  document.getElementById('authEmail').style.display = 'none';
+  document.getElementById('authPassword').style.display = 'none';
+  document.getElementById('authError').style.display = 'none';
+  document.getElementById('authSubmitBtn').style.display = 'none';
+  document.getElementById('forgotPasswordWrap').style.display = 'none';
+  document.getElementById('authSwitchText').parentElement.style.display = 'none';
+
+  // Affiche le formulaire forgot
+  document.getElementById('forgotPasswordView').style.display = 'block';
+  document.getElementById('forgotEmail').value = document.getElementById('authEmail').value || '';
+}
+
+// Ferme la vue Forgot Password et revient sur Sign In
+function closeForgotPassword() {
+  // Réaffiche les vues Sign In
+  document.getElementById('tabSignIn').parentElement.style.display = '';
+  document.getElementById('authTitle').style.display = '';
+  document.getElementById('authSub').style.display = '';
+  document.querySelectorAll('#authModal label').forEach(l => { l.style.display = ''; });
+  document.getElementById('authEmail').style.display = '';
+  document.getElementById('authPassword').style.display = '';
+  document.getElementById('authSubmitBtn').style.display = '';
+  document.getElementById('forgotPasswordWrap').style.display = '';
+  document.getElementById('authSwitchText').parentElement.style.display = '';
+
+  // Cache le forgot
+  document.getElementById('forgotPasswordView').style.display = 'none';
+  document.getElementById('forgotError').style.display = 'none';
+  document.getElementById('forgotSuccess').style.display = 'none';
+
+  // Re-affiche éventuellement le firstName si on était en signup
+  if (authMode === 'signup') {
+    document.getElementById('firstNameWrap').style.display = '';
+  }
+}
+
+// Envoie l'email de reset
+async function sendForgotPassword() {
+  const email = document.getElementById('forgotEmail').value.trim();
+  const errorEl = document.getElementById('forgotError');
+  const successEl = document.getElementById('forgotSuccess');
+  const btn = document.getElementById('forgotSubmitBtn');
+
+  errorEl.style.display = 'none';
+  successEl.style.display = 'none';
+
+  if (!email) {
+    errorEl.textContent = 'Please enter your email';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+
+  // URL de redirection après clic dans l'email
+  const redirectTo = window.location.origin + '/reset-password.html';
+
+  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo });
+
+  btn.disabled = false;
+  btn.textContent = 'Send reset email';
+
+  if (error) {
+    errorEl.textContent = error.message;
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  successEl.innerHTML = `✅ Email sent to <strong>${email}</strong>. Check your inbox and spam folder.`;
+  successEl.style.display = 'block';
 }
 
 // Soumission du formulaire
