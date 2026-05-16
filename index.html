@@ -635,6 +635,11 @@ footer{background:var(--ink);padding:60px 52px 32px}
     <span class="user-menu-icon">⚙️</span>
     <span>Settings</span>
   </a>
+  <a href="admin.html" class="user-menu-item" id="adminMenuItem" style="display:none">
+  <span class="user-menu-icon">⚙️</span>
+  <span>Admin Panel</span>
+</a>
+<div class="user-menu-divider" id="adminMenuDivider" style="display:none"></div>
   <a href="contact.html" class="user-menu-item">
     <span class="user-menu-icon">📞</span>
     <span>Contact</span>
@@ -1147,6 +1152,11 @@ async function refreshUserState() {
     // Met à jour le menu dropdown
     document.getElementById('userMenuName').textContent = displayName;
     document.getElementById('userMenuEmail').textContent = user.email;
+    // Affiche le bouton Admin Panel si admin
+    if (profile?.role === 'admin') {
+      document.getElementById('adminMenuItem').style.display = '';
+      document.getElementById('adminMenuDivider').style.display = '';
+    }
 
     console.log('✅ Logged in as:', user.email, '— Role:', profile?.role);
   } else {
@@ -1197,9 +1207,8 @@ async function loadRestosFromSupabase() {
 
   console.log('✅ Restaurants loaded from Supabase:', data);
 
-  // Convertit le format Supabase vers le format attendu par le site
   if (data && data.length > 0) {
-    restos.length = 0; // vide le tableau actuel
+    restos.length = 0;
     data.forEach(r => {
       restos.push({
         id: r.id,
@@ -1212,13 +1221,16 @@ async function loadRestosFromSupabase() {
         priceMin: parseFloat(r.price_min),
         priceMax: parseFloat(r.price_max),
         bg: r.bg_color || '#E8DDD4',
+        photoUrl: r.photo_url || null,
+        websiteUrl: r.website_url || null,
+        priceVerified: !!r.price_source_url,
         topReview: {
           text: r.top_review_text || 'Great place!',
           by: r.top_review_author || 'A guest'
         }
       });
     });
-    filterRestos(); // rafraîchit l'affichage
+    filterRestos();
   }
 }
 
@@ -1770,14 +1782,26 @@ function filterRestos(){
   document.getElementById('restoCountLabel').textContent = `Showing ${list.length} restaurant${list.length!==1?'s':''}`;
   document.getElementById('restoGrid').innerHTML = list.map(x=>`
     <div class="resto-card">
-      <div class="resto-img" style="background:${x.bg}">${x.emoji}</div>
+      ${x.photoUrl
+        ? `<div class="resto-img" style="background-image:url(${x.photoUrl});background-size:cover;background-position:center"></div>`
+        : `<div class="resto-img" style="background:${x.bg}">${x.emoji}</div>`
+      }
       <div class="resto-body">
         <div class="resto-name">${x.name}</div>
         <div class="resto-cuisine">${x.cuisine}</div>
         <div class="r-stars-row">${[1,2,3,4,5].map(n=>`<span class="r-star-${n<=Math.floor(x.rating)?'f':'e'}">★</span>`).join('')}<span class="r-score">${x.rating}</span><span class="r-count">(${x.reviews.toLocaleString()})</span></div>
-        <div class="resto-meta"><span class="resto-dist">📍 ${x.dist}km</span><span class="resto-price">$${x.priceMin}–$${x.priceMax}</span></div>
+        <div class="resto-meta">
+          <span class="resto-dist">📍 ${x.dist}km</span>
+          <span class="resto-price">$${x.priceMin}–$${x.priceMax}${x.priceVerified ? ' <span style="color:var(--green);font-size:9px;margin-left:2px">✓</span>' : ''}</span>
+        </div>
         <div class="resto-review-snip"><div class="resto-review-snip-text">"${x.topReview.text}"</div><div class="resto-review-snip-by">— ${x.topReview.by}</div></div>
-        <button class="resto-add-btn" onclick="addResto(this,'${x.name.replace(/'/g,"\\'")}')">+ Add to schedule</button>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button class="resto-add-btn" onclick="addResto(this,'${x.name.replace(/'/g,"\\'")}')" style="flex:1">+ Add to schedule</button>
+          ${x.websiteUrl
+            ? `<a href="${x.websiteUrl}" target="_blank" rel="noopener" style="padding:10px 14px;background:var(--bg2);color:var(--ink);border:1px solid var(--border);border-radius:var(--r-sm);font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;display:flex;align-items:center;gap:4px;transition:all .2s" onmouseover="this.style.background='var(--sage)';this.style.color='white';this.style.borderColor='var(--sage)'" onmouseout="this.style.background='var(--bg2)';this.style.color='var(--ink)';this.style.borderColor='var(--border)'">Visit ↗</a>`
+            : ''
+          }
+        </div>
       </div>
     </div>`).join('');
 }
