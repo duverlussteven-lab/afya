@@ -1247,7 +1247,39 @@ async function loadActivitiesFromSupabase() {
   console.log('✅ Activities loaded from Supabase:', data);
 
   if (data && data.length > 0) {
-    activities.length = 0; // vide le tableau actuel
+    activities.length = 0;
+    data.forEach(a => {
+      activities.push({
+        id: a.id,
+        emoji: a.emoji,
+        name: a.name,
+        desc: a.description,
+        tag: a.tag,
+        price: parseFloat(a.price),
+        rating: parseFloat(a.rating),
+        reviews: a.reviews_count,
+        bg: a.bg_color || '#E8E0D4',
+        photoUrl: a.photo_url || null,
+        websiteUrl: a.website_url || null,
+        priceVerified: !!a.price_source_url
+      });
+    });
+    renderActivities();
+  }
+}
+
+loadActivitiesFromSupabase();
+  const { data, error } = await sb.from('activities').select('*');
+
+  if (error) {
+    console.error('❌ Error loading activities:', error);
+    return;
+  }
+
+  console.log('✅ Activities loaded from Supabase:', data);
+
+  if (data && data.length > 0) {
+    activities.length = 0;
     data.forEach(a => {
       activities.push({
         id: a.id,
@@ -1261,11 +1293,10 @@ async function loadActivitiesFromSupabase() {
         bg: a.bg_color || '#E8E0D4'
       });
     });
-    renderActivities(); // rafraîchit l'affichage
+    renderActivities();
   }
 }
 
-// Lance le chargement
 loadActivitiesFromSupabase();
 loadRestosFromSupabase();
 // ═════════════════════ LOGO MOUNT ═════════════════════
@@ -1727,19 +1758,27 @@ function filterActs(tag, btn){
   btn.classList.add('active');
   renderActivities();
 }
-function renderActivities(){
-  const list = actFilter==='all'?activities:activities.filter(a=>a.tag===actFilter);
-  document.getElementById('actGrid').innerHTML = list.map(a=>`
+document.getElementById('actGrid').innerHTML = list.map(x=>`
     <div class="act-card">
-      <div class="act-img" style="background:${a.bg}">${a.emoji}</div>
+      ${x.photoUrl
+        ? `<div class="act-img" style="background-image:url(${x.photoUrl});background-size:cover;background-position:center"></div>`
+        : `<div class="act-img" style="background:${x.bg}">${x.emoji}</div>`
+      }
       <div class="act-body">
-        <div class="act-name">${a.name}</div>
-        <div class="act-desc">${a.desc}</div>
-        <div class="act-foot">
-          <div class="act-price">${a.price===0?'🆓 Free':'$'+a.price}</div>
-          <div class="act-rating-row">${[1,2,3,4,5].map(n=>`<span class="act-star">${n<=Math.round(a.rating)?'★':'☆'}</span>`).join('')}<span class="act-rcount">${a.rating} (${a.reviews.toLocaleString()})</span></div>
+        <div class="act-tag">${x.tag}</div>
+        <div class="act-name">${x.name}</div>
+        <div class="act-desc">${x.desc}</div>
+        <div class="act-meta">
+          <div class="r-stars-row">${[1,2,3,4,5].map(n=>`<span class="r-star-${n<=Math.floor(x.rating)?'f':'e'}">★</span>`).join('')}<span class="r-score">${x.rating}</span><span class="r-count">(${x.reviews.toLocaleString()})</span></div>
+          <div class="act-price">${x.price===0?'Free':'$'+x.price}${x.priceVerified ? ' <span style="color:var(--green);font-size:9px;margin-left:2px">✓</span>' : ''}</div>
         </div>
-        <button class="act-add-btn" onclick="addAct(this,'${a.name.replace(/'/g,"\\'")}')">+ Add to schedule</button>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="act-add-btn" onclick="addActivity(this,'${x.name.replace(/'/g,"\\'")}')" style="flex:1">+ Add to schedule</button>
+          ${x.websiteUrl
+            ? `<a href="${x.websiteUrl}" target="_blank" rel="noopener" style="padding:10px 14px;background:var(--bg2);color:var(--ink);border:1px solid var(--border);border-radius:var(--r-sm);font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;display:flex;align-items:center;gap:4px;transition:all .2s" onmouseover="this.style.background='var(--sage)';this.style.color='white';this.style.borderColor='var(--sage)'" onmouseout="this.style.background='var(--bg2)';this.style.color='var(--ink)';this.style.borderColor='var(--border)'">Visit ↗</a>`
+            : ''
+          }
+        </div>
       </div>
     </div>`).join('');
 }

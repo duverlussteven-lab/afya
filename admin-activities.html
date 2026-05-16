@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Activities — AFYA Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg:#FDFCF9; --bg2:#F6F3EE; --bg3:#EEEAE2; --sur:#FFFFFF;
+  --ink:#1D2B3A; --ink2:#3B5068; --ink3:#7A93A8;
+  --sage:#6D8F82; --sage-l:#8BAD9E; --sage-p:#C8D8D2;
+  --gold:#D4A843; --green:#4A9E6F; --red:#C94F3A;
+  --border:rgba(109,143,130,.18); --border2:rgba(109,143,130,.3);
+  --shadow:rgba(29,43,58,.07); --shadow2:rgba(29,43,58,.14);
+  --disp:'Cormorant Garamond',serif; --ui:'Syne',sans-serif; --body:'DM Sans',sans-serif;
+  --r:16px; --r-sm:8px; --r-lg:20px;
+  --sidebar-w:260px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg2);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.65;min-height:100vh}
+a{color:inherit;text-decoration:none}
+
+/* ═══ SIDEBAR ═══ */
+.sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);background:var(--ink);padding:24px 16px;overflow-y:auto;z-index:100}
+.sidebar-brand{display:flex;align-items:center;gap:10px;padding:8px 12px 24px;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:16px}
+.sidebar-brand-text{font-family:var(--ui);font-size:12px;font-weight:800;letter-spacing:.18em;color:white}
+.sidebar-brand-badge{font-family:var(--ui);font-size:8px;font-weight:700;letter-spacing:.14em;color:var(--sage-l);background:rgba(139,173,158,.12);padding:3px 8px;border-radius:4px;margin-left:auto}
+.sidebar-section-title{font-family:var(--ui);font-size:9px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.3);padding:14px 12px 8px}
+.sidebar-link{display:flex;align-items:center;gap:11px;padding:11px 14px;border-radius:8px;cursor:pointer;font-family:var(--ui);font-size:12px;font-weight:600;color:rgba(255,255,255,.55);margin-bottom:2px;transition:all .15s}
+.sidebar-link:hover{background:rgba(255,255,255,.05);color:white}
+.sidebar-link.active{background:rgba(109,143,130,.15);color:white}
+.sidebar-icon{font-size:14px;width:18px;text-align:center}
+
+/* ═══ BURGER ═══ */
+.burger-btn{display:none;position:fixed;top:16px;left:16px;z-index:200;width:44px;height:44px;background:var(--ink);border:none;border-radius:10px;color:white;cursor:pointer;align-items:center;justify-content:center;box-shadow:0 4px 16px var(--shadow2)}
+.burger-btn:hover{background:var(--sage)}
+.burger-icon{display:flex;flex-direction:column;gap:4px}
+.burger-icon span{display:block;width:18px;height:2px;background:white;border-radius:2px}
+.sidebar-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:90;backdrop-filter:blur(2px)}
+.sidebar-backdrop.show{display:block}
+
+/* ═══ MAIN ═══ */
+.main{margin-left:var(--sidebar-w);min-height:100vh;padding:32px 40px}
+.page-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:32px;flex-wrap:wrap;gap:16px}
+.admin-eye{display:inline-flex;align-items:center;gap:10px;font-family:var(--ui);font-size:9px;font-weight:700;letter-spacing:.32em;text-transform:uppercase;color:var(--sage);margin-bottom:10px}
+.admin-eye::before{content:'';display:block;width:20px;height:1px;background:var(--sage)}
+.admin-title{font-family:var(--disp);font-size:42px;font-weight:300;color:var(--ink)}
+.admin-title em{font-style:italic;color:var(--sage)}
+
+.btn-primary{background:var(--ink);color:white;padding:12px 22px;border:none;border-radius:8px;cursor:pointer;font-family:var(--ui);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;display:inline-flex;align-items:center;gap:8px;transition:all .25s}
+.btn-primary:hover{background:var(--sage);transform:translateY(-1px)}
+.btn-ghost{background:transparent;color:var(--ink2);padding:8px 16px;border:1.5px solid var(--border);border-radius:6px;cursor:pointer;font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.btn-ghost:hover{border-color:var(--sage);color:var(--sage)}
+.btn-danger{background:var(--red);color:white;padding:8px 16px;border:none;border-radius:6px;cursor:pointer;font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.btn-danger:hover{background:#A03D2B}
+
+/* ═══ TOOLBAR ═══ */
+.toolbar{display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap}
+.search-input{flex:1;min-width:200px;background:var(--sur);border:1.5px solid var(--border);border-radius:8px;padding:11px 16px;font-family:var(--body);font-size:14px;color:var(--ink);outline:none}
+.search-input:focus{border-color:var(--sage)}
+
+/* ═══ TABLE ═══ */
+.table-wrap{background:var(--sur);border-radius:var(--r-lg);border:1px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;min-width:760px;border-collapse:collapse}
+thead{background:var(--bg2);border-bottom:1px solid var(--border)}
+th{text-align:left;padding:14px 16px;font-family:var(--ui);font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--ink3)}
+td{padding:14px 16px;font-size:13px;color:var(--ink2);border-bottom:1px solid var(--border)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(109,143,130,.03)}
+
+.cell-name{font-family:var(--ui);font-weight:700;color:var(--ink);font-size:13px}
+.cell-meta{font-size:11px;color:var(--ink3);margin-top:2px}
+.cell-rating{display:flex;align-items:center;gap:4px;font-family:var(--ui);font-weight:700;color:var(--ink)}
+
+/* ═══ ACTIONS MENU (⋯) ═══ */
+.cell-actions{position:relative;display:flex;justify-content:flex-end}
+.actions-btn{width:32px;height:32px;border:1px solid var(--border);background:transparent;border-radius:8px;cursor:pointer;font-size:18px;font-weight:700;color:var(--ink2);line-height:1;letter-spacing:1px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.actions-btn:hover{background:var(--bg2);border-color:var(--ink3);color:var(--ink)}
+.actions-menu{position:absolute;top:calc(100% + 6px);right:0;background:var(--sur);border:1px solid var(--border);border-radius:10px;padding:6px;box-shadow:0 12px 32px rgba(29,43,58,.16);z-index:50;min-width:160px;display:none}
+.actions-menu.open{display:block;animation:fadeUp .15s ease}
+.actions-menu-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:6px;cursor:pointer;font-family:var(--ui);font-size:12px;font-weight:600;color:var(--ink2);background:none;border:none;width:100%;text-align:left;transition:background .15s}
+.actions-menu-item:hover{background:rgba(109,143,130,.08);color:var(--sage)}
+.actions-menu-icon{font-size:13px;width:16px;text-align:center}
+.actions-menu-item.danger{color:var(--red)}
+.actions-menu-item.danger:hover{background:rgba(201,79,58,.08);color:var(--red)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+
+.empty{text-align:center;padding:80px 24px;color:var(--ink3)}
+.empty-icon{font-size:48px;margin-bottom:16px;opacity:.5}
+
+/* ═══ MODAL ═══ */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--sur);border-radius:var(--r-lg);padding:32px;max-width:600px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.2)}
+.modal-title{font-family:var(--disp);font-size:28px;font-weight:400;color:var(--ink);margin-bottom:6px}
+.modal-title em{font-style:italic;color:var(--sage)}
+.modal-sub{font-size:13px;color:var(--ink2);margin-bottom:24px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px}
+.form-group{margin-bottom:14px}
+label{display:block;font-family:var(--ui);font-size:9px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:var(--sage);margin-bottom:7px}
+input,select,textarea{width:100%;background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r-sm);padding:10px 14px;font-family:var(--body);font-size:13px;color:var(--ink);outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--sage)}
+textarea{resize:vertical;min-height:80px}
+.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:24px;padding-top:20px;border-top:1px solid var(--border)}
+.alert{padding:12px 16px;border-radius:8px;font-size:13px;margin-bottom:18px;display:none}
+.alert.error{background:rgba(201,79,58,.1);color:var(--red);display:block}
+.alert.success{background:rgba(74,158,111,.1);color:var(--green);display:block}
+.loading{text-align:center;padding:80px;color:var(--ink3);font-family:var(--ui);font-size:13px}
+
+@media(max-width:900px){
+  .sidebar{transform:translateX(-100%);transition:transform .25s ease;box-shadow:0 0 40px rgba(0,0,0,.3)}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0;padding:20px;padding-top:72px}
+  .burger-btn{display:flex}
+  .form-row,.form-row-3{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- BURGER + BACKDROP -->
+<button class="burger-btn" onclick="toggleSidebar()" aria-label="Open admin menu">
+  <div class="burger-icon"><span></span><span></span><span></span></div>
+</button>
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <span class="sidebar-brand-text">AFYA</span>
+    <span class="sidebar-brand-badge">ADMIN</span>
+  </div>
+  <div class="sidebar-section-title">Overview</div>
+  <a href="admin.html" class="sidebar-link"><span class="sidebar-icon">📊</span><span>Dashboard</span></a>
+  <div class="sidebar-section-title">Content</div>
+  <a href="admin-restaurants.html" class="sidebar-link"><span class="sidebar-icon">🍽️</span><span>Restaurants</span></a>
+  <a href="admin-activities.html" class="sidebar-link active"><span class="sidebar-icon">🎯</span><span>Activities</span></a>
+  <div class="sidebar-section-title">Community</div>
+  <a href="admin-users.html" class="sidebar-link"><span class="sidebar-icon">👥</span><span>Users</span></a>
+  <a href="admin-reviews.html" class="sidebar-link"><span class="sidebar-icon">⭐</span><span>Reviews</span></a>
+  <div class="sidebar-section-title">Account</div>
+  <a href="index.html" class="sidebar-link"><span class="sidebar-icon">↩️</span><span>Back to site</span></a>
+  <a href="#" onclick="signOut();return false" class="sidebar-link"><span class="sidebar-icon">🚪</span><span>Sign Out</span></a>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div id="loading" class="loading">Loading activities...</div>
+  <div id="content" style="display:none">
+
+    <div class="page-header">
+      <div>
+        <div class="admin-eye">Content Management</div>
+        <h1 class="admin-title">Manage <em>Activities</em></h1>
+      </div>
+      <button class="btn-primary" onclick="openAddModal()">
+        <span>➕</span> Add Activity
+      </button>
+    </div>
+
+    <div class="toolbar">
+      <input type="text" class="search-input" id="searchInput" placeholder="🔍 Search by name, tag, city..." oninput="filterTable()">
+      <select class="search-input" id="tagFilter" onchange="filterTable()" style="flex:0 0 200px">
+        <option value="">All tags</option>
+        <option>Culture</option>
+        <option>Outdoors</option>
+        <option>Nightlife</option>
+        <option>Food</option>
+        <option>Sport</option>
+        <option>Wellness</option>
+        <option>Family</option>
+      </select>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:70px">Photo</th>
+            <th>Name</th>
+            <th>Tag</th>
+            <th>Rating</th>
+            <th>Duration</th>
+            <th>Price</th>
+            <th>Link</th>
+            <th>City</th>
+            <th style="width:60px"></th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+      <div id="emptyState" class="empty" style="display:none">
+        <div class="empty-icon">🎯</div>
+        <div style="font-family:var(--ui);font-size:14px;font-weight:600;color:var(--ink2);margin-bottom:6px">No activities found</div>
+        <div style="font-size:13px">Click "Add Activity" to create your first entry.</div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- MODAL ADD/EDIT -->
+<div class="modal-overlay" id="formModal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <h2 class="modal-title" id="modalTitle">Add a new <em>activity</em></h2>
+    <p class="modal-sub" id="modalSub">Fill in the information below.</p>
+    <div class="alert" id="formAlert"></div>
+    <input type="hidden" id="editId">
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Emoji</label>
+        <input type="text" id="inputEmoji" placeholder="🎨" maxlength="4">
+      </div>
+      <div class="form-group">
+        <label>Name *</label>
+        <input type="text" id="inputName" placeholder="MoMA Highlights Tour">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Description</label>
+      <textarea id="inputDescription" placeholder="World-class modern art masterpieces."></textarea>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Tag *</label>
+        <select id="inputTag">
+          <option value="">Choose...</option>
+          <option>Culture</option>
+          <option>Outdoors</option>
+          <option>Nightlife</option>
+          <option>Food</option>
+          <option>Sport</option>
+          <option>Wellness</option>
+          <option>Family</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>City</label>
+        <input type="text" id="inputCity" placeholder="New York">
+      </div>
+    </div>
+
+    <div class="form-row-3">
+      <div class="form-group">
+        <label>Rating (0-5)</label>
+        <input type="number" id="inputRating" step="0.1" min="0" max="5" placeholder="4.5">
+      </div>
+      <div class="form-group">
+        <label>Nb reviews</label>
+        <input type="number" id="inputReviewsCount" min="0" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label>Duration (min)</label>
+        <input type="number" id="inputDuration" min="0" placeholder="60">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Price ($)</label>
+        <input type="number" id="inputPrice" min="0" placeholder="25">
+      </div>
+      <div class="form-group">
+        <label>Background color</label>
+        <input type="text" id="inputBgColor" placeholder="#E8E0D4">
+      </div>
+    </div>
+
+    <!-- Photo upload -->
+    <div class="form-group">
+      <label>Photo</label>
+      <div style="display:flex;align-items:center;gap:14px">
+        <div id="photoPreview" style="width:80px;height:80px;border-radius:10px;background:var(--bg2);border:1.5px dashed var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;background-size:cover;background-position:center">
+          <span style="font-size:24px;opacity:.3">📷</span>
+        </div>
+        <div style="flex:1">
+          <input type="file" id="inputPhoto" accept="image/*" style="display:none" onchange="previewPhoto(event)">
+          <button type="button" class="btn-ghost" onclick="document.getElementById('inputPhoto').click()">Choose photo</button>
+          <button type="button" class="btn-ghost" onclick="clearPhoto()" id="clearPhotoBtn" style="display:none;margin-left:6px">Remove</button>
+          <div style="font-size:11px;color:var(--ink3);margin-top:6px;font-family:var(--ui)">JPG, PNG or WebP. Max 5MB.</div>
+        </div>
+      </div>
+      <input type="hidden" id="currentPhotoUrl">
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Website URL</label>
+        <input type="url" id="inputWebsite" placeholder="https://activity-officiel.com">
+      </div>
+      <div class="form-group">
+        <label>Price source URL</label>
+        <input type="url" id="inputPriceSource" placeholder="https://...pricing">
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveActivity()" id="saveBtn">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DELETE -->
+<div class="modal-overlay" id="deleteModal" onclick="if(event.target===this)closeDeleteModal()">
+  <div class="modal" style="max-width:420px">
+    <h2 class="modal-title">Delete <em>activity</em>?</h2>
+    <p class="modal-sub" id="deleteConfirmText">This action is permanent.</p>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeDeleteModal()">Cancel</button>
+      <button class="btn-danger" onclick="confirmDelete()">Delete forever</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://zryfceystyipimniarst.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_uI4dQX6KFlLcxtxqw52ewA_ujacVkch';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let allActivities = [];
+let deleteTargetId = null;
+
+async function checkAdmin() {
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) { alert('Access denied'); window.location.href = 'index.html'; return null; }
+  const { data: profile } = await sb.from('profiles').select('*').eq('id', user.id).single();
+  if (!profile || profile.role !== 'admin') { alert('Admin only'); window.location.href = 'index.html'; return null; }
+  return { user, profile };
+}
+
+async function loadActivities() {
+  const { data, error } = await sb.from('activities').select('*').order('created_at', { ascending: false });
+  if (error) { console.error(error); return; }
+  allActivities = data || [];
+  renderTable(allActivities);
+}
+
+function escapeHtml(text) {
+  if (!text) return '';
+  return String(text).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function renderTable(list) {
+  const tbody = document.getElementById('tableBody');
+  const empty = document.getElementById('emptyState');
+  if (list.length === 0) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  tbody.innerHTML = list.map(a => `
+    <tr>
+      <td>
+        ${a.photo_url
+          ? `<img src="${a.photo_url}" style="width:48px;height:48px;border-radius:8px;object-fit:cover;display:block">`
+          : `<div style="width:48px;height:48px;border-radius:8px;background:${a.bg_color || '#E8E0D4'};display:flex;align-items:center;justify-content:center;font-size:22px">${a.emoji || '🎯'}</div>`
+        }
+      </td>
+      <td>
+        <div class="cell-name">${escapeHtml(a.name)}</div>
+        <div class="cell-meta">${escapeHtml(a.description || '').slice(0, 50)}${(a.description || '').length > 50 ? '...' : ''}</div>
+      </td>
+      <td>${escapeHtml(a.tag || '—')}</td>
+      <td><span class="cell-rating">⭐ ${parseFloat(a.rating || 0).toFixed(1)}</span></td>
+      <td>${a.duration_min || 0} min</td>
+      <td>
+        ${a.price === 0 ? 'Free' : '$' + a.price}
+        ${a.price_source_url ? `<div style="font-size:9px;color:var(--green);margin-top:2px;font-family:var(--ui);font-weight:700">✓ Verified</div>` : ''}
+      </td>
+      <td>
+        ${a.website_url
+          ? `<a href="${a.website_url}" target="_blank" rel="noopener" style="color:var(--sage);font-size:12px;font-family:var(--ui);font-weight:600;text-decoration:underline">Visit ↗</a>`
+          : '—'
+        }
+      </td>
+      <td>${escapeHtml(a.city || '—')}</td>
+      <td>
+        <div class="cell-actions">
+          <button class="actions-btn" onclick="toggleActionsMenu('${a.id}',event)">⋯</button>
+          <div class="actions-menu" id="actions-menu-${a.id}">
+            <button class="actions-menu-item" onclick="openEditModal('${a.id}');closeAllActionsMenus()">
+              <span class="actions-menu-icon">✏️</span><span>Edit</span>
+            </button>
+            <button class="actions-menu-item danger" onclick="openDeleteModal('${a.id}','${escapeHtml(a.name).replace(/'/g,"\\'")}');closeAllActionsMenus()">
+              <span class="actions-menu-icon">🗑️</span><span>Delete</span>
+            </button>
+          </div>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function toggleActionsMenu(id, event) {
+  event.stopPropagation();
+  const menu = document.getElementById('actions-menu-' + id);
+  const wasOpen = menu.classList.contains('open');
+  closeAllActionsMenus();
+  if (!wasOpen) menu.classList.add('open');
+}
+function closeAllActionsMenus() {
+  document.querySelectorAll('.actions-menu').forEach(m => m.classList.remove('open'));
+}
+document.addEventListener('click', () => closeAllActionsMenus());
+
+function filterTable() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const tag = document.getElementById('tagFilter').value;
+  const filtered = allActivities.filter(a => {
+    const matchesQ = !q || (a.name||'').toLowerCase().includes(q) || (a.tag||'').toLowerCase().includes(q) || (a.city||'').toLowerCase().includes(q);
+    const matchesT = !tag || a.tag === tag;
+    return matchesQ && matchesT;
+  });
+  renderTable(filtered);
+}
+
+function openAddModal() {
+  document.getElementById('modalTitle').innerHTML = 'Add a new <em>activity</em>';
+  document.getElementById('modalSub').textContent = 'Fill in the information below.';
+  document.getElementById('saveBtn').textContent = 'Create activity';
+  document.getElementById('editId').value = '';
+  document.getElementById('inputEmoji').value = '🎯';
+  document.getElementById('inputName').value = '';
+  document.getElementById('inputDescription').value = '';
+  document.getElementById('inputTag').value = '';
+  document.getElementById('inputCity').value = '';
+  document.getElementById('inputRating').value = '';
+  document.getElementById('inputReviewsCount').value = '0';
+  document.getElementById('inputDuration').value = '60';
+  document.getElementById('inputPrice').value = '0';
+  document.getElementById('inputBgColor').value = '#E8E0D4';
+  document.getElementById('inputWebsite').value = '';
+  document.getElementById('inputPriceSource').value = '';
+  document.getElementById('currentPhotoUrl').value = '';
+  resetPhotoPreview();
+  document.getElementById('formAlert').className = 'alert';
+  document.getElementById('formModal').classList.add('open');
+}
+
+function openEditModal(id) {
+  const a = allActivities.find(x => x.id === id);
+  if (!a) return;
+  document.getElementById('modalTitle').innerHTML = 'Edit <em>activity</em>';
+  document.getElementById('modalSub').textContent = `Editing "${a.name}"`;
+  document.getElementById('saveBtn').textContent = 'Save changes';
+  document.getElementById('editId').value = a.id;
+  document.getElementById('inputEmoji').value = a.emoji || '';
+  document.getElementById('inputName').value = a.name || '';
+  document.getElementById('inputDescription').value = a.description || '';
+  document.getElementById('inputTag').value = a.tag || '';
+  document.getElementById('inputCity').value = a.city || '';
+  document.getElementById('inputRating').value = a.rating || '';
+  document.getElementById('inputReviewsCount').value = a.reviews_count || 0;
+  document.getElementById('inputDuration').value = a.duration_min || 60;
+  document.getElementById('inputPrice').value = a.price || 0;
+  document.getElementById('inputBgColor').value = a.bg_color || '#E8E0D4';
+  document.getElementById('inputWebsite').value = a.website_url || '';
+  document.getElementById('inputPriceSource').value = a.price_source_url || '';
+  document.getElementById('currentPhotoUrl').value = a.photo_url || '';
+
+  const preview = document.getElementById('photoPreview');
+  if (a.photo_url) {
+    preview.style.backgroundImage = `url(${a.photo_url})`;
+    preview.innerHTML = '';
+    document.getElementById('clearPhotoBtn').style.display = '';
+  } else {
+    resetPhotoPreview();
+  }
+
+  document.getElementById('formAlert').className = 'alert';
+  document.getElementById('formModal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('formModal').classList.remove('open');
+}
+
+function showFormAlert(msg, type='error') {
+  const el = document.getElementById('formAlert');
+  el.textContent = msg;
+  el.className = 'alert ' + type;
+}
+
+function resetPhotoPreview() {
+  const preview = document.getElementById('photoPreview');
+  preview.style.backgroundImage = '';
+  preview.innerHTML = '<span style="font-size:24px;opacity:.3">📷</span>';
+  document.getElementById('clearPhotoBtn').style.display = 'none';
+  document.getElementById('inputPhoto').value = '';
+}
+
+function previewPhoto(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) {
+    showFormAlert('Photo too large (max 5MB)');
+    event.target.value = '';
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('photoPreview').style.backgroundImage = `url(${e.target.result})`;
+    document.getElementById('photoPreview').innerHTML = '';
+    document.getElementById('clearPhotoBtn').style.display = '';
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearPhoto() {
+  document.getElementById('currentPhotoUrl').value = '';
+  resetPhotoPreview();
+}
+
+async function saveActivity() {
+  const id = document.getElementById('editId').value;
+  const name = document.getElementById('inputName').value.trim();
+  const tag = document.getElementById('inputTag').value;
+
+  if (!name) { showFormAlert('Name is required'); return; }
+  if (!tag) { showFormAlert('Tag is required'); return; }
+
+  const saveBtn = document.getElementById('saveBtn');
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'Saving...';
+
+  let photoUrl = document.getElementById('currentPhotoUrl').value || null;
+  const fileInput = document.getElementById('inputPhoto');
+  if (fileInput.files && fileInput.files[0]) {
+    const file = fileInput.files[0];
+    const ext = file.name.split('.').pop().toLowerCase();
+    const safeName = name.toLowerCase().replace(/[^a-z0-9]/g, '-').slice(0, 30);
+    const path = `activities/${safeName}-${Date.now()}.${ext}`;
+
+    saveBtn.textContent = 'Uploading photo...';
+
+    const { error: uploadError } = await sb.storage.from('places').upload(path, file, { upsert: true });
+    if (uploadError) {
+      saveBtn.disabled = false;
+      saveBtn.textContent = id ? 'Save changes' : 'Create activity';
+      showFormAlert('Photo upload failed: ' + uploadError.message);
+      return;
+    }
+    const { data: urlData } = sb.storage.from('places').getPublicUrl(path);
+    photoUrl = urlData.publicUrl;
+  }
+
+  const payload = {
+    emoji: document.getElementById('inputEmoji').value.trim() || '🎯',
+    name: name,
+    description: document.getElementById('inputDescription').value.trim() || null,
+    tag: tag,
+    city: document.getElementById('inputCity').value.trim() || null,
+    rating: parseFloat(document.getElementById('inputRating').value) || 0,
+    reviews_count: parseInt(document.getElementById('inputReviewsCount').value) || 0,
+    duration_min: parseInt(document.getElementById('inputDuration').value) || 60,
+    price: parseFloat(document.getElementById('inputPrice').value) || 0,
+    bg_color: document.getElementById('inputBgColor').value.trim() || '#E8E0D4',
+    website_url: document.getElementById('inputWebsite').value.trim() || null,
+    price_source_url: document.getElementById('inputPriceSource').value.trim() || null,
+    photo_url: photoUrl,
+    updated_at: new Date().toISOString()
+  };
+
+  saveBtn.textContent = 'Saving...';
+
+  let error;
+  if (id) {
+    const result = await sb.from('activities').update(payload).eq('id', id);
+    error = result.error;
+  } else {
+    const result = await sb.from('activities').insert(payload);
+    error = result.error;
+  }
+
+  saveBtn.disabled = false;
+  saveBtn.textContent = id ? 'Save changes' : 'Create activity';
+
+  if (error) { showFormAlert(error.message); return; }
+
+  closeModal();
+  await loadActivities();
+}
+
+function openDeleteModal(id, name) {
+  deleteTargetId = id;
+  document.getElementById('deleteConfirmText').textContent = `You are about to delete "${name}". This action is permanent.`;
+  document.getElementById('deleteModal').classList.add('open');
+}
+function closeDeleteModal() {
+  document.getElementById('deleteModal').classList.remove('open');
+  deleteTargetId = null;
+}
+async function confirmDelete() {
+  if (!deleteTargetId) return;
+  const { error } = await sb.from('activities').delete().eq('id', deleteTargetId);
+  if (error) { alert(error.message); return; }
+  closeDeleteModal();
+  await loadActivities();
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarBackdrop').classList.toggle('show');
+}
+document.querySelectorAll('.sidebar-link').forEach(link => {
+  link.addEventListener('click', () => {
+    if (window.innerWidth <= 900) {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebarBackdrop').classList.remove('show');
+    }
+  });
+});
+
+async function signOut() {
+  await sb.auth.signOut();
+  window.location.href = 'index.html';
+}
+
+async function init() {
+  const auth = await checkAdmin();
+  if (!auth) return;
+  await loadActivities();
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('content').style.display = 'block';
+  console.log('✅ Activities admin loaded');
+}
+
+init();
+</script>
+</body>
+</html>
