@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reviews Moderation — AFYA Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="admin-shared.js"></script>
+<style>
+/* ═══ TOKENS ═══ */
+:root{
+  --bg:#FDFCF9; --bg2:#F6F3EE; --bg3:#EEEAE2; --sur:#FFFFFF;
+  --ink:#1D2B3A; --ink2:#3B5068; --ink3:#7A93A8;
+  --sage:#6D8F82; --sage-l:#8BAD9E; --sage-p:#C8D8D2;
+  --gold:#D4A843; --green:#4A9E6F; --red:#C94F3A;
+  --purple:#9D4FCC; --blue:#3B5068;
+  --border:rgba(109,143,130,.18); --border2:rgba(109,143,130,.3);
+  --shadow:rgba(29,43,58,.07); --shadow2:rgba(29,43,58,.14);
+  --disp:'Cormorant Garamond',serif; --ui:'Syne',sans-serif; --body:'DM Sans',sans-serif;
+  --r:16px; --r-sm:8px; --r-lg:20px;
+  --sidebar-w:260px;
+}
+[data-theme="dark"]{
+  --bg:#111A22; --bg2:#162028; --bg3:#1D2B3A; --sur:#1E2C3A;
+  --ink:#F0EDE8; --ink2:#A8BDC8; --ink3:#6B8A9A;
+  --border:rgba(139,173,158,.14);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg2);color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.6;min-height:100vh}
+
+/* ═══ SIDEBAR ═══ */
+.sidebar{
+  position:fixed; top:0; left:0; bottom:0;
+  width:var(--sidebar-w); background:var(--ink);
+  padding:24px 16px; overflow-y:auto; z-index:100;
+  display:flex; flex-direction:column;
+}
+.sidebar-brand{
+  display:flex; align-items:center; gap:10px;
+  padding:8px 12px 24px; border-bottom:1px solid rgba(255,255,255,.08);
+  margin-bottom:16px;
+}
+.sidebar-brand-text{font-family:var(--ui); font-size:12px; font-weight:800; letter-spacing:.18em; color:white}
+.sidebar-brand-badge{
+  font-family:var(--ui); font-size:8px; font-weight:700; letter-spacing:.14em;
+  color:var(--sage-l); background:rgba(139,173,158,.12);
+  padding:3px 8px; border-radius:4px; margin-left:auto;
+}
+.sidebar-section-title{
+  font-family:var(--ui); font-size:9px; font-weight:700; letter-spacing:.22em;
+  text-transform:uppercase; color:rgba(255,255,255,.3); padding:14px 12px 8px;
+}
+.sidebar-link{
+  display:flex; align-items:center; gap:11px; padding:11px 14px;
+  border-radius:8px; cursor:pointer; font-family:var(--ui);
+  font-size:12px; font-weight:600; color:rgba(255,255,255,.55);
+  margin-bottom:2px; transition:all .15s; text-decoration:none;
+}
+.sidebar-link:hover{background:rgba(255,255,255,.05); color:white}
+.sidebar-link.active{background:rgba(109,143,130,.15); color:white}
+.sidebar-icon{font-size:14px; width:18px; text-align:center}
+
+/* ═══ MAIN ═══ */
+.main{margin-left:var(--sidebar-w); padding:32px 40px; min-height:100vh}
+.burger-btn{display:none}
+
+/* ═══ HEADER ═══ */
+.admin-header{display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:16px}
+.admin-eye{display:inline-flex; align-items:center; gap:10px; font-family:var(--ui); font-size:9px; font-weight:700; letter-spacing:.32em; text-transform:uppercase; color:var(--sage); margin-bottom:10px}
+.admin-eye::before{content:''; display:block; width:20px; height:1px; background:var(--sage)}
+.admin-title{font-family:var(--disp); font-size:42px; font-weight:300; line-height:1.05; color:var(--ink)}
+.admin-title em{font-style:italic; color:var(--sage)}
+
+/* ═══ STATS ═══ */
+.stats-row{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:20px}
+.stat-card{background:var(--sur); border:1px solid var(--border); border-radius:12px; padding:18px 20px}
+.stat-num{font-family:var(--disp); font-size:32px; font-weight:400; color:var(--ink); margin-bottom:4px}
+.stat-label{font-family:var(--ui); font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--ink3)}
+.stat-card.alert .stat-num{color:var(--gold)}
+.stat-card.danger .stat-num{color:var(--red)}
+
+/* ═══ FILTERS ═══ */
+.filters-bar{background:var(--sur); border:1px solid var(--border); border-radius:12px; padding:14px 18px; margin-bottom:18px; display:flex; align-items:center; gap:14px; flex-wrap:wrap}
+.filter-section{display:flex; gap:6px; flex-wrap:wrap; align-items:center}
+.filter-label{font-family:var(--ui); font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--ink3); margin-right:4px}
+.filter-btn{
+  padding:7px 14px; border:1.5px solid var(--border); border-radius:100px;
+  background:transparent; cursor:pointer; font-family:var(--ui);
+  font-size:10px; font-weight:700; letter-spacing:.08em;
+  color:var(--ink2); transition:all .2s;
+}
+.filter-btn.active{background:var(--sage); border-color:var(--sage); color:white}
+.filter-btn .count{background:rgba(255,255,255,.2); margin-left:6px; padding:1px 6px; border-radius:10px; font-size:9px}
+.filter-btn.active .count{background:rgba(255,255,255,.25)}
+.search-input{flex:1; min-width:200px; border:1.5px solid var(--border); border-radius:8px; padding:8px 12px; font-family:var(--ui); font-size:13px; outline:none}
+.search-input:focus{border-color:var(--sage)}
+
+/* ═══ REVIEW CARDS ═══ */
+.reviews-list{display:flex; flex-direction:column; gap:16px}
+.review-card{
+  background:var(--sur); border:1px solid var(--border);
+  border-radius:14px; padding:24px; position:relative;
+  transition:all .2s;
+}
+.review-card.pending{border-left:4px solid var(--gold)}
+.review-card.featured{border-left:4px solid var(--purple)}
+.review-card.reported{border-left:4px solid var(--red)}
+.review-card:hover{box-shadow:0 4px 20px var(--shadow)}
+
+.rev-top{display:flex; align-items:flex-start; gap:14px; margin-bottom:12px}
+.rev-avatar{
+  width:46px; height:46px; border-radius:50%;
+  background:var(--sage); color:white;
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--ui); font-weight:700; font-size:16px;
+  flex-shrink:0; background-size:cover; background-position:center;
+}
+.rev-info{flex:1; min-width:0}
+.rev-name{font-family:var(--ui); font-size:14px; font-weight:700; color:var(--ink); display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.rev-meta{font-size:11px; color:var(--ink3); margin-top:2px; display:flex; gap:10px; flex-wrap:wrap}
+.rev-source-tp{background:#00B67A; color:white; font-family:var(--ui); font-size:8px; font-weight:700; letter-spacing:.1em; padding:2px 7px; border-radius:4px; text-transform:uppercase}
+.rev-source-afya{background:var(--sage); color:white; font-family:var(--ui); font-size:8px; font-weight:700; letter-spacing:.1em; padding:2px 7px; border-radius:4px; text-transform:uppercase}
+.rev-source-g{background:#4285F4; color:white; font-family:var(--ui); font-size:8px; font-weight:700; letter-spacing:.1em; padding:2px 7px; border-radius:4px; text-transform:uppercase}
+.rev-status{font-family:var(--ui); font-size:9px; font-weight:700; letter-spacing:.1em; padding:3px 8px; border-radius:100px; text-transform:uppercase}
+.rev-status.pending{background:rgba(212,168,67,.15); color:#A8862A}
+.rev-status.approved{background:rgba(74,158,111,.15); color:var(--green)}
+.rev-status.featured{background:rgba(157,79,204,.15); color:var(--purple)}
+.rev-status.reported{background:rgba(201,79,58,.15); color:var(--red)}
+
+.rev-stars{display:flex; gap:2px; margin:8px 0}
+.rev-star-f{color:var(--gold); font-size:14px}
+.rev-star-e{color:var(--border2); font-size:14px}
+
+.rev-title{font-family:var(--ui); font-size:15px; font-weight:700; color:var(--ink); margin:6px 0 8px}
+.rev-body{font-size:13px; color:var(--ink2); line-height:1.7}
+
+.rev-locks{display:flex; gap:8px; margin-top:12px; flex-wrap:wrap}
+.lock-badge{
+  display:inline-flex; align-items:center; gap:6px;
+  font-family:var(--ui); font-size:10px; font-weight:600;
+  padding:5px 10px; border-radius:6px; background:var(--bg2);
+}
+.lock-badge.author{color:#A8862A; background:rgba(212,168,67,.1)}
+.lock-badge.staff{color:var(--red); background:rgba(201,79,58,.1)}
+
+/* ═══ ACTION BUTTONS ═══ */
+.rev-actions{
+  display:flex; gap:8px; margin-top:16px; padding-top:14px;
+  border-top:1px solid var(--border); flex-wrap:wrap;
+}
+.action-btn{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:8px 14px; border:1.5px solid var(--border);
+  border-radius:8px; background:white; cursor:pointer;
+  font-family:var(--ui); font-size:11px; font-weight:700;
+  letter-spacing:.08em; color:var(--ink2); transition:all .15s;
+}
+.action-btn:hover{transform:translateY(-1px); box-shadow:0 2px 8px var(--shadow)}
+.action-btn.approve{border-color:var(--green); color:var(--green)}
+.action-btn.approve:hover{background:var(--green); color:white}
+.action-btn.feature{border-color:var(--purple); color:var(--purple)}
+.action-btn.feature:hover{background:var(--purple); color:white}
+.action-btn.unfeature{border-color:var(--ink3); color:var(--ink3)}
+.action-btn.delete{border-color:var(--red); color:var(--red)}
+.action-btn.delete:hover{background:var(--red); color:white}
+.action-btn.report{border-color:var(--gold); color:#A8862A}
+.action-btn.report:hover{background:var(--gold); color:white}
+.action-btn.lock{border-color:var(--ink3); color:var(--ink3)}
+.action-btn.unlock{border-color:var(--green); color:var(--green)}
+
+/* ═══ REPLIES ═══ */
+.replies-section{margin-top:18px; padding-top:18px; border-top:1px solid var(--border)}
+.replies-header{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px}
+.replies-title{font-family:var(--ui); font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--ink2)}
+.replies-toggle{font-family:var(--ui); font-size:11px; color:var(--sage); cursor:pointer; background:none; border:none; font-weight:600}
+.replies-toggle:hover{text-decoration:underline}
+.replies-list{display:flex; flex-direction:column; gap:10px; margin-bottom:14px}
+.reply-card{
+  background:var(--bg2); border-radius:10px; padding:12px 14px;
+  border-left:3px solid var(--ink3);
+}
+.reply-card.staff-super{border-left-color:var(--purple); background:rgba(157,79,204,.05)}
+.reply-card.staff-admin{border-left-color:var(--blue); background:rgba(59,80,104,.05)}
+.reply-card.staff-mod{border-left-color:var(--green); background:rgba(74,158,111,.05)}
+.reply-head{display:flex; align-items:center; gap:8px; margin-bottom:6px; flex-wrap:wrap}
+.reply-author{font-family:var(--ui); font-size:11px; font-weight:700; color:var(--ink)}
+.reply-role-badge{font-family:var(--ui); font-size:8px; font-weight:700; letter-spacing:.1em; padding:2px 6px; border-radius:100px; color:white}
+.reply-role-badge.super{background:var(--purple)}
+.reply-role-badge.admin{background:var(--blue)}
+.reply-role-badge.mod{background:var(--green)}
+.reply-date{font-size:10px; color:var(--ink3); font-family:var(--ui)}
+.reply-body{font-size:12px; color:var(--ink2); line-height:1.6}
+.reply-delete-btn{
+  background:transparent; border:none; color:var(--red); cursor:pointer;
+  font-family:var(--ui); font-size:10px; opacity:.6;
+  margin-left:auto;
+}
+.reply-delete-btn:hover{opacity:1}
+
+.reply-form{
+  display:flex; gap:8px; align-items:flex-start;
+  background:var(--bg2); padding:12px; border-radius:10px;
+}
+.reply-textarea{
+  flex:1; border:1.5px solid var(--border); border-radius:8px;
+  padding:10px 12px; font-family:var(--body); font-size:12px;
+  resize:vertical; min-height:60px; outline:none;
+}
+.reply-textarea:focus{border-color:var(--sage)}
+.reply-submit-btn{
+  padding:10px 18px; background:var(--ink); color:white;
+  border:none; border-radius:8px; cursor:pointer;
+  font-family:var(--ui); font-size:10px; font-weight:700;
+  letter-spacing:.12em; text-transform:uppercase;
+  white-space:nowrap; align-self:stretch;
+}
+.reply-submit-btn:hover{background:var(--sage)}
+.reply-closed-notice{
+  text-align:center; padding:14px; color:var(--ink3);
+  font-family:var(--ui); font-size:11px; font-style:italic;
+  background:var(--bg2); border-radius:10px;
+}
+
+/* ═══ MODAL ═══ */
+.modal-overlay{position:fixed; inset:0; background:rgba(0,0,0,.6); backdrop-filter:blur(4px); z-index:200; display:none; align-items:center; justify-content:center; padding:20px}
+.modal-overlay.open{display:flex}
+.modal-card{background:var(--sur); border-radius:16px; padding:28px; max-width:480px; width:100%; box-shadow:0 24px 60px rgba(0,0,0,.2)}
+.modal-icon{width:54px; height:54px; border-radius:50%; background:rgba(201,79,58,.12); display:flex; align-items:center; justify-content:center; font-size:24px; margin:0 auto 14px}
+.modal-icon.info{background:rgba(109,143,130,.12)}
+.modal-icon.success{background:rgba(74,158,111,.12)}
+.modal-card h3{font-family:var(--disp); font-size:22px; font-weight:400; color:var(--ink); text-align:center; margin-bottom:8px}
+.modal-card p{text-align:center; color:var(--ink2); font-size:13px; margin-bottom:18px; line-height:1.5}
+.modal-textarea{width:100%; border:1.5px solid var(--border); border-radius:8px; padding:10px 12px; font-family:var(--body); font-size:13px; resize:vertical; min-height:80px; margin-bottom:14px; outline:none}
+.modal-actions{display:flex; gap:10px}
+.btn{flex:1; padding:11px; border:none; border-radius:8px; font-family:var(--ui); font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; cursor:pointer; transition:all .2s}
+.btn-cancel{background:var(--bg2); color:var(--ink2)}
+.btn-cancel:hover{background:var(--bg3)}
+.btn-confirm{background:var(--red); color:white}
+.btn-confirm:hover{background:#A8402F}
+.btn-confirm.success{background:var(--green)}
+.btn-confirm.success:hover{background:#3D8458}
+.btn-confirm.warning{background:var(--gold); color:white}
+
+/* ═══ TOAST ═══ */
+.toast{position:fixed; bottom:24px; right:24px; background:var(--ink); color:white; padding:14px 20px; border-radius:10px; font-family:var(--ui); font-size:12px; font-weight:600; box-shadow:0 8px 24px rgba(0,0,0,.2); transform:translateY(100px); opacity:0; transition:all .3s; z-index:300; display:flex; align-items:center; gap:10px; max-width:380px}
+.toast.show{transform:translateY(0); opacity:1}
+
+/* ═══ LOADING ═══ */
+.loading{text-align:center; padding:80px; color:var(--ink3); font-family:var(--ui); font-size:13px}
+.empty{text-align:center; padding:80px; color:var(--ink3); font-family:var(--ui); font-size:13px; background:var(--sur); border-radius:14px; border:1px solid var(--border)}
+
+/* ═══ RESPONSIVE ═══ */
+@media(max-width:900px){
+  .sidebar{transform:translateX(-100%); transition:transform .25s; box-shadow:0 0 40px rgba(0,0,0,.3); z-index:1000}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0; padding:64px 16px 24px}
+  .burger-btn{display:flex; align-items:center; justify-content:center; position:fixed; top:16px; left:16px; z-index:200; width:42px; height:42px; background:var(--ink); color:white; border:none; border-radius:8px; cursor:pointer; font-size:20px; box-shadow:0 4px 12px var(--shadow)}
+  .stats-row{grid-template-columns:1fr 1fr}
+  .admin-title{font-size:32px}
+}
+@media(max-width:560px){
+  .stats-row{grid-template-columns:1fr}
+  .rev-actions{flex-direction:column; align-items:stretch}
+  .action-btn{justify-content:center}
+}
+</style>
+</head>
+<body>
+
+<!-- Burger mobile -->
+<button class="burger-btn" onclick="toggleSidebar()">☰</button>
+
+<!-- Sidebar (injectée dynamiquement par admin-shared.js) -->
+<div id="sidebarPlaceholder"></div>
+
+<!-- Main -->
+<main class="main">
+
+  <div class="admin-header">
+    <div>
+      <div class="admin-eye">Moderation</div>
+      <h1 class="admin-title">Reviews <em>Management</em></h1>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-num" id="statTotal">0</div>
+      <div class="stat-label">Total Reviews</div>
+    </div>
+    <div class="stat-card alert">
+      <div class="stat-num" id="statPending">0</div>
+      <div class="stat-label">Pending</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statApproved">0</div>
+      <div class="stat-label">Approved</div>
+    </div>
+    <div class="stat-card danger">
+      <div class="stat-num" id="statReports">0</div>
+      <div class="stat-label">Active Reports</div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-bar">
+    <div class="filter-section">
+      <span class="filter-label">Status:</span>
+      <button class="filter-btn active" data-status="all" onclick="setStatusFilter('all', this)">All <span class="count" id="countAll">0</span></button>
+      <button class="filter-btn" data-status="pending" onclick="setStatusFilter('pending', this)">Pending <span class="count" id="countPending">0</span></button>
+      <button class="filter-btn" data-status="approved" onclick="setStatusFilter('approved', this)">Approved <span class="count" id="countApproved">0</span></button>
+      <button class="filter-btn" data-status="featured" onclick="setStatusFilter('featured', this)">Featured <span class="count" id="countFeatured">0</span></button>
+      <button class="filter-btn" data-status="reported" onclick="setStatusFilter('reported', this)">Reported <span class="count" id="countReported">0</span></button>
+    </div>
+    <input type="text" class="search-input" id="searchInput" placeholder="🔍 Search reviews..." oninput="renderReviews()">
+  </div>
+
+  <!-- Reviews list -->
+  <div id="reviewsContainer">
+    <div class="loading">Loading reviews…</div>
+  </div>
+</main>
+
+<!-- Modal de confirmation -->
+<div class="modal-overlay" id="confirmModal" onclick="if(event.target===this)closeConfirm()">
+  <div class="modal-card">
+    <div class="modal-icon" id="modalIcon">⚠️</div>
+    <h3 id="modalTitle">Are you sure?</h3>
+    <p id="modalMessage">This action cannot be undone.</p>
+    <textarea class="modal-textarea" id="modalTextarea" placeholder="Add a note (optional)..." style="display:none"></textarea>
+    <div class="modal-actions">
+      <button class="btn btn-cancel" onclick="closeConfirm()">Cancel</button>
+      <button class="btn btn-confirm" id="confirmBtn" onclick="executeAction()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"><span id="toastMsg"></span></div>
+
+<script>
+// ═══ CONFIG ═══
+const SUPABASE_URL = 'https://zryfceystyipimniarst.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_uI4dQX6KFlLcxtxqw52ewA_ujacVkch';  // ⚠️ REMETS TA VRAIE CLÉ
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ═══ STATE ═══
+let allReviews = [];
+let allReplies = []; // toutes les réponses chargées
+let allReports = []; // tous les reports actifs
+let currentUserId = null;
+let currentUserRole = null;
+let currentUserProfile = null;
+let statusFilter = 'all';
+let pendingAction = null;
+let expandedReplies = new Set(); // IDs des avis dont les replies sont déployées
+
+// ═══ AUTH ═══
+async function checkAdmin() {
+  return await afyaCheckAdminAccess(sb, ['admin', 'super_admin', 'moderator']);
+}
+
+// ═══ LOAD DATA ═══
+async function loadReviews() {
+  // 1) Charger tous les avis
+  const { data: reviews, error: revErr } = await sb
+    .from('reviews')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (revErr) {
+    console.error('❌ Error loading reviews:', revErr);
+    document.getElementById('reviewsContainer').innerHTML = `<div class="empty" style="color:var(--red)">Error loading reviews: ${revErr.message}</div>`;
+    return;
+  }
+
+  // 2) Charger toutes les réponses
+  const { data: replies } = await sb
+    .from('review_replies')
+    .select('*, profiles:author_id(id, first_name, email, role, avatar_url)')
+    .order('created_at', { ascending: false });
+
+  // 3) Charger les profils des auteurs d'avis
+  const userIds = [...new Set((reviews || []).map(r => r.user_id).filter(Boolean))];
+  let profilesMap = {};
+  if (userIds.length > 0) {
+    const { data: profiles } = await sb
+      .from('profiles')
+      .select('id, first_name, email, avatar_url')
+      .in('id', userIds);
+    (profiles || []).forEach(p => { profilesMap[p.id] = p; });
+  }
+
+  // 4) Charger les reports actifs
+  const { data: reports } = await sb
+    .from('review_reports')
+    .select('*')
+    .eq('status', 'pending');
+
+  allReviews = (reviews || []).map(r => ({
+    ...r,
+    author: profilesMap[r.user_id] || null,
+    reports_count: (reports || []).filter(rep => rep.review_id === r.id).length
+  }));
+  allReplies = replies || [];
+  allReports = reports || [];
+
+  // Tri : pending d'abord, puis reported, puis le reste par date
+  allReviews.sort((a, b) => {
+    const aPending = a.is_approved === false;
+    const bPending = b.is_approved === false;
+    if (aPending && !bPending) return -1;
+    if (!aPending && bPending) return 1;
+    const aReported = a.reports_count > 0;
+    const bReported = b.reports_count > 0;
+    if (aReported && !bReported) return -1;
+    if (!aReported && bReported) return 1;
+    return new Date(b.created_at) - new Date(a.created_at);
+  });
+
+  updateStats();
+  renderReviews();
+}
+
+// ═══ STATS ═══
+function updateStats() {
+  const total = allReviews.length;
+  const pending = allReviews.filter(r => r.is_approved === false).length;
+  const approved = allReviews.filter(r => r.is_approved === true).length;
+  const featured = allReviews.filter(r => r.is_featured === true).length;
+  const reported = allReviews.filter(r => r.reports_count > 0).length;
+
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statPending').textContent = pending;
+  document.getElementById('statApproved').textContent = approved;
+  document.getElementById('statReports').textContent = allReports.length;
+
+  document.getElementById('countAll').textContent = total;
+  document.getElementById('countPending').textContent = pending;
+  document.getElementById('countApproved').textContent = approved;
+  document.getElementById('countFeatured').textContent = featured;
+  document.getElementById('countReported').textContent = reported;
+}
+
+// ═══ FILTERS ═══
+function setStatusFilter(status, btn) {
+  statusFilter = status;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderReviews();
+}
+
+// ═══ RENDER ═══
+function renderReviews() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  let list = [...allReviews];
+
+  if (statusFilter === 'pending') list = list.filter(r => r.is_approved === false);
+  else if (statusFilter === 'approved') list = list.filter(r => r.is_approved === true);
+  else if (statusFilter === 'featured') list = list.filter(r => r.is_featured === true);
+  else if (statusFilter === 'reported') list = list.filter(r => r.reports_count > 0);
+
+  if (search) {
+    list = list.filter(r =>
+      (r.title || '').toLowerCase().includes(search) ||
+      (r.body || '').toLowerCase().includes(search) ||
+      (r.author?.first_name || '').toLowerCase().includes(search) ||
+      (r.author?.email || '').toLowerCase().includes(search)
+    );
+  }
+
+  if (list.length === 0) {
+    document.getElementById('reviewsContainer').innerHTML = `<div class="empty">No reviews found.</div>`;
+    return;
+  }
+
+  document.getElementById('reviewsContainer').innerHTML = `
+    <div class="reviews-list">
+      ${list.map(r => reviewCard(r)).join('')}
+    </div>
+  `;
+}
+
+function reviewCard(r) {
+  const author = r.author;
+  const authorName = author?.first_name || author?.email?.split('@')[0] || 'Anonymous';
+  const avatar = author?.avatar_url
+    ? `<div class="rev-avatar" style="background-image:url('${author.avatar_url}')"></div>`
+    : `<div class="rev-avatar">${authorName.charAt(0).toUpperCase()}</div>`;
+  const date = new Date(r.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  const sourceLabel = {
+    afya: '<span class="rev-source-afya">AFYA</span>',
+    trustpilot: '<span class="rev-source-tp">Trustpilot</span>',
+    google: '<span class="rev-source-g">Google</span>'
+  }[r.source] || '';
+
+  // Statut
+  let statusHtml = '';
+  if (r.is_approved === false) statusHtml = '<span class="rev-status pending">⏳ Pending</span>';
+  else if (r.is_featured) statusHtml = '<span class="rev-status featured">⭐ Featured</span>';
+  else statusHtml = '<span class="rev-status approved">✅ Approved</span>';
+  if (r.reports_count > 0) statusHtml += `<span class="rev-status reported">🚨 ${r.reports_count} report${r.reports_count > 1 ? 's' : ''}</span>`;
+
+  // Classes de la carte
+  let cardClass = 'review-card';
+  if (r.is_approved === false) cardClass += ' pending';
+  else if (r.is_featured) cardClass += ' featured';
+  if (r.reports_count > 0) cardClass += ' reported';
+
+  // Stars
+  const starsHtml = [1,2,3,4,5].map(n => `<span class="rev-star-${n<=r.stars?'f':'e'}">★</span>`).join('');
+
+  // Locks badges
+  let locksHtml = '';
+  if (r.replies_closed_by_author) locksHtml += '<span class="lock-badge author">🔒 Replies closed by author</span>';
+  if (r.replies_closed_by_staff) locksHtml += '<span class="lock-badge staff">🔒 Replies closed by AFYA</span>';
+  if (r.notifications_muted_by_author) locksHtml += '<span class="lock-badge author">🔇 Notifications muted by author</span>';
+  if (r.notifications_muted_by_staff) locksHtml += '<span class="lock-badge staff">🔇 Notifications muted by AFYA</span>';
+
+  // Actions selon le rôle
+  const actionsHtml = buildActions(r);
+
+  // Replies
+  const reviewReplies = allReplies.filter(rp => rp.review_id === r.id);
+  const isExpanded = expandedReplies.has(r.id);
+  const repliesHtml = buildRepliesSection(r, reviewReplies, isExpanded);
+
+  return `
+    <div class="${cardClass}">
+      <div class="rev-top">
+        ${avatar}
+        <div class="rev-info">
+          <div class="rev-name">
+            ${authorName}
+            ${statusHtml}
+          </div>
+          <div class="rev-meta">
+            ${sourceLabel}
+            <span>${r.trip_type || '🌍 Traveller'}</span>
+            <span>📅 ${date}</span>
+            ${r.helpful_count ? `<span>👍 ${r.helpful_count}</span>` : ''}
+          </div>
+        </div>
+      </div>
+
+      <div class="rev-stars">${starsHtml}</div>
+      <div class="rev-title">${escapeHtml(r.title || '(no title)')}</div>
+      <div class="rev-body">${escapeHtml(r.body || '')}</div>
+
+      ${locksHtml ? `<div class="rev-locks">${locksHtml}</div>` : ''}
+
+      <div class="rev-actions">${actionsHtml}</div>
+
+      ${repliesHtml}
+    </div>
+  `;
+}
+
+function buildActions(r) {
+  const isStaff = ['admin', 'super_admin'].includes(currentUserRole);
+  const isMod = currentUserRole === 'moderator';
+  let actions = [];
+
+  if (isStaff) {
+    if (r.is_approved === false) {
+      actions.push(`<button class="action-btn approve" onclick="confirmAction('approve','${r.id}')">✅ Approve</button>`);
+    } else {
+      actions.push(`<button class="action-btn approve" onclick="confirmAction('unapprove','${r.id}')" style="opacity:.7">↶ Unapprove</button>`);
+    }
+    if (r.is_featured) {
+      actions.push(`<button class="action-btn unfeature" onclick="confirmAction('unfeature','${r.id}')">⭐ Unfeature</button>`);
+    } else if (r.is_approved) {
+      actions.push(`<button class="action-btn feature" onclick="confirmAction('feature','${r.id}')">⭐ Feature</button>`);
+    }
+    // Close/Open replies
+    if (r.replies_closed_by_staff) {
+      actions.push(`<button class="action-btn unlock" onclick="confirmAction('open_replies','${r.id}')">🔓 Open replies</button>`);
+    } else {
+      actions.push(`<button class="action-btn lock" onclick="confirmAction('close_replies','${r.id}')">🔒 Close replies</button>`);
+    }
+    // Mute notifications
+    if (r.notifications_muted_by_staff) {
+      actions.push(`<button class="action-btn unlock" onclick="confirmAction('unmute_notifs','${r.id}')">🔔 Unmute notifs</button>`);
+    } else {
+      actions.push(`<button class="action-btn lock" onclick="confirmAction('mute_notifs','${r.id}')">🔇 Mute notifs</button>`);
+    }
+    actions.push(`<button class="action-btn delete" onclick="confirmAction('delete','${r.id}')">🗑️ Delete</button>`);
+  } else if (isMod) {
+    // Le moderator peut signaler et demander la fermeture
+    actions.push(`<button class="action-btn report" onclick="confirmAction('report','${r.id}')">🚨 Report</button>`);
+  }
+
+  return actions.join('');
+}
+
+function buildRepliesSection(r, replies, isExpanded) {
+  // Tri : super_admin > admin > moderator > user, par date DESC dans chaque groupe
+  const roleOrder = { super_admin: 0, admin: 1, moderator: 2, user: 3 };
+  const sortedReplies = [...replies].sort((a, b) => {
+    const aRole = roleOrder[a.profiles?.role] ?? 4;
+    const bRole = roleOrder[b.profiles?.role] ?? 4;
+    if (aRole !== bRole) return aRole - bRole;
+    return new Date(b.created_at) - new Date(a.created_at);
+  });
+
+  const replyCount = sortedReplies.length;
+  const toggleLabel = isExpanded
+    ? '▾ Hide replies'
+    : (replyCount > 0 ? `▸ Show ${replyCount} repl${replyCount > 1 ? 'ies' : 'y'}` : '+ Add a reply');
+
+  let repliesHtmlContent = '';
+  if (isExpanded) {
+    repliesHtmlContent = `
+      <div class="replies-list">
+        ${sortedReplies.map(rep => replyCard(rep)).join('') || '<div style="text-align:center;color:var(--ink3);font-family:var(--ui);font-size:11px;padding:10px">No replies yet.</div>'}
+      </div>
+      ${buildReplyForm(r)}
+    `;
+  }
+
+  return `
+    <div class="replies-section">
+      <div class="replies-header">
+        <div class="replies-title">💬 Replies (${replyCount})</div>
+        <button class="replies-toggle" onclick="toggleReplies('${r.id}')">${toggleLabel}</button>
+      </div>
+      ${repliesHtmlContent}
+    </div>
+  `;
+}
+
+function replyCard(rep) {
+  const role = rep.profiles?.role;
+  const name = rep.profiles?.first_name || rep.profiles?.email?.split('@')[0] || 'User';
+  const date = new Date(rep.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  let roleClass = '';
+  let badgeHtml = '';
+  if (role === 'super_admin') { roleClass = 'staff-super'; badgeHtml = '<span class="reply-role-badge super">👑 SUPER ADMIN</span>'; }
+  else if (role === 'admin') { roleClass = 'staff-admin'; badgeHtml = '<span class="reply-role-badge admin">ADMIN</span>'; }
+  else if (role === 'moderator') { roleClass = 'staff-mod'; badgeHtml = '<span class="reply-role-badge mod">MODERATOR</span>'; }
+
+  // Bouton supprimer si c'est ma réponse OU si je suis admin/super_admin
+  const canDelete = rep.author_id === currentUserId || ['admin', 'super_admin'].includes(currentUserRole);
+  const deleteBtn = canDelete ? `<button class="reply-delete-btn" onclick="confirmAction('delete_reply','${rep.id}')">🗑️</button>` : '';
+
+  return `
+    <div class="reply-card ${roleClass}">
+      <div class="reply-head">
+        <span class="reply-author">${escapeHtml(name)}</span>
+        ${badgeHtml}
+        <span class="reply-date">${date}</span>
+        ${rep.is_edited ? '<span class="reply-date" style="font-style:italic">(edited)</span>' : ''}
+        ${deleteBtn}
+      </div>
+      <div class="reply-body">${escapeHtml(rep.body)}</div>
+    </div>
+  `;
+}
+
+function buildReplyForm(r) {
+  const isStaff = ['admin', 'super_admin', 'moderator'].includes(currentUserRole);
+  const closedByAnyone = r.replies_closed_by_author || r.replies_closed_by_staff;
+
+  if (closedByAnyone && !isStaff) {
+    return `<div class="reply-closed-notice">🔒 Replies are closed on this review.</div>`;
+  }
+
+  const placeholder = isStaff
+    ? 'Reply as AFYA staff... (your reply will be highlighted)'
+    : 'Write a reply...';
+
+  return `
+    <div class="reply-form">
+      <textarea class="reply-textarea" id="reply-textarea-${r.id}" placeholder="${placeholder}"></textarea>
+      <button class="reply-submit-btn" onclick="submitReply('${r.id}')">Reply</button>
+    </div>
+  `;
+}
+
+function toggleReplies(reviewId) {
+  if (expandedReplies.has(reviewId)) {
+    expandedReplies.delete(reviewId);
+  } else {
+    expandedReplies.add(reviewId);
+  }
+  renderReviews();
+}
+
+// ═══ ACTIONS ═══
+function confirmAction(type, reviewId, extra) {
+  pendingAction = { type, reviewId, extra };
+  const icon = document.getElementById('modalIcon');
+  const title = document.getElementById('modalTitle');
+  const message = document.getElementById('modalMessage');
+  const btn = document.getElementById('confirmBtn');
+  const textarea = document.getElementById('modalTextarea');
+  textarea.style.display = 'none';
+  textarea.value = '';
+
+  const review = allReviews.find(r => r.id === reviewId);
+  const title_text = review?.title || 'this review';
+
+  const configs = {
+    approve: { icon: '✅', iconCls: 'success', t: 'Approve this review?', m: `Approve "${title_text}"? The author will be notified.`, btn: 'Approve', btnCls: 'success' },
+    unapprove: { icon: '↶', iconCls: 'info', t: 'Unapprove this review?', m: `Unapprove "${title_text}"? It will be hidden from the public.`, btn: 'Unapprove', btnCls: '' },
+    feature: { icon: '⭐', iconCls: 'success', t: 'Feature this review?', m: `Feature "${title_text}"? The author will be notified.`, btn: 'Feature', btnCls: 'success' },
+    unfeature: { icon: '⭐', iconCls: 'info', t: 'Unfeature this review?', m: `Remove featured status from "${title_text}"?`, btn: 'Unfeature', btnCls: '' },
+    delete: { icon: '🗑️', iconCls: '', t: 'Delete this review?', m: `Permanently delete "${title_text}"? This cannot be undone.`, btn: 'Delete', btnCls: '' },
+    close_replies: { icon: '🔒', iconCls: 'info', t: 'Close replies?', m: `Close replies on "${title_text}"? Only AFYA staff will be able to reply.`, btn: 'Close', btnCls: 'warning' },
+    open_replies: { icon: '🔓', iconCls: 'success', t: 'Open replies?', m: `Reopen replies on "${title_text}"?`, btn: 'Open', btnCls: 'success' },
+    mute_notifs: { icon: '🔇', iconCls: 'info', t: 'Mute notifications?', m: `Mute notifications for the author of "${title_text}"? They won't be notified of new replies.`, btn: 'Mute', btnCls: 'warning' },
+    unmute_notifs: { icon: '🔔', iconCls: 'success', t: 'Unmute notifications?', m: `Restore notifications for the author of "${title_text}"?`, btn: 'Unmute', btnCls: 'success' },
+    report: { icon: '🚨', iconCls: '', t: 'Report this review?', m: `Report "${title_text}" to admins for review. Add a reason below:`, btn: 'Report', btnCls: 'warning', textarea: true },
+    delete_reply: { icon: '🗑️', iconCls: '', t: 'Delete this reply?', m: `Permanently delete this reply? This cannot be undone.`, btn: 'Delete', btnCls: '' }
+  };
+
+  const c = configs[type];
+  if (!c) return;
+
+  icon.textContent = c.icon;
+  icon.className = 'modal-icon ' + c.iconCls;
+  title.textContent = c.t;
+  message.textContent = c.m;
+  btn.textContent = c.btn;
+  btn.className = 'btn btn-confirm ' + (c.btnCls || '');
+
+  if (c.textarea) {
+    textarea.style.display = 'block';
+    textarea.placeholder = 'Reason for report (visible to admins)...';
+  }
+
+  document.getElementById('confirmModal').classList.add('open');
+}
+
+function closeConfirm() {
+  document.getElementById('confirmModal').classList.remove('open');
+  pendingAction = null;
+}
+
+async function executeAction() {
+  if (!pendingAction) return;
+  const { type, reviewId } = pendingAction;
+  const btn = document.getElementById('confirmBtn');
+  const note = document.getElementById('modalTextarea').value.trim();
+  btn.disabled = true;
+  btn.textContent = 'Processing...';
+
+  let result;
+  if (type === 'approve') {
+    result = await sb.from('reviews').update({ is_approved: true }).eq('id', reviewId);
+  } else if (type === 'unapprove') {
+    result = await sb.from('reviews').update({ is_approved: false }).eq('id', reviewId);
+  } else if (type === 'feature') {
+    result = await sb.from('reviews').update({ is_featured: true }).eq('id', reviewId);
+  } else if (type === 'unfeature') {
+    result = await sb.from('reviews').update({ is_featured: false }).eq('id', reviewId);
+  } else if (type === 'delete') {
+    result = await sb.from('reviews').delete().eq('id', reviewId);
+  } else if (type === 'close_replies') {
+    result = await sb.from('reviews').update({ replies_closed_by_staff: true }).eq('id', reviewId);
+  } else if (type === 'open_replies') {
+    result = await sb.from('reviews').update({ replies_closed_by_staff: false }).eq('id', reviewId);
+  } else if (type === 'mute_notifs') {
+    result = await sb.from('reviews').update({ notifications_muted_by_staff: true }).eq('id', reviewId);
+  } else if (type === 'unmute_notifs') {
+    result = await sb.from('reviews').update({ notifications_muted_by_staff: false }).eq('id', reviewId);
+  } else if (type === 'report') {
+    if (!note) {
+      toast('⚠️ Please provide a reason for the report');
+      btn.disabled = false;
+      btn.textContent = 'Report';
+      return;
+    }
+    result = await sb.from('review_reports').insert({
+      review_id: reviewId,
+      reporter_id: currentUserId,
+      reason: note,
+      status: 'pending'
+    });
+  } else if (type === 'delete_reply') {
+    result = await sb.from('review_replies').delete().eq('id', reviewId);
+  }
+
+  if (result?.error) {
+    toast(`❌ Error: ${result.error.message}`);
+  } else {
+    const messages = {
+      approve: '✅ Review approved',
+      unapprove: '↶ Review unapproved',
+      feature: '⭐ Review featured',
+      unfeature: 'Featured removed',
+      delete: '🗑️ Review deleted',
+      close_replies: '🔒 Replies closed',
+      open_replies: '🔓 Replies opened',
+      mute_notifs: '🔇 Notifications muted',
+      unmute_notifs: '🔔 Notifications restored',
+      report: '🚨 Report submitted',
+      delete_reply: 'Reply deleted'
+    };
+    toast(messages[type] || '✅ Done');
+    await loadReviews();
+  }
+
+  btn.disabled = false;
+  closeConfirm();
+}
+
+// ═══ REPLIES ═══
+async function submitReply(reviewId) {
+  const textarea = document.getElementById(`reply-textarea-${reviewId}`);
+  const body = textarea.value.trim();
+  if (!body) {
+    toast('⚠️ Please enter a reply');
+    return;
+  }
+
+  textarea.disabled = true;
+  const { error } = await sb.from('review_replies').insert({
+    review_id: reviewId,
+    author_id: currentUserId,
+    body: body
+  });
+
+  if (error) {
+    toast(`❌ Error: ${error.message}`);
+    textarea.disabled = false;
+    return;
+  }
+
+  toast('✅ Reply posted');
+  textarea.value = '';
+  textarea.disabled = false;
+  await loadReviews();
+}
+
+// ═══ UTILS ═══
+function escapeHtml(text) {
+  if (!text) return '';
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function toast(msg) {
+  document.getElementById('toastMsg').textContent = msg;
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  if (sb) sb.classList.toggle('open');
+}
+
+// ═══ INIT ═══
+async function init() {
+  const auth = await checkAdmin();
+  if (!auth) return;
+  
+  currentUserId = auth.user.id;
+  currentUserRole = auth.profile.role;
+  currentUserProfile = auth.profile;
+  
+  afyaInjectSidebar(auth.profile, 'reviews');
+  
+  await loadReviews();
+  console.log('✅ Reviews admin loaded as:', currentUserRole);
+}
+
+init();
+</script>
+</body>
+</html>
