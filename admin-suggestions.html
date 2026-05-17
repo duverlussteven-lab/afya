@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Suggestions — AFYA Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="admin-shared.js"></script>
+<style>
+/* ═══ TOKENS ═══ */
+:root{
+  --bg:#FDFCF9; --bg2:#F6F3EE; --bg3:#EEEAE2; --sur:#FFFFFF;
+  --ink:#1D2B3A; --ink2:#3B5068; --ink3:#7A93A8;
+  --sage:#6D8F82; --sage-l:#8BAD9E;
+  --gold:#D4A843; --green:#4A9E6F; --red:#C94F3A;
+  --purple:#9D4FCC; --blue:#3B5068;
+  --border:rgba(109,143,130,.18); --border2:rgba(109,143,130,.3);
+  --shadow:rgba(29,43,58,.07);
+  --disp:'Cormorant Garamond',serif; --ui:'Syne',sans-serif; --body:'DM Sans',sans-serif;
+  --r:16px; --r-sm:8px; --r-lg:20px;
+  --sidebar-w:260px;
+}
+[data-theme="dark"]{
+  --bg:#111A22; --bg2:#162028; --bg3:#1D2B3A; --sur:#1E2C3A;
+  --ink:#F0EDE8; --ink2:#A8BDC8; --ink3:#6B8A9A;
+  --border:rgba(139,173,158,.14);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg2);color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.6;min-height:100vh}
+
+/* ═══ SIDEBAR ═══ */
+.sidebar{position:fixed; top:0; left:0; bottom:0; width:var(--sidebar-w); background:var(--ink); padding:24px 16px; overflow-y:auto; z-index:100; display:flex; flex-direction:column}
+.sidebar-brand{display:flex; align-items:center; gap:10px; padding:8px 12px 24px; border-bottom:1px solid rgba(255,255,255,.08); margin-bottom:16px}
+.sidebar-brand-text{font-family:var(--ui); font-size:12px; font-weight:800; letter-spacing:.18em; color:white}
+.sidebar-brand-badge{font-family:var(--ui); font-size:8px; font-weight:700; letter-spacing:.14em; color:var(--sage-l); background:rgba(139,173,158,.12); padding:3px 8px; border-radius:4px; margin-left:auto}
+.sidebar-section-title{font-family:var(--ui); font-size:9px; font-weight:700; letter-spacing:.22em; text-transform:uppercase; color:rgba(255,255,255,.3); padding:14px 12px 8px}
+.sidebar-link{display:flex; align-items:center; gap:11px; padding:11px 14px; border-radius:8px; cursor:pointer; font-family:var(--ui); font-size:12px; font-weight:600; color:rgba(255,255,255,.55); margin-bottom:2px; transition:all .15s; text-decoration:none}
+.sidebar-link:hover{background:rgba(255,255,255,.05); color:white}
+.sidebar-link.active{background:rgba(109,143,130,.15); color:white}
+.sidebar-icon{font-size:14px; width:18px; text-align:center}
+
+/* ═══ MAIN ═══ */
+.main{margin-left:var(--sidebar-w); padding:32px 40px; min-height:100vh}
+
+/* ═══ HEADER ═══ */
+.admin-header{display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:16px}
+.admin-eye{display:inline-flex; align-items:center; gap:10px; font-family:var(--ui); font-size:9px; font-weight:700; letter-spacing:.32em; text-transform:uppercase; color:var(--sage); margin-bottom:10px}
+.admin-eye::before{content:''; display:block; width:20px; height:1px; background:var(--sage)}
+.admin-title{font-family:var(--disp); font-size:42px; font-weight:300; line-height:1.05; color:var(--ink)}
+.admin-title em{font-style:italic; color:var(--sage)}
+.btn-primary{display:inline-flex; align-items:center; gap:8px; padding:11px 22px; background:var(--ink); color:white; border:none; border-radius:8px; cursor:pointer; font-family:var(--ui); font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; transition:all .2s}
+.btn-primary:hover{background:var(--sage); transform:translateY(-1px)}
+
+/* ═══ STATS ═══ */
+.stats-row{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:20px}
+.stat-card{background:var(--sur); border:1px solid var(--border); border-radius:12px; padding:18px 20px}
+.stat-num{font-family:var(--disp); font-size:32px; font-weight:400; color:var(--ink); margin-bottom:4px}
+.stat-label{font-family:var(--ui); font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--ink3)}
+.stat-card.alert .stat-num{color:var(--gold)}
+.stat-card.success .stat-num{color:var(--green)}
+.stat-card.danger .stat-num{color:var(--red)}
+
+/* ═══ FILTERS ═══ */
+.filters-bar{background:var(--sur); border:1px solid var(--border); border-radius:12px; padding:14px 18px; margin-bottom:18px; display:flex; align-items:center; gap:14px; flex-wrap:wrap}
+.filter-section{display:flex; gap:6px; flex-wrap:wrap; align-items:center}
+.filter-label{font-family:var(--ui); font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--ink3); margin-right:4px}
+.filter-btn{padding:7px 14px; border:1.5px solid var(--border); border-radius:100px; background:transparent; cursor:pointer; font-family:var(--ui); font-size:10px; font-weight:700; letter-spacing:.08em; color:var(--ink2); transition:all .2s}
+.filter-btn.active{background:var(--sage); border-color:var(--sage); color:white}
+.filter-btn .count{background:rgba(255,255,255,.2); margin-left:6px; padding:1px 6px; border-radius:10px; font-size:9px}
+.filter-btn.active .count{background:rgba(255,255,255,.25)}
+.search-input{flex:1; min-width:200px; border:1.5px solid var(--border); border-radius:8px; padding:8px 12px; font-family:var(--ui); font-size:13px; outline:none}
+.search-input:focus{border-color:var(--sage)}
+
+/* ═══ SUGGESTION CARDS ═══ */
+.suggestions-list{display:flex; flex-direction:column; gap:16px}
+.sug-card{background:var(--sur); border:1px solid var(--border); border-radius:14px; padding:24px; position:relative; transition:all .2s}
+.sug-card.pending{border-left:4px solid var(--gold)}
+.sug-card.approved{border-left:4px solid var(--green); opacity:.7}
+.sug-card.rejected{border-left:4px solid var(--red); opacity:.7}
+.sug-card:hover{box-shadow:0 4px 20px var(--shadow)}
+
+.sug-top{display:flex; align-items:flex-start; gap:14px; margin-bottom:14px; flex-wrap:wrap}
+.sug-photo{width:80px; height:80px; border-radius:12px; background:var(--bg2); display:flex; align-items:center; justify-content:center; font-size:32px; flex-shrink:0; background-size:cover; background-position:center; overflow:hidden}
+.sug-info{flex:1; min-width:0}
+.sug-name{font-family:var(--disp); font-size:24px; font-weight:400; color:var(--ink); margin-bottom:4px}
+.sug-type-row{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:6px}
+.sug-type-badge{font-family:var(--ui); font-size:9px; font-weight:700; letter-spacing:.1em; padding:3px 9px; border-radius:100px; text-transform:uppercase}
+.sug-type-resto{background:rgba(212,168,67,.15); color:#A8862A}
+.sug-type-act{background:rgba(109,143,130,.15); color:var(--sage)}
+.sug-status{font-family:var(--ui); font-size:9px; font-weight:700; letter-spacing:.1em; padding:3px 9px; border-radius:100px; text-transform:uppercase}
+.sug-status.pending{background:rgba(212,168,67,.15); color:#A8862A}
+.sug-status.approved{background:rgba(74,158,111,.15); color:var(--green)}
+.sug-status.rejected{background:rgba(201,79,58,.15); color:var(--red)}
+.sug-meta{font-size:11px; color:var(--ink3); font-family:var(--ui); display:flex; gap:10px; flex-wrap:wrap; margin-top:6px}
+.sug-author-tag{display:inline-flex; align-items:center; gap:5px; padding:3px 8px; border-radius:100px; background:var(--bg2); font-size:10px; font-weight:600; color:var(--ink2)}
+.sug-author-tag .role-badge{font-size:8px; padding:1px 5px; border-radius:6px; color:white}
+.sug-author-tag .role-badge.super{background:var(--purple)}
+.sug-author-tag .role-badge.admin{background:var(--blue)}
+.sug-author-tag .role-badge.mod{background:var(--green)}
+
+.sug-desc{font-size:13px; color:var(--ink2); line-height:1.7; margin-bottom:12px}
+.sug-details{display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:10px; padding:14px; background:var(--bg2); border-radius:10px; margin-bottom:12px}
+.sug-detail-item{font-size:12px}
+.sug-detail-label{font-family:var(--ui); font-size:9px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--ink3); margin-bottom:2px}
+.sug-detail-value{color:var(--ink); font-weight:500}
+.sug-notes{background:rgba(212,168,67,.08); border-left:3px solid var(--gold); padding:10px 14px; border-radius:6px; margin-bottom:12px; font-size:12px; color:var(--ink2)}
+.sug-notes-label{font-family:var(--ui); font-size:9px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:#A8862A; margin-bottom:4px}
+.sug-review-note{background:rgba(201,79,58,.08); border-left:3px solid var(--red); padding:10px 14px; border-radius:6px; margin-bottom:12px; font-size:12px; color:var(--ink2)}
+.sug-review-note-label{font-family:var(--ui); font-size:9px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--red); margin-bottom:4px}
+.sug-edited-notice{font-size:11px; color:var(--ink3); font-style:italic; margin-bottom:10px}
+
+.sug-actions{display:flex; gap:8px; margin-top:14px; padding-top:14px; border-top:1px solid var(--border); flex-wrap:wrap}
+.action-btn{display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border:1.5px solid var(--border); border-radius:8px; background:white; cursor:pointer; font-family:var(--ui); font-size:11px; font-weight:700; letter-spacing:.08em; color:var(--ink2); transition:all .15s}
+.action-btn:hover{transform:translateY(-1px); box-shadow:0 2px 8px var(--shadow)}
+.action-btn.approve{border-color:var(--green); color:var(--green)}
+.action-btn.approve:hover{background:var(--green); color:white}
+.action-btn.reject{border-color:var(--red); color:var(--red)}
+.action-btn.reject:hover{background:var(--red); color:white}
+.action-btn.edit{border-color:var(--blue); color:var(--blue)}
+.action-btn.edit:hover{background:var(--blue); color:white}
+.action-btn.delete{border-color:var(--red); color:var(--red)}
+.action-btn.delete:hover{background:var(--red); color:white}
+
+/* ═══ MODAL ═══ */
+.modal-overlay{position:fixed; inset:0; background:rgba(0,0,0,.6); backdrop-filter:blur(4px); z-index:200; display:none; align-items:center; justify-content:center; padding:20px}
+.modal-overlay.open{display:flex}
+.modal-card{background:var(--sur); border-radius:16px; padding:28px; max-width:680px; width:100%; max-height:90vh; overflow-y:auto; box-shadow:0 24px 60px rgba(0,0,0,.2)}
+.modal-card.confirm{max-width:480px}
+.modal-icon{width:54px; height:54px; border-radius:50%; background:rgba(201,79,58,.12); display:flex; align-items:center; justify-content:center; font-size:24px; margin:0 auto 14px}
+.modal-icon.info{background:rgba(109,143,130,.12)}
+.modal-icon.success{background:rgba(74,158,111,.12)}
+.modal-icon.warning{background:rgba(212,168,67,.12)}
+.modal-card h3{font-family:var(--disp); font-size:24px; font-weight:400; color:var(--ink); text-align:center; margin-bottom:8px}
+.modal-card p{text-align:center; color:var(--ink2); font-size:13px; margin-bottom:18px; line-height:1.5}
+.modal-card label{display:block; font-family:var(--ui); font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--ink2); margin-bottom:6px; margin-top:12px}
+.modal-card input, .modal-card select, .modal-card textarea{width:100%; border:1.5px solid var(--border); border-radius:8px; padding:10px 12px; font-family:var(--body); font-size:13px; outline:none; transition:border-color .15s}
+.modal-card input:focus, .modal-card select:focus, .modal-card textarea:focus{border-color:var(--sage)}
+.modal-card textarea{resize:vertical; min-height:80px}
+.modal-grid-2{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+.modal-grid-3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px}
+.modal-actions{display:flex; gap:10px; margin-top:20px}
+.btn{flex:1; padding:11px; border:none; border-radius:8px; font-family:var(--ui); font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; cursor:pointer; transition:all .2s}
+.btn-cancel{background:var(--bg2); color:var(--ink2)}
+.btn-cancel:hover{background:var(--bg3)}
+.btn-confirm{background:var(--red); color:white}
+.btn-confirm:hover{background:#A8402F}
+.btn-confirm.success{background:var(--green)}
+.btn-confirm.success:hover{background:#3D8458}
+.btn-confirm.warning{background:var(--gold); color:white}
+
+.type-selector{display:flex; gap:10px; margin-bottom:16px}
+.type-option{flex:1; padding:16px; border:2px solid var(--border); border-radius:10px; cursor:pointer; text-align:center; transition:all .2s}
+.type-option.active{border-color:var(--sage); background:rgba(109,143,130,.05)}
+.type-option-icon{font-size:32px; margin-bottom:6px}
+.type-option-label{font-family:var(--ui); font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--ink)}
+
+/* ═══ TOAST ═══ */
+.toast{position:fixed; bottom:24px; right:24px; background:var(--ink); color:white; padding:14px 20px; border-radius:10px; font-family:var(--ui); font-size:12px; font-weight:600; box-shadow:0 8px 24px rgba(0,0,0,.2); transform:translateY(100px); opacity:0; transition:all .3s; z-index:300; max-width:380px}
+.toast.show{transform:translateY(0); opacity:1}
+
+/* ═══ LOADING / EMPTY ═══ */
+.loading{text-align:center; padding:80px; color:var(--ink3); font-family:var(--ui); font-size:13px}
+.empty{text-align:center; padding:80px; color:var(--ink3); font-family:var(--ui); font-size:13px; background:var(--sur); border-radius:14px; border:1px solid var(--border)}
+.empty-icon{font-size:48px; margin-bottom:14px; opacity:.4}
+
+@media(max-width:900px){
+  .sidebar{transform:translateX(-100%); transition:transform .25s; z-index:1000}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0; padding:64px 16px 24px}
+  .stats-row{grid-template-columns:1fr 1fr}
+  .admin-title{font-size:32px}
+  .modal-grid-2, .modal-grid-3{grid-template-columns:1fr}
+}
+@media(max-width:560px){
+  .stats-row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div id="sidebarPlaceholder"></div>
+
+<main class="main">
+
+  <div class="admin-header">
+    <div>
+      <div class="admin-eye" id="pageEye">Suggestions</div>
+      <h1 class="admin-title" id="pageTitle">My <em>Suggestions</em></h1>
+    </div>
+    <button class="btn-primary" onclick="openNewSuggestionModal()">💡 New Suggestion</button>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card alert">
+      <div class="stat-num" id="statPending">0</div>
+      <div class="stat-label">Pending</div>
+    </div>
+    <div class="stat-card success">
+      <div class="stat-num" id="statApproved">0</div>
+      <div class="stat-label">Approved</div>
+    </div>
+    <div class="stat-card danger">
+      <div class="stat-num" id="statRejected">0</div>
+      <div class="stat-label">Rejected</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statTotal">0</div>
+      <div class="stat-label">Total</div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-bar">
+    <div class="filter-section">
+      <span class="filter-label">Status:</span>
+      <button class="filter-btn active" onclick="setStatusFilter('all', this)">All <span class="count" id="countAll">0</span></button>
+      <button class="filter-btn" onclick="setStatusFilter('pending', this)">Pending <span class="count" id="countPending">0</span></button>
+      <button class="filter-btn" onclick="setStatusFilter('approved', this)">Approved <span class="count" id="countApprovedFilter">0</span></button>
+      <button class="filter-btn" onclick="setStatusFilter('rejected', this)">Rejected <span class="count" id="countRejected">0</span></button>
+    </div>
+    <div class="filter-section">
+      <span class="filter-label">Type:</span>
+      <button class="filter-btn active" onclick="setTypeFilter('all', this)">All</button>
+      <button class="filter-btn" onclick="setTypeFilter('restaurant', this)">🍽️ Restaurants</button>
+      <button class="filter-btn" onclick="setTypeFilter('activity', this)">🎯 Activities</button>
+    </div>
+    <input type="text" class="search-input" id="searchInput" placeholder="🔍 Search suggestions..." oninput="renderSuggestions()">
+  </div>
+
+  <!-- Liste des suggestions -->
+  <div id="suggestionsContainer">
+    <div class="loading">Loading suggestions…</div>
+  </div>
+</main>
+
+<!-- ═══ MODAL : Créer / Éditer une suggestion ═══ -->
+<div class="modal-overlay" id="formModal" onclick="if(event.target===this)closeFormModal()">
+  <div class="modal-card">
+    <h3 id="formTitle">💡 New Suggestion</h3>
+    <p id="formSubtitle">Suggest a new restaurant or activity for AFYA</p>
+
+    <!-- Type selector -->
+    <div class="type-selector" id="typeSelector">
+      <div class="type-option active" data-type="restaurant" onclick="selectType('restaurant', this)">
+        <div class="type-option-icon">🍽️</div>
+        <div class="type-option-label">Restaurant</div>
+      </div>
+      <div class="type-option" data-type="activity" onclick="selectType('activity', this)">
+        <div class="type-option-icon">🎯</div>
+        <div class="type-option-label">Activity</div>
+      </div>
+    </div>
+
+    <!-- Common fields -->
+    <div class="modal-grid-2">
+      <div>
+        <label>Emoji</label>
+        <input type="text" id="fEmoji" placeholder="🥐" maxlength="2">
+      </div>
+      <div>
+        <label>Name *</label>
+        <input type="text" id="fName" placeholder="Le Petit Bistrot">
+      </div>
+    </div>
+
+    <label>City *</label>
+    <input type="text" id="fCity" placeholder="Paris">
+
+    <label>Description</label>
+    <textarea id="fDescription" placeholder="Brief description of the place..."></textarea>
+
+    <!-- Restaurant specific -->
+    <div id="restaurantFields">
+      <label>Cuisine</label>
+      <select id="fCuisine">
+        <option value="">Select cuisine...</option>
+        <option>French</option><option>Italian</option><option>Japanese</option>
+        <option>American</option><option>Mediterranean</option><option>Asian</option>
+        <option>Indian</option><option>Mexican</option><option>Spanish</option>
+        <option>Greek</option><option>Thai</option><option>Vietnamese</option>
+        <option>Korean</option><option>Other</option>
+      </select>
+      <div class="modal-grid-3">
+        <div>
+          <label>Price Min ($)</label>
+          <input type="number" id="fPriceMin" placeholder="30" min="0">
+        </div>
+        <div>
+          <label>Price Max ($)</label>
+          <input type="number" id="fPriceMax" placeholder="80" min="0">
+        </div>
+        <div>
+          <label>Distance (km)</label>
+          <input type="number" id="fDistance" placeholder="1.5" step="0.1" min="0">
+        </div>
+      </div>
+    </div>
+
+    <!-- Activity specific -->
+    <div id="activityFields" style="display:none">
+      <div class="modal-grid-2">
+        <div>
+          <label>Tag</label>
+          <select id="fTag">
+            <option value="">Select tag...</option>
+            <option>Culture</option><option>Outdoors</option><option>Food</option>
+            <option>Nightlife</option><option>Sports</option><option>Shows</option>
+            <option>Sightseeing</option><option>Wellness</option><option>Shopping</option>
+          </select>
+        </div>
+        <div>
+          <label>Price ($) <span style="font-weight:400;color:var(--ink3)">(0 = Free)</span></label>
+          <input type="number" id="fPrice" placeholder="25" min="0">
+        </div>
+      </div>
+    </div>
+
+    <label>Website URL</label>
+    <input type="url" id="fWebsite" placeholder="https://...">
+
+    <label>Photo URL <span style="font-weight:400;color:var(--ink3)">(optional)</span></label>
+    <input type="url" id="fPhoto" placeholder="https://...">
+
+    <label>Notes for admin <span style="font-weight:400;color:var(--ink3)">(why are you suggesting this?)</span></label>
+    <textarea id="fNotes" placeholder="Found this gem on..."></textarea>
+
+    <div class="modal-actions">
+      <button class="btn btn-cancel" onclick="closeFormModal()">Cancel</button>
+      <button class="btn btn-confirm success" id="submitFormBtn" onclick="submitForm()">💡 Suggest</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL : Confirmation action ═══ -->
+<div class="modal-overlay" id="confirmModal" onclick="if(event.target===this)closeConfirm()">
+  <div class="modal-card confirm">
+    <div class="modal-icon" id="confirmIcon">⚠️</div>
+    <h3 id="confirmTitle">Are you sure?</h3>
+    <p id="confirmMessage">This action cannot be undone.</p>
+    <textarea id="confirmTextarea" placeholder="Add a note (optional)..." style="display:none"></textarea>
+    <div class="modal-actions">
+      <button class="btn btn-cancel" onclick="closeConfirm()">Cancel</button>
+      <button class="btn btn-confirm" id="confirmBtn" onclick="executeAction()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"><span id="toastMsg"></span></div>
+
+<script>
+// ═══ CONFIG ═══
+const SUPABASE_URL = 'https://zryfceystyipimniarst.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_uI4dQX6KFlLcxtxqw52ewA_ujacVkch';  // ⚠️ REMETS TA VRAIE CLÉ
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ═══ STATE ═══
+let allSuggestions = [];
+let currentUserId = null;
+let currentUserRole = null;
+let statusFilter = 'all';
+let typeFilter = 'all';
+let pendingAction = null;
+let editingSuggestionId = null;
+let selectedType = 'restaurant';
+
+// ═══ AUTH ═══
+async function checkAdmin() {
+  return await afyaCheckAdminAccess(sb, ['admin', 'super_admin', 'moderator']);
+}
+
+// ═══ LOAD ═══
+async function loadSuggestions() {
+  const isStaff = ['admin', 'super_admin'].includes(currentUserRole);
+
+  // Si moderator → seulement ses propres suggestions
+  // Si admin/super_admin → toutes
+  let query = sb
+    .from('suggestions')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (!isStaff) {
+    query = query.eq('suggested_by', currentUserId);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error('❌ Error loading suggestions:', error);
+    document.getElementById('suggestionsContainer').innerHTML = `<div class="empty" style="color:var(--red)">Error: ${error.message}</div>`;
+    return;
+  }
+
+  // Charger les profils des auteurs
+  const userIds = [...new Set((data || []).map(s => s.suggested_by).filter(Boolean))];
+  const editorIds = [...new Set((data || []).map(s => s.last_edited_by).filter(Boolean))];
+  const allIds = [...new Set([...userIds, ...editorIds])];
+  
+  let profilesMap = {};
+  if (allIds.length > 0) {
+    const { data: profiles } = await sb
+      .from('profiles')
+      .select('id, first_name, email, role')
+      .in('id', allIds);
+    (profiles || []).forEach(p => { profilesMap[p.id] = p; });
+  }
+
+  allSuggestions = (data || []).map(s => ({
+    ...s,
+    author: profilesMap[s.suggested_by] || null,
+    editor: profilesMap[s.last_edited_by] || null
+  }));
+
+  // Tri : pending d'abord
+  allSuggestions.sort((a, b) => {
+    const order = { pending: 0, approved: 1, rejected: 2 };
+    if (order[a.status] !== order[b.status]) return order[a.status] - order[b.status];
+    return new Date(b.created_at) - new Date(a.created_at);
+  });
+
+  updateStats();
+  renderSuggestions();
+}
+
+// ═══ STATS ═══
+function updateStats() {
+  const total = allSuggestions.length;
+  const pending = allSuggestions.filter(s => s.status === 'pending').length;
+  const approved = allSuggestions.filter(s => s.status === 'approved').length;
+  const rejected = allSuggestions.filter(s => s.status === 'rejected').length;
+
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statPending').textContent = pending;
+  document.getElementById('statApproved').textContent = approved;
+  document.getElementById('statRejected').textContent = rejected;
+  document.getElementById('countAll').textContent = total;
+  document.getElementById('countPending').textContent = pending;
+  document.getElementById('countApprovedFilter').textContent = approved;
+  document.getElementById('countRejected').textContent = rejected;
+}
+
+// ═══ FILTERS ═══
+function setStatusFilter(s, btn) {
+  statusFilter = s;
+  document.querySelectorAll('.filters-bar .filter-section:nth-child(1) .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderSuggestions();
+}
+
+function setTypeFilter(t, btn) {
+  typeFilter = t;
+  document.querySelectorAll('.filters-bar .filter-section:nth-child(2) .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderSuggestions();
+}
+
+// ═══ RENDER ═══
+function renderSuggestions() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  let list = [...allSuggestions];
+
+  if (statusFilter !== 'all') list = list.filter(s => s.status === statusFilter);
+  if (typeFilter !== 'all') list = list.filter(s => s.type === typeFilter);
+  if (search) {
+    list = list.filter(s =>
+      (s.name || '').toLowerCase().includes(search) ||
+      (s.city || '').toLowerCase().includes(search) ||
+      (s.description || '').toLowerCase().includes(search) ||
+      (s.author?.first_name || '').toLowerCase().includes(search)
+    );
+  }
+
+  if (list.length === 0) {
+    document.getElementById('suggestionsContainer').innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">💡</div>
+        <div>No suggestions found.</div>
+        <div style="margin-top:8px;font-size:11px;opacity:.7">Click "New Suggestion" to create one!</div>
+      </div>
+    `;
+    return;
+  }
+
+  document.getElementById('suggestionsContainer').innerHTML = `
+    <div class="suggestions-list">
+      ${list.map(s => suggestionCard(s)).join('')}
+    </div>
+  `;
+}
+
+function suggestionCard(s) {
+  const isStaff = ['admin', 'super_admin'].includes(currentUserRole);
+  const isOwner = s.suggested_by === currentUserId;
+  const isPending = s.status === 'pending';
+
+  const author = s.author;
+  const authorName = author?.first_name || author?.email?.split('@')[0] || 'Unknown';
+  const authorRole = author?.role || 'user';
+  const roleLabel = { super_admin: 'SUPER', admin: 'ADMIN', moderator: 'MOD', user: 'USER' }[authorRole];
+  const roleCls = { super_admin: 'super', admin: 'admin', moderator: 'mod', user: '' }[authorRole];
+
+  const photo = s.photo_url
+    ? `<div class="sug-photo" style="background-image:url('${s.photo_url}')"></div>`
+    : `<div class="sug-photo">${s.emoji || (s.type === 'restaurant' ? '🍽️' : '🎯')}</div>`;
+
+  const date = new Date(s.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+  // Details selon type
+  let detailsHtml = '';
+  if (s.type === 'restaurant') {
+    detailsHtml = `
+      <div class="sug-details">
+        ${s.cuisine ? `<div class="sug-detail-item"><div class="sug-detail-label">Cuisine</div><div class="sug-detail-value">${escapeHtml(s.cuisine)}</div></div>` : ''}
+        ${(s.price_min || s.price_max) ? `<div class="sug-detail-item"><div class="sug-detail-label">Price range</div><div class="sug-detail-value">$${s.price_min || '?'} – $${s.price_max || '?'}</div></div>` : ''}
+        ${s.distance_km ? `<div class="sug-detail-item"><div class="sug-detail-label">Distance</div><div class="sug-detail-value">${s.distance_km} km</div></div>` : ''}
+        ${s.website_url ? `<div class="sug-detail-item"><div class="sug-detail-label">Website</div><div class="sug-detail-value"><a href="${s.website_url}" target="_blank" style="color:var(--sage)">View ↗</a></div></div>` : ''}
+      </div>
+    `;
+  } else {
+    detailsHtml = `
+      <div class="sug-details">
+        ${s.tag ? `<div class="sug-detail-item"><div class="sug-detail-label">Tag</div><div class="sug-detail-value">${escapeHtml(s.tag)}</div></div>` : ''}
+        ${s.price !== null && s.price !== undefined ? `<div class="sug-detail-item"><div class="sug-detail-label">Price</div><div class="sug-detail-value">${s.price == 0 ? 'Free 🆓' : '$' + s.price}</div></div>` : ''}
+        ${s.website_url ? `<div class="sug-detail-item"><div class="sug-detail-label">Website</div><div class="sug-detail-value"><a href="${s.website_url}" target="_blank" style="color:var(--sage)">View ↗</a></div></div>` : ''}
+      </div>
+    `;
+  }
+
+  // Notes du moderator
+  const notesHtml = s.notes ? `
+    <div class="sug-notes">
+      <div class="sug-notes-label">📝 Note from ${authorName}</div>
+      <div>${escapeHtml(s.notes)}</div>
+    </div>
+  ` : '';
+
+  // Note de rejet/approbation
+  const reviewNoteHtml = (s.status !== 'pending' && s.review_note) ? `
+    <div class="sug-review-note">
+      <div class="sug-review-note-label">${s.status === 'approved' ? '✅ Admin note' : '❌ Rejection reason'}</div>
+      <div>${escapeHtml(s.review_note)}</div>
+    </div>
+  ` : '';
+
+  // Notice d'édition par admin
+  const editedNotice = s.last_edited_by && s.editor ? `
+    <div class="sug-edited-notice">✏️ Edited by ${s.editor.first_name || 'Admin'} on ${new Date(s.last_edited_at).toLocaleDateString()}</div>
+  ` : '';
+
+  // Status
+  const statusLabels = { pending: '⏳ Pending', approved: '✅ Approved', rejected: '❌ Rejected' };
+
+  // Actions
+  let actionsHtml = '';
+  if (isPending) {
+    if (isStaff) {
+      actionsHtml = `
+        <button class="action-btn edit" onclick="openEditModal('${s.id}')">✏️ Edit</button>
+        <button class="action-btn approve" onclick="confirmAction('approve','${s.id}')">✅ Approve</button>
+        <button class="action-btn reject" onclick="confirmAction('reject','${s.id}')">❌ Reject</button>
+      `;
+    } else if (isOwner) {
+      actionsHtml = `
+        <button class="action-btn edit" onclick="openEditModal('${s.id}')">✏️ Edit</button>
+        <button class="action-btn delete" onclick="confirmAction('delete','${s.id}')">🗑️ Delete</button>
+      `;
+    }
+  } else if (isStaff) {
+    actionsHtml = `<button class="action-btn delete" onclick="confirmAction('delete','${s.id}')">🗑️ Delete</button>`;
+  }
+
+  return `
+    <div class="sug-card ${s.status}">
+      <div class="sug-top">
+        ${photo}
+        <div class="sug-info">
+          <div class="sug-type-row">
+            <span class="sug-type-badge ${s.type === 'restaurant' ? 'sug-type-resto' : 'sug-type-act'}">${s.type === 'restaurant' ? '🍽️ Restaurant' : '🎯 Activity'}</span>
+            <span class="sug-status ${s.status}">${statusLabels[s.status]}</span>
+          </div>
+          <div class="sug-name">${escapeHtml(s.name)}</div>
+          <div class="sug-meta">
+            <span>📍 ${escapeHtml(s.city)}</span>
+            <span>📅 ${date}</span>
+            <span class="sug-author-tag">
+              By ${escapeHtml(authorName)}
+              ${roleCls ? `<span class="role-badge ${roleCls}">${roleLabel}</span>` : ''}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      ${editedNotice}
+      ${s.description ? `<div class="sug-desc">${escapeHtml(s.description)}</div>` : ''}
+      ${detailsHtml}
+      ${notesHtml}
+      ${reviewNoteHtml}
+
+      ${actionsHtml ? `<div class="sug-actions">${actionsHtml}</div>` : ''}
+    </div>
+  `;
+}
+
+// ═══ FORM MODAL ═══
+function openNewSuggestionModal() {
+  editingSuggestionId = null;
+  selectedType = 'restaurant';
+  document.getElementById('formTitle').textContent = '💡 New Suggestion';
+  document.getElementById('formSubtitle').textContent = 'Suggest a new restaurant or activity for AFYA';
+  document.getElementById('submitFormBtn').textContent = '💡 Suggest';
+  document.getElementById('typeSelector').style.display = 'flex';
+
+  // Reset fields
+  ['fEmoji','fName','fCity','fDescription','fCuisine','fPriceMin','fPriceMax','fDistance','fTag','fPrice','fWebsite','fPhoto','fNotes'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+
+  selectType('restaurant', document.querySelector('[data-type="restaurant"]'));
+  document.getElementById('formModal').classList.add('open');
+}
+
+function openEditModal(suggestionId) {
+  const s = allSuggestions.find(x => x.id === suggestionId);
+  if (!s) return;
+
+  editingSuggestionId = suggestionId;
+  selectedType = s.type;
+  document.getElementById('formTitle').textContent = '✏️ Edit Suggestion';
+  document.getElementById('formSubtitle').textContent = 'Update the suggestion details';
+  document.getElementById('submitFormBtn').textContent = '💾 Save changes';
+  document.getElementById('typeSelector').style.display = 'none'; // pas de changement de type
+
+  // Remplir
+  document.getElementById('fEmoji').value = s.emoji || '';
+  document.getElementById('fName').value = s.name || '';
+  document.getElementById('fCity').value = s.city || '';
+  document.getElementById('fDescription').value = s.description || '';
+  document.getElementById('fWebsite').value = s.website_url || '';
+  document.getElementById('fPhoto').value = s.photo_url || '';
+  document.getElementById('fNotes').value = s.notes || '';
+
+  if (s.type === 'restaurant') {
+    document.getElementById('restaurantFields').style.display = 'block';
+    document.getElementById('activityFields').style.display = 'none';
+    document.getElementById('fCuisine').value = s.cuisine || '';
+    document.getElementById('fPriceMin').value = s.price_min || '';
+    document.getElementById('fPriceMax').value = s.price_max || '';
+    document.getElementById('fDistance').value = s.distance_km || '';
+  } else {
+    document.getElementById('restaurantFields').style.display = 'none';
+    document.getElementById('activityFields').style.display = 'block';
+    document.getElementById('fTag').value = s.tag || '';
+    document.getElementById('fPrice').value = s.price ?? '';
+  }
+
+  document.getElementById('formModal').classList.add('open');
+}
+
+function closeFormModal() {
+  document.getElementById('formModal').classList.remove('open');
+  editingSuggestionId = null;
+}
+
+function selectType(type, el) {
+  selectedType = type;
+  document.querySelectorAll('.type-option').forEach(o => o.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('restaurantFields').style.display = type === 'restaurant' ? 'block' : 'none';
+  document.getElementById('activityFields').style.display = type === 'activity' ? 'block' : 'none';
+}
+
+async function submitForm() {
+  const name = document.getElementById('fName').value.trim();
+  const city = document.getElementById('fCity').value.trim();
+  if (!name || !city) {
+    toast('⚠️ Name and city are required');
+    return;
+  }
+
+  const data = {
+    type: selectedType,
+    emoji: document.getElementById('fEmoji').value.trim() || null,
+    name,
+    city,
+    description: document.getElementById('fDescription').value.trim() || null,
+    website_url: document.getElementById('fWebsite').value.trim() || null,
+    photo_url: document.getElementById('fPhoto').value.trim() || null,
+    notes: document.getElementById('fNotes').value.trim() || null
+  };
+
+  if (selectedType === 'restaurant') {
+    data.cuisine = document.getElementById('fCuisine').value || null;
+    data.price_min = parseFloat(document.getElementById('fPriceMin').value) || null;
+    data.price_max = parseFloat(document.getElementById('fPriceMax').value) || null;
+    data.distance_km = parseFloat(document.getElementById('fDistance').value) || null;
+  } else {
+    data.tag = document.getElementById('fTag').value || null;
+    const p = document.getElementById('fPrice').value;
+    data.price = p === '' ? null : parseFloat(p);
+  }
+
+  const btn = document.getElementById('submitFormBtn');
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+
+  let result;
+  if (editingSuggestionId) {
+    // Edit
+    result = await sb.from('suggestions').update(data).eq('id', editingSuggestionId);
+  } else {
+    // Create
+    data.suggested_by = currentUserId;
+    data.status = 'pending';
+    result = await sb.from('suggestions').insert(data);
+  }
+
+  btn.disabled = false;
+  btn.textContent = editingSuggestionId ? '💾 Save changes' : '💡 Suggest';
+
+  if (result.error) {
+    toast(`❌ Error: ${result.error.message}`);
+    return;
+  }
+
+  toast(editingSuggestionId ? '✅ Suggestion updated' : '✅ Suggestion submitted');
+  closeFormModal();
+  await loadSuggestions();
+}
+
+// ═══ CONFIRM ACTIONS ═══
+function confirmAction(type, suggestionId) {
+  pendingAction = { type, suggestionId };
+  const icon = document.getElementById('confirmIcon');
+  const title = document.getElementById('confirmTitle');
+  const message = document.getElementById('confirmMessage');
+  const btn = document.getElementById('confirmBtn');
+  const textarea = document.getElementById('confirmTextarea');
+  textarea.style.display = 'none';
+  textarea.value = '';
+
+  const s = allSuggestions.find(x => x.id === suggestionId);
+  if (!s) return;
+
+  const configs = {
+    approve: { icon: '✅', iconCls: 'success', t: 'Approve and publish?', m: `Approve "${s.name}"? It will be automatically added to ${s.type === 'restaurant' ? 'restaurants' : 'activities'} and ${s.author?.first_name || 'the author'} will be notified.`, btn: 'Approve & Publish', btnCls: 'success', textarea: true, placeholder: 'Optional note to the author...' },
+    reject: { icon: '❌', iconCls: '', t: 'Reject this suggestion?', m: `Reject "${s.name}"? Please explain why so the author can improve.`, btn: 'Reject', btnCls: '', textarea: true, placeholder: 'Reason for rejection (required, will be sent to author)...', textareaRequired: true },
+    delete: { icon: '🗑️', iconCls: '', t: 'Delete this suggestion?', m: `Permanently delete "${s.name}"? This cannot be undone.`, btn: 'Delete', btnCls: '' }
+  };
+
+  const c = configs[type];
+  if (!c) return;
+
+  icon.textContent = c.icon;
+  icon.className = 'modal-icon ' + c.iconCls;
+  title.textContent = c.t;
+  message.textContent = c.m;
+  btn.textContent = c.btn;
+  btn.className = 'btn btn-confirm ' + (c.btnCls || '');
+
+  if (c.textarea) {
+    textarea.style.display = 'block';
+    textarea.placeholder = c.placeholder;
+    pendingAction.textareaRequired = c.textareaRequired;
+  }
+
+  document.getElementById('confirmModal').classList.add('open');
+}
+
+function closeConfirm() {
+  document.getElementById('confirmModal').classList.remove('open');
+  pendingAction = null;
+}
+
+async function executeAction() {
+  if (!pendingAction) return;
+  const { type, suggestionId, textareaRequired } = pendingAction;
+  const note = document.getElementById('confirmTextarea').value.trim();
+  const btn = document.getElementById('confirmBtn');
+
+  if (textareaRequired && !note) {
+    toast('⚠️ Please provide a reason');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Processing...';
+
+  const s = allSuggestions.find(x => x.id === suggestionId);
+
+  if (type === 'approve') {
+    // 1) Créer l'entrée dans restaurants ou activities
+    let recordId = null;
+    if (s.type === 'restaurant') {
+      const restData = {
+        emoji: s.emoji || '🍽️',
+        name: s.name,
+        cuisine: s.cuisine || 'Other',
+        rating: 4.5,
+        reviews_count: 0,
+        distance_km: s.distance_km || 0,
+        price_min: s.price_min || 0,
+        price_max: s.price_max || 0,
+        city: s.city,
+        bg_color: '#E8DDD4',
+        photo_url: s.photo_url,
+        website_url: s.website_url
+      };
+      const { data: newR, error: restErr } = await sb.from('restaurants').insert(restData).select().single();
+      if (restErr) { toast(`❌ Error creating restaurant: ${restErr.message}`); btn.disabled = false; closeConfirm(); return; }
+      recordId = newR?.id;
+    } else {
+      const actData = {
+        emoji: s.emoji || '🎯',
+        name: s.name,
+        description: s.description || '',
+        tag: s.tag || 'Culture',
+        price: s.price ?? 0,
+        rating: 4.5,
+        reviews_count: 0,
+        city: s.city,
+        bg_color: '#E8E0D4',
+        photo_url: s.photo_url,
+        website_url: s.website_url
+      };
+      const { data: newA, error: actErr } = await sb.from('activities').insert(actData).select().single();
+      if (actErr) { toast(`❌ Error creating activity: ${actErr.message}`); btn.disabled = false; closeConfirm(); return; }
+      recordId = newA?.id;
+    }
+
+    // 2) Marquer la suggestion comme approved
+    const updateData = {
+      status: 'approved',
+      reviewed_by: currentUserId,
+      reviewed_at: new Date().toISOString(),
+      review_note: note || null,
+      created_record_id: recordId
+    };
+    const { error: updErr } = await sb.from('suggestions').update(updateData).eq('id', suggestionId);
+    if (updErr) {
+      toast(`⚠️ Created but failed to mark suggestion: ${updErr.message}`);
+    } else {
+      toast(`✅ "${s.name}" published to ${s.type}s!`);
+    }
+
+  } else if (type === 'reject') {
+    const updateData = {
+      status: 'rejected',
+      reviewed_by: currentUserId,
+      reviewed_at: new Date().toISOString(),
+      review_note: note
+    };
+    const { error } = await sb.from('suggestions').update(updateData).eq('id', suggestionId);
+    if (error) { toast(`❌ Error: ${error.message}`); }
+    else { toast('❌ Suggestion rejected'); }
+
+  } else if (type === 'delete') {
+    const { error } = await sb.from('suggestions').delete().eq('id', suggestionId);
+    if (error) { toast(`❌ Error: ${error.message}`); }
+    else { toast('🗑️ Suggestion deleted'); }
+  }
+
+  btn.disabled = false;
+  closeConfirm();
+  await loadSuggestions();
+}
+
+// ═══ UTILS ═══
+function escapeHtml(text) {
+  if (!text && text !== 0) return '';
+  const div = document.createElement('div');
+  div.textContent = String(text);
+  return div.innerHTML;
+}
+
+function toast(msg) {
+  document.getElementById('toastMsg').textContent = msg;
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// ═══ INIT ═══
+async function init() {
+  const auth = await checkAdmin();
+  if (!auth) return;
+
+  currentUserId = auth.user.id;
+  currentUserRole = auth.profile.role;
+
+  afyaInjectSidebar(auth.profile, 'suggestions');
+
+  // Adapte le titre selon le rôle
+  const isStaff = ['admin', 'super_admin'].includes(currentUserRole);
+  if (isStaff) {
+    document.getElementById('pageEye').textContent = 'Review & Approve';
+    document.getElementById('pageTitle').innerHTML = 'Community <em>Suggestions</em>';
+  } else {
+    document.getElementById('pageEye').textContent = 'Your contributions';
+    document.getElementById('pageTitle').innerHTML = 'My <em>Suggestions</em>';
+  }
+
+  await loadSuggestions();
+  console.log('✅ Suggestions admin loaded as:', currentUserRole);
+}
+
+init();
+</script>
+</body>
+</html>

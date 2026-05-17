@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reports — AFYA Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="admin-shared.js"></script>
+<style>
+:root{
+  --bg:#FDFCF9; --bg2:#F6F3EE; --bg3:#EEEAE2; --sur:#FFFFFF;
+  --ink:#1D2B3A; --ink2:#3B5068; --ink3:#7A93A8;
+  --sage:#6D8F82; --sage-l:#8BAD9E;
+  --gold:#D4A843; --green:#4A9E6F; --red:#C94F3A;
+  --purple:#9D4FCC; --blue:#3B5068;
+  --border:rgba(109,143,130,.18);
+  --shadow:rgba(29,43,58,.07);
+  --disp:'Cormorant Garamond',serif; --ui:'Syne',sans-serif; --body:'DM Sans',sans-serif;
+  --sidebar-w:260px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg2);color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.6;min-height:100vh}
+
+/* Sidebar identique aux autres pages */
+.sidebar{position:fixed; top:0; left:0; bottom:0; width:var(--sidebar-w); background:var(--ink); padding:24px 16px; overflow-y:auto; z-index:100; display:flex; flex-direction:column}
+.sidebar-brand{display:flex; align-items:center; gap:10px; padding:8px 12px 24px; border-bottom:1px solid rgba(255,255,255,.08); margin-bottom:16px}
+.sidebar-brand-text{font-family:var(--ui); font-size:12px; font-weight:800; letter-spacing:.18em; color:white}
+.sidebar-brand-badge{font-family:var(--ui); font-size:8px; font-weight:700; letter-spacing:.14em; color:var(--sage-l); background:rgba(139,173,158,.12); padding:3px 8px; border-radius:4px; margin-left:auto}
+.sidebar-section-title{font-family:var(--ui); font-size:9px; font-weight:700; letter-spacing:.22em; text-transform:uppercase; color:rgba(255,255,255,.3); padding:14px 12px 8px}
+.sidebar-link{display:flex; align-items:center; gap:11px; padding:11px 14px; border-radius:8px; cursor:pointer; font-family:var(--ui); font-size:12px; font-weight:600; color:rgba(255,255,255,.55); margin-bottom:2px; transition:all .15s; text-decoration:none}
+.sidebar-link:hover{background:rgba(255,255,255,.05); color:white}
+.sidebar-link.active{background:rgba(109,143,130,.15); color:white}
+.sidebar-icon{font-size:14px; width:18px; text-align:center}
+
+.main{margin-left:var(--sidebar-w); padding:32px 40px; min-height:100vh}
+
+/* Header */
+.admin-header{margin-bottom:24px}
+.admin-eye{display:inline-flex; align-items:center; gap:10px; font-family:var(--ui); font-size:9px; font-weight:700; letter-spacing:.32em; text-transform:uppercase; color:var(--sage); margin-bottom:10px}
+.admin-eye::before{content:''; display:block; width:20px; height:1px; background:var(--sage)}
+.admin-title{font-family:var(--disp); font-size:42px; font-weight:300; line-height:1.05; color:var(--ink)}
+.admin-title em{font-style:italic; color:var(--sage)}
+
+/* Stats */
+.stats-row{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:20px}
+.stat-card{background:var(--sur); border:1px solid var(--border); border-radius:12px; padding:18px 20px}
+.stat-num{font-family:var(--disp); font-size:32px; font-weight:400; color:var(--ink); margin-bottom:4px}
+.stat-label{font-family:var(--ui); font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--ink3)}
+.stat-card.danger .stat-num{color:var(--red)}
+.stat-card.success .stat-num{color:var(--green)}
+.stat-card.warning .stat-num{color:var(--gold)}
+
+/* Filters */
+.filters-bar{background:var(--sur); border:1px solid var(--border); border-radius:12px; padding:14px 18px; margin-bottom:18px; display:flex; align-items:center; gap:14px; flex-wrap:wrap}
+.filter-section{display:flex; gap:6px; flex-wrap:wrap; align-items:center}
+.filter-label{font-family:var(--ui); font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--ink3); margin-right:4px}
+.filter-btn{padding:7px 14px; border:1.5px solid var(--border); border-radius:100px; background:transparent; cursor:pointer; font-family:var(--ui); font-size:10px; font-weight:700; letter-spacing:.08em; color:var(--ink2); transition:all .2s}
+.filter-btn.active{background:var(--sage); border-color:var(--sage); color:white}
+.filter-btn .count{background:rgba(255,255,255,.2); margin-left:6px; padding:1px 6px; border-radius:10px; font-size:9px}
+.filter-btn.active .count{background:rgba(255,255,255,.25)}
+
+/* Report cards */
+.reports-list{display:flex; flex-direction:column; gap:16px}
+.report-card{background:var(--sur); border:1px solid var(--border); border-radius:14px; padding:24px; position:relative; transition:all .2s}
+.report-card.pending{border-left:4px solid var(--red)}
+.report-card.resolved{border-left:4px solid var(--green); opacity:.75}
+.report-card.dismissed{border-left:4px solid var(--ink3); opacity:.6}
+
+.report-header{display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:14px; flex-wrap:wrap; gap:10px}
+.report-meta-left{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+.report-status{font-family:var(--ui); font-size:10px; font-weight:700; letter-spacing:.12em; padding:4px 10px; border-radius:100px; text-transform:uppercase}
+.report-status.pending{background:rgba(201,79,58,.15); color:var(--red)}
+.report-status.resolved{background:rgba(74,158,111,.15); color:var(--green)}
+.report-status.dismissed{background:rgba(122,147,168,.15); color:var(--ink3)}
+.report-date{font-family:var(--ui); font-size:11px; color:var(--ink3)}
+.reporter-info{display:flex; align-items:center; gap:8px; padding:5px 12px; background:var(--bg2); border-radius:100px; font-family:var(--ui); font-size:11px; font-weight:600; color:var(--ink2)}
+.role-badge{font-family:var(--ui); font-size:8px; font-weight:700; letter-spacing:.1em; padding:2px 6px; border-radius:4px; color:white}
+.role-badge.super{background:var(--purple)}
+.role-badge.admin{background:var(--blue)}
+.role-badge.mod{background:var(--green)}
+
+.report-reason{background:rgba(201,79,58,.05); border-left:3px solid var(--red); padding:12px 14px; border-radius:6px; margin-bottom:14px}
+.report-reason-label{font-family:var(--ui); font-size:9px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--red); margin-bottom:4px}
+.report-reason-text{font-size:13px; color:var(--ink); line-height:1.6}
+
+.review-preview{background:var(--bg2); border-radius:10px; padding:16px; margin-bottom:14px}
+.review-preview-label{font-family:var(--ui); font-size:9px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--ink3); margin-bottom:10px}
+.review-preview-content{display:flex; gap:12px; align-items:flex-start}
+.preview-avatar{width:36px; height:36px; border-radius:50%; background:var(--sage); color:white; display:flex; align-items:center; justify-content:center; font-family:var(--ui); font-weight:700; font-size:13px; flex-shrink:0; background-size:cover; background-position:center}
+.preview-info{flex:1; min-width:0}
+.preview-author{font-family:var(--ui); font-size:12px; font-weight:700; color:var(--ink)}
+.preview-stars{display:flex; gap:2px; margin:4px 0}
+.preview-star{color:var(--gold); font-size:11px}
+.preview-star.e{color:rgba(109,143,130,.3)}
+.preview-title{font-family:var(--ui); font-size:13px; font-weight:700; color:var(--ink); margin:6px 0 4px}
+.preview-body{font-size:12px; color:var(--ink2); line-height:1.6}
+.preview-deleted{color:var(--red); font-style:italic; font-size:12px}
+
+.resolution-note{background:rgba(74,158,111,.05); border-left:3px solid var(--green); padding:10px 14px; border-radius:6px; margin-bottom:14px}
+.resolution-note.dismissed{background:rgba(122,147,168,.05); border-left-color:var(--ink3)}
+.resolution-note-label{font-family:var(--ui); font-size:9px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--green); margin-bottom:4px}
+.resolution-note.dismissed .resolution-note-label{color:var(--ink3)}
+.resolved-by{font-family:var(--ui); font-size:11px; color:var(--ink3); margin-top:6px}
+
+.actions-row{display:flex; gap:8px; margin-top:14px; padding-top:14px; border-top:1px solid var(--border); flex-wrap:wrap}
+.action-btn{display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border:1.5px solid var(--border); border-radius:8px; background:white; cursor:pointer; font-family:var(--ui); font-size:11px; font-weight:700; letter-spacing:.08em; color:var(--ink2); transition:all .15s}
+.action-btn:hover{transform:translateY(-1px); box-shadow:0 2px 8px var(--shadow)}
+.action-btn.resolve{border-color:var(--green); color:var(--green)}
+.action-btn.resolve:hover{background:var(--green); color:white}
+.action-btn.dismiss{border-color:var(--ink3); color:var(--ink3)}
+.action-btn.dismiss:hover{background:var(--ink3); color:white}
+.action-btn.delete{border-color:var(--red); color:var(--red)}
+.action-btn.delete:hover{background:var(--red); color:white}
+.action-btn.close{border-color:var(--gold); color:#A8862A}
+.action-btn.close:hover{background:var(--gold); color:white}
+
+/* Modal */
+.modal-overlay{position:fixed; inset:0; background:rgba(0,0,0,.6); backdrop-filter:blur(4px); z-index:200; display:none; align-items:center; justify-content:center; padding:20px}
+.modal-overlay.open{display:flex}
+.modal-card{background:var(--sur); border-radius:16px; padding:28px; max-width:480px; width:100%; box-shadow:0 24px 60px rgba(0,0,0,.2)}
+.modal-icon{width:54px; height:54px; border-radius:50%; background:rgba(201,79,58,.12); display:flex; align-items:center; justify-content:center; font-size:24px; margin:0 auto 14px}
+.modal-icon.success{background:rgba(74,158,111,.12)}
+.modal-icon.info{background:rgba(109,143,130,.12)}
+.modal-card h3{font-family:var(--disp); font-size:22px; font-weight:400; color:var(--ink); text-align:center; margin-bottom:8px}
+.modal-card p{text-align:center; color:var(--ink2); font-size:13px; margin-bottom:18px; line-height:1.5}
+.modal-card textarea{width:100%; border:1.5px solid var(--border); border-radius:8px; padding:10px 12px; font-family:var(--body); font-size:13px; resize:vertical; min-height:80px; margin-bottom:14px; outline:none}
+.modal-card textarea:focus{border-color:var(--sage)}
+.modal-actions{display:flex; gap:10px}
+.btn{flex:1; padding:11px; border:none; border-radius:8px; font-family:var(--ui); font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; cursor:pointer; transition:all .2s}
+.btn-cancel{background:var(--bg2); color:var(--ink2)}
+.btn-cancel:hover{background:var(--bg3)}
+.btn-confirm{background:var(--red); color:white}
+.btn-confirm:hover{background:#A8402F}
+.btn-confirm.success{background:var(--green)}
+.btn-confirm.success:hover{background:#3D8458}
+
+/* Toast & Empty */
+.toast{position:fixed; bottom:24px; right:24px; background:var(--ink); color:white; padding:14px 20px; border-radius:10px; font-family:var(--ui); font-size:12px; font-weight:600; box-shadow:0 8px 24px rgba(0,0,0,.2); transform:translateY(100px); opacity:0; transition:all .3s; z-index:300}
+.toast.show{transform:translateY(0); opacity:1}
+.loading{text-align:center; padding:80px; color:var(--ink3); font-family:var(--ui); font-size:13px}
+.empty{text-align:center; padding:80px; color:var(--ink3); font-family:var(--ui); font-size:13px; background:var(--sur); border-radius:14px; border:1px solid var(--border)}
+.empty-icon{font-size:48px; margin-bottom:14px; opacity:.4}
+
+@media(max-width:900px){
+  .sidebar{transform:translateX(-100%); transition:transform .25s; z-index:1000}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0; padding:64px 16px 24px}
+  .stats-row{grid-template-columns:1fr 1fr}
+  .admin-title{font-size:32px}
+}
+</style>
+</head>
+<body>
+
+<div id="sidebarPlaceholder"></div>
+
+<main class="main">
+
+  <div class="admin-header">
+    <div class="admin-eye" id="pageEye">Moderation</div>
+    <h1 class="admin-title" id="pageTitle">Reports <em>Center</em></h1>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card danger">
+      <div class="stat-num" id="statPending">0</div>
+      <div class="stat-label">Pending</div>
+    </div>
+    <div class="stat-card success">
+      <div class="stat-num" id="statResolved">0</div>
+      <div class="stat-label">Resolved</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statDismissed">0</div>
+      <div class="stat-label">Dismissed</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statTotal">0</div>
+      <div class="stat-label">Total</div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-bar">
+    <div class="filter-section">
+      <span class="filter-label">Status:</span>
+      <button class="filter-btn active" onclick="setStatusFilter('all', this)">All <span class="count" id="countAll">0</span></button>
+      <button class="filter-btn" onclick="setStatusFilter('pending', this)">Pending <span class="count" id="countPending">0</span></button>
+      <button class="filter-btn" onclick="setStatusFilter('resolved', this)">Resolved <span class="count" id="countResolved">0</span></button>
+      <button class="filter-btn" onclick="setStatusFilter('dismissed', this)">Dismissed <span class="count" id="countDismissed">0</span></button>
+    </div>
+  </div>
+
+  <!-- Reports list -->
+  <div id="reportsContainer">
+    <div class="loading">Loading reports…</div>
+  </div>
+</main>
+
+<!-- Modal de confirmation -->
+<div class="modal-overlay" id="confirmModal" onclick="if(event.target===this)closeConfirm()">
+  <div class="modal-card">
+    <div class="modal-icon" id="modalIcon">⚠️</div>
+    <h3 id="modalTitle">Are you sure?</h3>
+    <p id="modalMessage">This action cannot be undone.</p>
+    <textarea id="modalTextarea" placeholder="Add a note..."></textarea>
+    <div class="modal-actions">
+      <button class="btn btn-cancel" onclick="closeConfirm()">Cancel</button>
+      <button class="btn btn-confirm" id="confirmBtn" onclick="executeAction()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><span id="toastMsg"></span></div>
+
+<script>
+const SUPABASE_URL = 'https://zryfceystyipimniarst.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_uI4dQX6KFlLcxtxqw52ewA_ujacVkch';  // ⚠️ REMETS TA VRAIE CLÉ
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let allReports = [];
+let allReviews = []; // pour afficher les previews
+let allProfiles = {}; // map id -> profile
+let currentUserId = null;
+let currentUserRole = null;
+let statusFilter = 'all';
+let pendingAction = null;
+
+async function checkAdmin() {
+  return await afyaCheckAdminAccess(sb, ['admin', 'super_admin', 'moderator']);
+}
+
+// ═══ AUDIT LOG ═══
+async function logAction(actionType, actionCategory, targetType, targetId, targetName, description, note) {
+  try {
+    await sb.from('audit_log').insert({
+      actor_id: currentUserId,
+      actor_role: currentUserRole,
+      action_type: actionType,
+      action_category: actionCategory,
+      target_type: targetType,
+      target_id: targetId,
+      target_name: targetName,
+      description: description,
+      note: note || null
+    });
+  } catch (e) {
+    console.error('Audit log failed:', e);
+  }
+}
+
+// ═══ LOAD ═══
+async function loadReports() {
+  const isStaff = ['admin', 'super_admin'].includes(currentUserRole);
+
+  let query = sb
+    .from('review_reports')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (!isStaff) {
+    // Moderator voit seulement ses propres reports
+    query = query.eq('reporter_id', currentUserId);
+  }
+
+  const { data: reports, error } = await query;
+
+  if (error) {
+    console.error('❌ Error loading reports:', error);
+    document.getElementById('reportsContainer').innerHTML = `<div class="empty" style="color:var(--red)">Error: ${error.message}</div>`;
+    return;
+  }
+
+  // Charger les reviews concernées
+  const reviewIds = [...new Set((reports || []).map(r => r.review_id).filter(Boolean))];
+  let reviewsMap = {};
+  if (reviewIds.length > 0) {
+    const { data: reviews } = await sb
+      .from('reviews')
+      .select('*')
+      .in('id', reviewIds);
+    (reviews || []).forEach(r => { reviewsMap[r.id] = r; });
+  }
+
+  // Charger les profils (reporters + resolvers + reviewers)
+  const profileIds = [...new Set([
+    ...(reports || []).map(r => r.reporter_id),
+    ...(reports || []).map(r => r.resolved_by),
+    ...Object.values(reviewsMap).map(r => r.user_id)
+  ].filter(Boolean))];
+
+  if (profileIds.length > 0) {
+    const { data: profiles } = await sb
+      .from('profiles')
+      .select('id, first_name, email, role, avatar_url')
+      .in('id', profileIds);
+    (profiles || []).forEach(p => { allProfiles[p.id] = p; });
+  }
+
+  allReports = (reports || []).map(r => ({
+    ...r,
+    review: reviewsMap[r.review_id] || null
+  }));
+
+  // Tri : pending d'abord
+  allReports.sort((a, b) => {
+    const order = { pending: 0, resolved: 1, dismissed: 2 };
+    if (order[a.status] !== order[b.status]) return order[a.status] - order[b.status];
+    return new Date(b.created_at) - new Date(a.created_at);
+  });
+
+  updateStats();
+  renderReports();
+}
+
+function updateStats() {
+  const total = allReports.length;
+  const pending = allReports.filter(r => r.status === 'pending').length;
+  const resolved = allReports.filter(r => r.status === 'resolved').length;
+  const dismissed = allReports.filter(r => r.status === 'dismissed').length;
+
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statPending').textContent = pending;
+  document.getElementById('statResolved').textContent = resolved;
+  document.getElementById('statDismissed').textContent = dismissed;
+  document.getElementById('countAll').textContent = total;
+  document.getElementById('countPending').textContent = pending;
+  document.getElementById('countResolved').textContent = resolved;
+  document.getElementById('countDismissed').textContent = dismissed;
+}
+
+function setStatusFilter(s, btn) {
+  statusFilter = s;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderReports();
+}
+
+function renderReports() {
+  let list = [...allReports];
+  if (statusFilter !== 'all') list = list.filter(r => r.status === statusFilter);
+
+  if (list.length === 0) {
+    document.getElementById('reportsContainer').innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">🚨</div>
+        <div>No reports found.</div>
+      </div>
+    `;
+    return;
+  }
+
+  document.getElementById('reportsContainer').innerHTML = `
+    <div class="reports-list">
+      ${list.map(r => reportCard(r)).join('')}
+    </div>
+  `;
+}
+
+function reportCard(r) {
+  const isStaff = ['admin', 'super_admin'].includes(currentUserRole);
+  const reporter = allProfiles[r.reporter_id];
+  const resolver = r.resolved_by ? allProfiles[r.resolved_by] : null;
+  const reviewer = r.review?.user_id ? allProfiles[r.review.user_id] : null;
+
+  const reporterName = reporter?.first_name || reporter?.email?.split('@')[0] || 'Unknown';
+  const reporterRole = reporter?.role || 'user';
+  const roleLabel = { super_admin: 'SUPER', admin: 'ADMIN', moderator: 'MOD' }[reporterRole] || '';
+  const roleCls = { super_admin: 'super', admin: 'admin', moderator: 'mod' }[reporterRole] || '';
+
+  const date = new Date(r.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+  const statusLabels = {
+    pending: '🚨 Pending',
+    resolved: '✅ Resolved',
+    dismissed: '❌ Dismissed'
+  };
+
+  // Preview de la review
+  let reviewPreview;
+  if (!r.review) {
+    reviewPreview = `<div class="review-preview"><div class="review-preview-label">Original Review</div><div class="preview-deleted">⚠️ Review has been deleted</div></div>`;
+  } else {
+    const reviewerName = reviewer?.first_name || reviewer?.email?.split('@')[0] || 'Anonymous';
+    const avatar = reviewer?.avatar_url
+      ? `<div class="preview-avatar" style="background-image:url('${reviewer.avatar_url}')"></div>`
+      : `<div class="preview-avatar">${reviewerName.charAt(0).toUpperCase()}</div>`;
+    const stars = [1,2,3,4,5].map(n => `<span class="preview-star${n<=r.review.stars?'':' e'}">★</span>`).join('');
+    reviewPreview = `
+      <div class="review-preview">
+        <div class="review-preview-label">Original Review</div>
+        <div class="review-preview-content">
+          ${avatar}
+          <div class="preview-info">
+            <div class="preview-author">${escapeHtml(reviewerName)}</div>
+            <div class="preview-stars">${stars}</div>
+            <div class="preview-title">${escapeHtml(r.review.title || '(no title)')}</div>
+            <div class="preview-body">${escapeHtml((r.review.body || '').substring(0, 200))}${r.review.body && r.review.body.length > 200 ? '...' : ''}</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // Resolution note
+  let resolutionHtml = '';
+  if (r.status !== 'pending' && r.resolution_note) {
+    const resolverName = resolver?.first_name || resolver?.email?.split('@')[0] || 'Admin';
+    const resolvedDate = r.resolved_at ? new Date(r.resolved_at).toLocaleDateString() : '';
+    resolutionHtml = `
+      <div class="resolution-note ${r.status}">
+        <div class="resolution-note-label">${r.status === 'resolved' ? '✅ Resolution' : '❌ Dismissal reason'}</div>
+        <div>${escapeHtml(r.resolution_note)}</div>
+        <div class="resolved-by">— ${escapeHtml(resolverName)} on ${resolvedDate}</div>
+      </div>
+    `;
+  }
+
+  // Actions (only for staff and pending)
+  let actionsHtml = '';
+  if (isStaff && r.status === 'pending') {
+    actionsHtml = `
+      <div class="actions-row">
+        <button class="action-btn resolve" onclick="confirmAction('resolve','${r.id}')">✅ Resolve</button>
+        <button class="action-btn dismiss" onclick="confirmAction('dismiss','${r.id}')">❌ Dismiss</button>
+        ${r.review ? `
+          <button class="action-btn delete" onclick="confirmAction('delete_review','${r.id}')">🗑️ Delete review</button>
+          ${!r.review.replies_closed_by_staff ? `<button class="action-btn close" onclick="confirmAction('close_replies','${r.id}')">🔒 Close replies</button>` : ''}
+        ` : ''}
+      </div>
+    `;
+  }
+
+  return `
+    <div class="report-card ${r.status}">
+      <div class="report-header">
+        <div class="report-meta-left">
+          <span class="report-status ${r.status}">${statusLabels[r.status]}</span>
+          <span class="reporter-info">
+            Reported by ${escapeHtml(reporterName)}
+            ${roleCls ? `<span class="role-badge ${roleCls}">${roleLabel}</span>` : ''}
+          </span>
+        </div>
+        <span class="report-date">${date}</span>
+      </div>
+
+      <div class="report-reason">
+        <div class="report-reason-label">📝 Reason</div>
+        <div class="report-reason-text">${escapeHtml(r.reason)}</div>
+        ${r.details ? `<div class="report-reason-text" style="margin-top:6px;font-size:12px;opacity:.8">${escapeHtml(r.details)}</div>` : ''}
+      </div>
+
+      ${reviewPreview}
+      ${resolutionHtml}
+      ${actionsHtml}
+    </div>
+  `;
+}
+
+// ═══ CONFIRM ACTIONS ═══
+function confirmAction(type, reportId) {
+  pendingAction = { type, reportId };
+  const r = allReports.find(x => x.id === reportId);
+  if (!r) return;
+
+  const icon = document.getElementById('modalIcon');
+  const title = document.getElementById('modalTitle');
+  const message = document.getElementById('modalMessage');
+  const btn = document.getElementById('confirmBtn');
+  const textarea = document.getElementById('modalTextarea');
+  textarea.value = '';
+  textarea.style.display = 'block';
+
+  const reviewTitle = r.review?.title || 'this review';
+
+  const configs = {
+    resolve: { icon:'✅', iconCls:'success', t:'Resolve this report?', m:'Mark this report as resolved. The reporter will be notified.', btn:'Resolve', btnCls:'success', ph:'Optional note for the reporter (e.g., "Review was edited", "Action taken")...' },
+    dismiss: { icon:'❌', iconCls:'info', t:'Dismiss this report?', m:'Dismiss this report as not actionable. Please provide a reason.', btn:'Dismiss', btnCls:'', ph:'Reason for dismissal (will be sent to the reporter)...', required:true },
+    delete_review: { icon:'🗑️', iconCls:'', t:'Delete the reported review?', m:`Permanently delete "${reviewTitle}"? The report will be marked as resolved.`, btn:'Delete review', btnCls:'', ph:'Optional resolution note...' },
+    close_replies: { icon:'🔒', iconCls:'info', t:'Close replies on this review?', m:`Close replies on "${reviewTitle}"? Only AFYA staff will be able to reply.`, btn:'Close replies', btnCls:'', ph:'Optional resolution note...' }
+  };
+
+  const c = configs[type];
+  if (!c) return;
+
+  icon.textContent = c.icon;
+  icon.className = 'modal-icon ' + c.iconCls;
+  title.textContent = c.t;
+  message.textContent = c.m;
+  btn.textContent = c.btn;
+  btn.className = 'btn btn-confirm ' + (c.btnCls || '');
+  textarea.placeholder = c.ph;
+  pendingAction.required = c.required;
+
+  document.getElementById('confirmModal').classList.add('open');
+}
+
+function closeConfirm() {
+  document.getElementById('confirmModal').classList.remove('open');
+  pendingAction = null;
+}
+
+async function executeAction() {
+  if (!pendingAction) return;
+  const { type, reportId, required } = pendingAction;
+  const note = document.getElementById('modalTextarea').value.trim();
+  const btn = document.getElementById('confirmBtn');
+
+  if (required && !note) {
+    toast('⚠️ Please provide a reason');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Processing...';
+
+  const r = allReports.find(x => x.id === reportId);
+  const reviewTitle = r.review?.title || 'review';
+
+  if (type === 'resolve') {
+    const { error } = await sb.from('review_reports').update({
+      status: 'resolved',
+      resolved_by: currentUserId,
+      resolved_at: new Date().toISOString(),
+      resolution_note: note || null
+    }).eq('id', reportId);
+
+    if (error) { toast(`❌ Error: ${error.message}`); }
+    else {
+      await logAction('report_resolve', 'report', 'review_report', reportId, reviewTitle, `Resolved report on review "${reviewTitle}"`, note);
+      toast('✅ Report resolved');
+    }
+  }
+  else if (type === 'dismiss') {
+    const { error } = await sb.from('review_reports').update({
+      status: 'dismissed',
+      resolved_by: currentUserId,
+      resolved_at: new Date().toISOString(),
+      resolution_note: note
+    }).eq('id', reportId);
+
+    if (error) { toast(`❌ Error: ${error.message}`); }
+    else {
+      await logAction('report_dismiss', 'report', 'review_report', reportId, reviewTitle, `Dismissed report on review "${reviewTitle}"`, note);
+      toast('❌ Report dismissed');
+    }
+  }
+  else if (type === 'delete_review') {
+    // 1) Supprime l'avis
+    const { error: delErr } = await sb.from('reviews').delete().eq('id', r.review_id);
+    if (delErr) { toast(`❌ Error: ${delErr.message}`); btn.disabled = false; closeConfirm(); return; }
+
+    // 2) Log de l'action
+    await logAction('review_delete', 'review', 'review', r.review_id, reviewTitle, `Deleted review "${reviewTitle}" (via report)`, note);
+
+    // 3) Marque le report comme resolved
+    await sb.from('review_reports').update({
+      status: 'resolved',
+      resolved_by: currentUserId,
+      resolved_at: new Date().toISOString(),
+      resolution_note: 'Review deleted. ' + (note || '')
+    }).eq('id', reportId);
+
+    await logAction('report_resolve', 'report', 'review_report', reportId, reviewTitle, `Resolved report (by deleting review)`, note);
+    toast('🗑️ Review deleted and report resolved');
+  }
+  else if (type === 'close_replies') {
+    // 1) Ferme les replies
+    const { error: closeErr } = await sb.from('reviews').update({ replies_closed_by_staff: true }).eq('id', r.review_id);
+    if (closeErr) { toast(`❌ Error: ${closeErr.message}`); btn.disabled = false; closeConfirm(); return; }
+
+    await logAction('review_close_replies', 'review', 'review', r.review_id, reviewTitle, `Closed replies on "${reviewTitle}" (via report)`, note);
+
+    // 2) Marque le report comme resolved
+    await sb.from('review_reports').update({
+      status: 'resolved',
+      resolved_by: currentUserId,
+      resolved_at: new Date().toISOString(),
+      resolution_note: 'Replies closed. ' + (note || '')
+    }).eq('id', reportId);
+
+    await logAction('report_resolve', 'report', 'review_report', reportId, reviewTitle, `Resolved report (by closing replies)`, note);
+    toast('🔒 Replies closed and report resolved');
+  }
+
+  btn.disabled = false;
+  closeConfirm();
+  await loadReports();
+}
+
+function escapeHtml(text) {
+  if (!text && text !== 0) return '';
+  const div = document.createElement('div');
+  div.textContent = String(text);
+  return div.innerHTML;
+}
+
+function toast(msg) {
+  document.getElementById('toastMsg').textContent = msg;
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+async function init() {
+  const auth = await checkAdmin();
+  if (!auth) return;
+
+  currentUserId = auth.user.id;
+  currentUserRole = auth.profile.role;
+
+  afyaInjectSidebar(auth.profile, 'reports');
+
+  const isStaff = ['admin', 'super_admin'].includes(currentUserRole);
+  if (isStaff) {
+    document.getElementById('pageEye').textContent = 'Moderation';
+    document.getElementById('pageTitle').innerHTML = 'Reports <em>Center</em>';
+  } else {
+    document.getElementById('pageEye').textContent = 'Your reports';
+    document.getElementById('pageTitle').innerHTML = 'My <em>Reports</em>';
+  }
+
+  await loadReports();
+  console.log('✅ Reports loaded as:', currentUserRole);
+}
+
+init();
+</script>
+</body>
+</html>

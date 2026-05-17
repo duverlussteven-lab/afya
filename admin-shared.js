@@ -76,6 +76,7 @@ function afyaBuildSidebar(profile, activePage) {
       ${link('admin-reviews.html', '⭐', 'Reviews', 'reviews')}
       ${link('admin-reports.html', '🚨', 'Reports', 'reports')}
       ${link('admin-suggestions.html', '💡', 'Suggestions', 'suggestions')}
+      ${link('admin-history.html', '📜', 'History', 'history')}
 
       <div class="sidebar-section-title">Account</div>
       ${link('index.html', '↩️', 'Back to site', null)}
