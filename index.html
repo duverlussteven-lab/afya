@@ -1153,7 +1153,7 @@ async function refreshUserState() {
     document.getElementById('userMenuName').textContent = displayName;
     document.getElementById('userMenuEmail').textContent = user.email;
     // Affiche le bouton Admin Panel si admin
-    if (profile?.role === 'admin') {
+    if (profile?.role === 'admin' || profile?.role === 'super_admin' || profile?.role === 'moderator') {
       document.getElementById('adminMenuItem').style.display = '';
       document.getElementById('adminMenuDivider').style.display = '';
     }

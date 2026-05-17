@@ -254,7 +254,7 @@ async function checkAdmin() {
   const { data: { user } } = await sb.auth.getUser();
   if (!user) { alert('Access denied'); window.location.href = 'index.html'; return null; }
   const { data: profile } = await sb.from('profiles').select('*').eq('id', user.id).single();
-  if (!profile || profile.role !== 'admin') { alert('Admin only'); window.location.href = 'index.html'; return null; }
+  if (!profile || !['admin', 'super_admin'].includes(profile.role)) { alert('Admin only'); window.location.href = 'index.html'; return null; }
   currentAdminId = user.id;
   return { user, profile };
 }
