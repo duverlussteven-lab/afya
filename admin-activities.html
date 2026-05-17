@@ -287,6 +287,53 @@ textarea{resize:vertical;min-height:80px}
       </div>
     </div>
 
+    <!-- ═══ EXACT ADDRESS ═══ -->
+    <div style="padding:14px;background:rgba(212,168,67,.05);border-radius:10px;border-left:3px solid var(--gold);margin-bottom:16px">
+      <div style="font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#A8862A;margin-bottom:10px">📍 Exact address (optional)</div>
+      <div class="form-group">
+        <label>Street address</label>
+        <input type="text" id="inputAddress" placeholder="5 Rue Léon Frot">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Postal code</label>
+          <input type="text" id="inputPostalCode" placeholder="75011">
+        </div>
+        <div class="form-group">
+          <label>Country</label>
+          <input type="text" id="inputCountry" placeholder="France">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Latitude <span style="font-weight:400;color:var(--ink3)">(GPS optional)</span></label>
+          <input type="number" step="0.00000001" id="inputLatitude" placeholder="48.8566">
+        </div>
+        <div class="form-group">
+          <label>Longitude <span style="font-weight:400;color:var(--ink3)">(GPS optional)</span></label>
+          <input type="number" step="0.00000001" id="inputLongitude" placeholder="2.3522">
+        </div>
+      </div>
+    </div>
+    <!-- ═══ EXTERNAL REVIEW PLATFORMS ═══ -->
+    <div style="padding:14px;background:rgba(109,143,130,.05);border-radius:10px;border-left:3px solid var(--sage);margin-bottom:16px">
+      <div style="font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--sage);margin-bottom:10px">🔗 External review platforms (optional)</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>🗺️ Google Maps URL</label>
+          <input type="url" id="inputGoogleMaps" placeholder="https://maps.google.com/...">
+        </div>
+        <div class="form-group">
+          <label>⭐ Trustpilot URL</label>
+          <input type="url" id="inputTrustpilot" placeholder="https://trustpilot.com/...">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>📋 Tripadvisor URL</label>
+        <input type="url" id="inputTripadvisor" placeholder="https://tripadvisor.com/...">
+      </div>
+    </div>
+
     <div class="modal-actions">
       <button class="btn-ghost" onclick="closeModal()">Cancel</button>
       <button class="btn-primary" onclick="saveActivity()" id="saveBtn">Save</button>
@@ -418,6 +465,14 @@ function openAddModal() {
   document.getElementById('inputBgColor').value = '#E8E0D4';
   document.getElementById('inputWebsite').value = '';
   document.getElementById('inputPriceSource').value = '';
+  document.getElementById('inputGoogleMaps').value = '';
+  document.getElementById('inputTrustpilot').value = '';
+  document.getElementById('inputTripadvisor').value = '';
+  document.getElementById('inputAddress').value = '';
+  document.getElementById('inputPostalCode').value = '';
+  document.getElementById('inputCountry').value = '';
+  document.getElementById('inputLatitude').value = '';
+  document.getElementById('inputLongitude').value = '';
   document.getElementById('currentPhotoUrl').value = '';
   resetPhotoPreview();
   document.getElementById('formAlert').className = 'alert';
@@ -443,6 +498,14 @@ function openEditModal(id) {
   document.getElementById('inputBgColor').value = a.bg_color || '#E8E0D4';
   document.getElementById('inputWebsite').value = a.website_url || '';
   document.getElementById('inputPriceSource').value = a.price_source_url || '';
+  document.getElementById('inputGoogleMaps').value = a.google_maps_url || '';
+  document.getElementById('inputTrustpilot').value = a.trustpilot_url || '';
+  document.getElementById('inputTripadvisor').value = a.tripadvisor_url || '';
+  document.getElementById('inputAddress').value = a.address || '';
+  document.getElementById('inputPostalCode').value = a.postal_code || '';
+  document.getElementById('inputCountry').value = a.country || '';
+  document.getElementById('inputLatitude').value = a.latitude || '';
+  document.getElementById('inputLongitude').value = a.longitude || '';
   document.getElementById('currentPhotoUrl').value = a.photo_url || '';
 
   const preview = document.getElementById('photoPreview');
@@ -544,6 +607,14 @@ async function saveActivity() {
     bg_color: document.getElementById('inputBgColor').value.trim() || '#E8E0D4',
     website_url: document.getElementById('inputWebsite').value.trim() || null,
     price_source_url: document.getElementById('inputPriceSource').value.trim() || null,
+    google_maps_url: document.getElementById('inputGoogleMaps').value.trim() || null,
+    trustpilot_url: document.getElementById('inputTrustpilot').value.trim() || null,
+    tripadvisor_url: document.getElementById('inputTripadvisor').value.trim() || null,
+    address: document.getElementById('inputAddress').value.trim() || null,
+    postal_code: document.getElementById('inputPostalCode').value.trim() || null,
+    country: document.getElementById('inputCountry').value.trim() || null,
+    latitude: parseFloat(document.getElementById('inputLatitude').value) || null,
+    longitude: parseFloat(document.getElementById('inputLongitude').value) || null,
     photo_url: photoUrl,
     updated_at: new Date().toISOString()
   };

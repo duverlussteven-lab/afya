@@ -59,6 +59,74 @@ nav{position:fixed;top:0;left:0;right:0;z-index:300;height:68px;display:flex;ali
 [data-theme="dark"] .dm-btn::after{transform:translateX(17px)}
 .nav-cta{background:var(--ink);color:white;padding:9px 20px;border-radius:6px;border:none;cursor:pointer;font-family:var(--ui);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;transition:background .2s,transform .15s}
 .nav-cta:hover{background:var(--sage);transform:translateY(-1px)}
+
+/* ═══ EXTERNAL LINKS (Google Maps / Trustpilot / Tripadvisor) ═══ */
+.external-links{display:flex;gap:8px;margin-top:10px;padding-top:10px;border-top:1px dashed var(--border);justify-content:center}
+.ext-link{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:8px;background:var(--bg2);border:1px solid var(--border);text-decoration:none;font-size:16px;transition:all .2s;cursor:pointer}
+.ext-link:hover{transform:translateY(-2px);box-shadow:0 4px 12px var(--shadow)}
+.ext-link.google:hover{background:#4285F4;border-color:#4285F4}
+.ext-link.trustpilot:hover{background:#00B67A;border-color:#00B67A}
+.ext-link.tripadvisor:hover{background:#34E0A1;border-color:#34E0A1}
+
+/* ═══ NOTIFICATION BELL ═══ */
+.notif-bell-wrap{position:relative;display:none;align-items:center;justify-content:center}
+.notif-bell-wrap.show{display:flex}
+.notif-bell-btn{background:transparent;border:none;cursor:pointer;width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--ink2);position:relative;transition:background .15s}
+.notif-bell-btn:hover{background:rgba(109,143,130,.1);color:var(--ink)}
+.notif-bell-badge{position:absolute;top:4px;right:4px;background:var(--red);color:white;font-family:var(--ui);font-size:9px;font-weight:800;padding:2px 5px;border-radius:8px;min-width:16px;text-align:center;display:none}
+.notif-bell-badge.show{display:block}
+.notif-dropdown{position:absolute;top:calc(100% + 10px);right:0;background:white;border:1px solid rgba(109,143,130,.18);border-radius:14px;box-shadow:0 16px 48px rgba(29,43,58,.16);z-index:999;width:380px;max-height:520px;display:none;overflow:hidden;flex-direction:column}
+.notif-dropdown.open{display:flex;animation:fadeUp .2s ease}
+[data-theme="dark"] .notif-dropdown{background:#1E2C3A;border-color:rgba(139,173,158,.14)}
+.notif-header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.notif-header-title{font-family:var(--ui);font-size:12px;font-weight:700;color:var(--ink);letter-spacing:.08em;text-transform:uppercase}
+.notif-mark-all{background:none;border:none;font-family:var(--ui);font-size:10px;color:var(--sage);cursor:pointer;font-weight:700;letter-spacing:.06em}
+.notif-mark-all:hover{text-decoration:underline}
+.notif-list{flex:1;overflow-y:auto;max-height:420px}
+.notif-item{padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;display:flex;gap:10px;align-items:flex-start}
+.notif-item:hover{background:rgba(109,143,130,.05)}
+.notif-item.unread{background:rgba(109,143,130,.05)}
+.notif-item.unread::before{content:'';position:absolute;left:0;width:3px;height:100%;background:var(--sage)}
+.notif-item-icon{width:32px;height:32px;border-radius:50%;background:rgba(109,143,130,.12);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.notif-item-content{flex:1;min-width:0}
+.notif-item-title{font-family:var(--ui);font-size:12px;font-weight:700;color:var(--ink);margin-bottom:2px}
+.notif-item-msg{font-size:11px;color:var(--ink2);line-height:1.5}
+.notif-item-time{font-family:var(--ui);font-size:10px;color:var(--ink3);margin-top:4px}
+.notif-empty{padding:50px 20px;text-align:center;color:var(--ink3);font-family:var(--ui);font-size:12px}
+.notif-empty-icon{font-size:36px;margin-bottom:10px;opacity:.4}
+.notif-loading{padding:30px;text-align:center;color:var(--ink3);font-family:var(--ui);font-size:12px}
+
+/* ═══ REVIEW BADGES ═══ */
+.rc-badge{display:inline-block;font-family:var(--ui);font-size:8px;font-weight:700;letter-spacing:.1em;padding:2px 7px;border-radius:4px;text-transform:uppercase;margin-left:6px}
+.rc-badge-pending{background:rgba(212,168,67,.2);color:#8a6a1f}
+.rc-badge-verified{background:rgba(74,158,111,.15);color:var(--green)}
+.rc-badge-yours{background:rgba(109,143,130,.15);color:var(--sage)}
+
+/* ═══ REVIEW REPLIES ═══ */
+.rc-replies-section{margin-top:14px;padding-top:14px;border-top:1px dashed var(--border)}
+.rc-replies-toggle{background:none;border:none;font-family:var(--ui);font-size:11px;color:var(--sage);cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px;padding:6px 0}
+.rc-replies-toggle:hover{text-decoration:underline}
+.rc-replies-list{margin-top:10px;display:flex;flex-direction:column;gap:8px}
+.rc-reply{background:rgba(109,143,130,.05);border-radius:10px;padding:10px 12px;border-left:3px solid var(--ink3);font-size:12px}
+.rc-reply.role-super{border-left-color:#9D4FCC;background:rgba(157,79,204,.06)}
+.rc-reply.role-admin{border-left-color:#3B5068;background:rgba(59,80,104,.06)}
+.rc-reply.role-mod{border-left-color:var(--green);background:rgba(74,158,111,.06)}
+.rc-reply-head{display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:wrap}
+.rc-reply-author{font-family:var(--ui);font-weight:700;font-size:11px;color:var(--ink)}
+.rc-reply-role{font-family:var(--ui);font-size:8px;font-weight:700;padding:1px 5px;border-radius:4px;color:white;letter-spacing:.06em}
+.rc-reply-role.super{background:#9D4FCC}
+.rc-reply-role.admin{background:#3B5068}
+.rc-reply-role.mod{background:var(--green)}
+.rc-reply-time{font-family:var(--ui);font-size:9px;color:var(--ink3);margin-left:auto}
+.rc-reply-body{color:var(--ink2);line-height:1.5;font-size:11px}
+.rc-reply-form{margin-top:10px;display:flex;gap:8px;align-items:flex-start}
+.rc-reply-textarea{flex:1;border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--body);font-size:12px;resize:vertical;min-height:50px;outline:none;background:white}
+.rc-reply-textarea:focus{border-color:var(--sage)}
+[data-theme="dark"] .rc-reply-textarea{background:#1E2C3A;color:var(--ink)}
+.rc-reply-submit{padding:8px 14px;background:var(--ink);color:white;border:none;border-radius:8px;cursor:pointer;font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;align-self:stretch;white-space:nowrap}
+.rc-reply-submit:hover{background:var(--sage)}
+.rc-reply-closed{color:var(--ink3);font-style:italic;font-family:var(--ui);font-size:11px;text-align:center;padding:10px;background:rgba(109,143,130,.05);border-radius:8px}
+
 /* ═══ USER DROPDOWN MENU ═══ */
 .user-menu{
   position:absolute;
@@ -539,10 +607,6 @@ footer{background:var(--ink);padding:60px 52px 32px}
       <span class="sp-star" data-v="5" onclick="setStar(5)">★</span>
     </div>
     <p class="star-label" id="starLabel">Select a rating</p>
-    <div class="modal-grid">
-      <div><label>First Name</label><input type="text" id="revName" placeholder="Sophie"></div>
-      <div><label>City</label><input type="text" id="revCity" placeholder="Paris"></div>
-    </div>
     <label>Review Title</label><input type="text" id="revTitle" placeholder="One unforgettable day in Lisbon…">
     <label>Your Review</label><textarea id="revBody" placeholder="Tell us about your experience…"></textarea>
     <label>Trip Type</label>
@@ -553,6 +617,21 @@ footer{background:var(--ink);padding:60px 52px 32px}
       <button type="button" class="trip-tag" onclick="toggleTrip(this)">💼 Business</button>
       <button type="button" class="trip-tag" onclick="toggleTrip(this)">🎒 Solo</button>
     </div>
+
+    <p class="modal-section-label" style="margin-top:20px">Optional <span style="color:var(--ink3);font-weight:400;text-transform:none;letter-spacing:0">(adds a Verified badge)</span></p>
+    <div class="modal-grid">
+      <div>
+        <label>Restaurant or Activity</label>
+        <select id="revRelated" style="width:100%;border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;font-family:var(--body);font-size:14px;background:white;outline:none">
+          <option value="">— Select (optional) —</option>
+        </select>
+      </div>
+      <div>
+        <label>Date of visit</label>
+        <input type="date" id="revVisitDate" style="width:100%">
+      </div>
+    </div>
+
     <button class="submit-review" onclick="submitReview()">Publish My Review</button>
   </div>
 </div>
@@ -621,6 +700,24 @@ footer{background:var(--ink);padding:60px 52px 32px}
       </div>
     </div>
     <button class="dm-btn" onclick="toggleDark()" aria-label="Dark mode"></button>
+    <div class="notif-bell-wrap" id="notifBellWrap">
+      <button class="notif-bell-btn" id="notifBellBtn" onclick="toggleNotifDropdown()" aria-label="Notifications">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+        <span class="notif-bell-badge" id="notifBadge">0</span>
+      </button>
+      <div class="notif-dropdown" id="notifDropdown">
+        <div class="notif-header">
+          <div class="notif-header-title">🔔 Notifications</div>
+          <button class="notif-mark-all" onclick="markAllNotificationsRead()">Mark all read</button>
+        </div>
+        <div class="notif-list" id="notifList">
+          <div class="notif-loading">Loading...</div>
+        </div>
+      </div>
+    </div>
     <button class="nav-cta" id="authBtn" onclick="handleAuthBtnClick()">Sign In</button>
 <div class="user-menu" id="userMenu">
   <div class="user-menu-header">
@@ -1139,11 +1236,14 @@ async function refreshUserState() {
   const { data: { user } } = await sb.auth.getUser();
   const authBtn = document.getElementById('authBtn');
   const userMenu = document.getElementById('userMenu');
+  const notifBellWrap = document.getElementById('notifBellWrap');
 
   if (user) {
     // Récupère le profil avec le prénom
-    const { data: profile } = await sb.from('profiles').select('first_name, role').eq('id', user.id).single();
+    const { data: profile } = await sb.from('profiles').select('first_name, role, avatar_url').eq('id', user.id).single();
     currentUser = { ...user, profile };
+    currentUserData = user;
+    currentUserProfile = profile;
     const displayName = profile?.first_name || user.email.split('@')[0];
 
     authBtn.textContent = `👋 ${displayName}`;
@@ -1158,12 +1258,27 @@ async function refreshUserState() {
       document.getElementById('adminMenuDivider').style.display = '';
     }
 
+    // Affiche la cloche et charge les notifs
+    if (notifBellWrap) notifBellWrap.classList.add('show');
+    await loadNotifications();
+    
+    // Recharge les avis pour afficher les pending de l'utilisateur
+    await loadReviewsFromSupabase();
+    renderReviews(currentFilter);
+
     console.log('✅ Logged in as:', user.email, '— Role:', profile?.role);
   } else {
     currentUser = null;
+    currentUserData = null;
+    currentUserProfile = null;
     authBtn.textContent = 'Sign In';
     authBtn.title = '';
     userMenu.classList.remove('open');
+    if (notifBellWrap) notifBellWrap.classList.remove('show');
+    
+    // Recharge les avis sans les pending
+    await loadReviewsFromSupabase();
+    renderReviews(currentFilter);
   }
 }
 
@@ -1223,6 +1338,14 @@ async function loadRestosFromSupabase() {
         bg: r.bg_color || '#E8DDD4',
         photoUrl: r.photo_url || null,
         websiteUrl: r.website_url || null,
+        googleMapsUrl: r.google_maps_url || null,
+        trustpilotUrl: r.trustpilot_url || null,
+        tripadvisorUrl: r.tripadvisor_url || null,
+        address: r.address || null,
+        postalCode: r.postal_code || null,
+        country: r.country || null,
+        latitude: r.latitude ? parseFloat(r.latitude) : null,
+        longitude: r.longitude ? parseFloat(r.longitude) : null,
         priceVerified: !!r.price_source_url,
         topReview: {
           text: r.top_review_text || 'Great place!',
@@ -1261,6 +1384,14 @@ async function loadActivitiesFromSupabase() {
         bg: a.bg_color || '#E8E0D4',
         photoUrl: a.photo_url || null,
         websiteUrl: a.website_url || null,
+        googleMapsUrl: a.google_maps_url || null,
+        trustpilotUrl: a.trustpilot_url || null,
+        tripadvisorUrl: a.tripadvisor_url || null,
+        address: a.address || null,
+        postalCode: a.postal_code || null,
+        country: a.country || null,
+        latitude: a.latitude ? parseFloat(a.latitude) : null,
+        longitude: a.longitude ? parseFloat(a.longitude) : null,
         priceVerified: !!a.price_source_url
       });
     });
@@ -1371,7 +1502,16 @@ function toast(msg){
 
 // ═════════════════════ MODAL ═════════════════════
 let selectedStar = 0, selectedTrip = '';
-function openModal(){ document.getElementById('reviewModal').classList.add('open'); document.body.style.overflow='hidden'; }
+async function openModal(){ 
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) {
+    toast('🔒 Please sign in to write a review');
+    setTimeout(()=>openAuthModal('signin'), 300);
+    return;
+  }
+  document.getElementById('reviewModal').classList.add('open'); 
+  document.body.style.overflow='hidden'; 
+}
 function closeModal(){ document.getElementById('reviewModal').classList.remove('open'); document.body.style.overflow=''; }
 function setStar(n){
   selectedStar = n;
@@ -1384,25 +1524,64 @@ function toggleTrip(el){
   el.classList.add('sel');
   selectedTrip = el.textContent.trim();
 }
-function submitReview(){
-  const name = document.getElementById('revName').value.trim();
+async function submitReview(){
+  // Vérifier que l'utilisateur est connecté
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) {
+    toast('🔒 Please sign in to publish a review');
+    closeModal();
+    setTimeout(()=>openAuthModal('signin'), 300);
+    return;
+  }
+
   const title = document.getElementById('revTitle').value.trim();
   const body = document.getElementById('revBody').value.trim();
-  const city = document.getElementById('revCity').value.trim();
-  if(!name||!title||!body||selectedStar===0){ toast('Please fill all fields ⚠️'); return; }
-  const newR = { id:Date.now(),name,city:city||'Unknown',title,body,stars:selectedStar,date:'Just now',source:'afya',trip:selectedTrip||'🌍 Traveller',helpful:0,avatar:name.substring(0,2).toUpperCase(),color:avatarColors[Math.floor(Math.random()*avatarColors.length)],featured:selectedStar===5 };
-  allReviews.unshift(newR);
-  totalReviews++;
-  document.getElementById('totalReviewCount').textContent = totalReviews.toLocaleString();
-  document.getElementById('mainCount').textContent = `Based on ${totalReviews.toLocaleString()} reviews`;
-  renderReviews(currentFilter);
+  const relatedId = document.getElementById('revRelated').value;
+  const visitDate = document.getElementById('revVisitDate').value || null;
+
+  if(!title||!body||selectedStar===0){ toast('Please fill all required fields ⚠️'); return; }
+
+  // Préparer les données
+  const reviewData = {
+    user_id: user.id,
+    stars: selectedStar,
+    title: title,
+    body: body,
+    trip_type: selectedTrip || '🌍 Traveller',
+    source: 'afya',
+    is_approved: false, // toujours pending
+    visit_date: visitDate
+  };
+
+  // Si lié à un resto/activité
+  if (relatedId) {
+    const [type, id] = relatedId.split(':');
+    if (type === 'resto') reviewData.related_restaurant_id = id;
+    else if (type === 'act') reviewData.related_activity_id = id;
+  }
+
+  // Insertion dans Supabase
+  const { error } = await sb.from('reviews').insert(reviewData);
+  if (error) {
+    console.error('❌ Error submitting review:', error);
+    toast(`❌ Error: ${error.message}`);
+    return;
+  }
+
   closeModal();
-  toast(`🎉 Thanks ${name}! Your review is published.`);
+  toast(`🎉 Thanks! Your review will be published after moderation.`);
   selectedStar=0; selectedTrip='';
-  ['revName','revTitle','revBody','revCity'].forEach(id=>document.getElementById(id).value='');
+  ['revTitle','revBody','revRelated','revVisitDate'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.value='';
+  });
   document.querySelectorAll('.sp-star').forEach(s=>s.classList.remove('lit'));
   document.querySelectorAll('.trip-tag').forEach(t=>t.classList.remove('sel'));
   document.getElementById('starLabel').textContent='Select a rating';
+
+  // Recharger les avis pour montrer le nouveau (pending) à l'auteur
+  await loadReviewsFromSupabase();
+  renderReviews(currentFilter);
 }
 
 // ═════════════════════ PLANNER DATA ═════════════════════
@@ -1754,6 +1933,13 @@ function renderActivities(){
             : ''
           }
         </div>
+        ${(x.googleMapsUrl || x.trustpilotUrl || x.tripadvisorUrl) ? `
+          <div class="external-links">
+            ${x.googleMapsUrl ? `<a href="${x.googleMapsUrl}" target="_blank" rel="noopener" class="ext-link google" title="View on Google Maps">🗺️</a>` : ''}
+            ${x.trustpilotUrl ? `<a href="${x.trustpilotUrl}" target="_blank" rel="noopener" class="ext-link trustpilot" title="View on Trustpilot">⭐</a>` : ''}
+            ${x.tripadvisorUrl ? `<a href="${x.tripadvisorUrl}" target="_blank" rel="noopener" class="ext-link tripadvisor" title="View on Tripadvisor">📋</a>` : ''}
+          </div>
+        ` : ''}
       </div>
     </div>`).join('');
 }
@@ -1808,7 +1994,7 @@ function filterRestos(){
         <div class="resto-cuisine">${x.cuisine}</div>
         <div class="r-stars-row">${[1,2,3,4,5].map(n=>`<span class="r-star-${n<=Math.floor(x.rating)?'f':'e'}">★</span>`).join('')}<span class="r-score">${x.rating}</span><span class="r-count">(${x.reviews.toLocaleString()})</span></div>
         <div class="resto-meta">
-          <span class="resto-dist">📍 ${x.dist}km</span>
+          <span class="resto-dist" title="${x.address ? escapeHtml(x.address + (x.postalCode ? ', ' + x.postalCode : '') + (x.city ? ', ' + x.city : '') + (x.country ? ', ' + x.country : '')) : 'No address'}">📍 ${x.address ? (x.address.length > 25 ? x.address.substring(0, 25) + '...' : x.address) : x.dist + 'km'}</span>
           <span class="resto-price">$${x.priceMin}–$${x.priceMax}${x.priceVerified ? ' <span style="color:var(--green);font-size:9px;margin-left:2px">✓</span>' : ''}</span>
         </div>
         <div class="resto-review-snip"><div class="resto-review-snip-text">"${x.topReview.text}"</div><div class="resto-review-snip-by">— ${x.topReview.by}</div></div>
@@ -1819,6 +2005,13 @@ function filterRestos(){
             : ''
           }
         </div>
+        ${(x.googleMapsUrl || x.trustpilotUrl || x.tripadvisorUrl) ? `
+          <div class="external-links">
+            ${x.googleMapsUrl ? `<a href="${x.googleMapsUrl}" target="_blank" rel="noopener" class="ext-link google" title="View on Google Maps">🗺️</a>` : ''}
+            ${x.trustpilotUrl ? `<a href="${x.trustpilotUrl}" target="_blank" rel="noopener" class="ext-link trustpilot" title="View on Trustpilot">⭐</a>` : ''}
+            ${x.tripadvisorUrl ? `<a href="${x.tripadvisorUrl}" target="_blank" rel="noopener" class="ext-link tripadvisor" title="View on Tripadvisor">📋</a>` : ''}
+          </div>
+        ` : ''}
       </div>
     </div>`).join('');
 }
@@ -1829,20 +2022,340 @@ const avatarColors = ['#6D8F82','#3B5068','#C94F3A','#D4A843','#4A9E6F','#7A5C8A
 let totalReviews = 2847;
 let currentFilter = 'all';
 let reviewPage = 1;
-const allReviews = [
-  {id:1,name:'Sophie L.',city:'Paris',title:'Transformed how I travel',body:'AFYA planned our 3-day Barcelona trip from scratch. Every activity was perfectly timed, the budget was spot on. The departure time alerts saved us multiple times.',stars:5,date:'March 12, 2026',source:'trustpilot',trip:'👫 Friends',helpful:142,avatar:'SL',color:'#6D8F82',featured:true},
-  {id:2,name:'Marco V.',city:'Milan',title:'The AI summary was surprisingly accurate',body:'Planned a romantic weekend in Lisbon. The AI summary genuinely captured the mood — poetic, warm, and spot on. My girlfriend cried reading it.',stars:5,date:'March 8, 2026',source:'afya',trip:'❤️ Couple',helpful:89,avatar:'MV',color:'#C94F3A',featured:true},
-  {id:3,name:'Emma R.',city:'London',title:'Great for families',body:'Three kids and a husband who hates museums. AFYA somehow satisfied everyone. The Family mode really understands what works for mixed age groups.',stars:5,date:'Feb 28, 2026',source:'google',trip:'🏠 Family',helpful:67,avatar:'ER',color:'#D4A843',featured:false},
-  {id:4,name:'James K.',city:'New York',title:'Used it for a client day',body:'Business mode is surprisingly refined. The restaurant choices were Michelin-level and the pacing was perfect for a full day of client entertainment.',stars:5,date:'Feb 20, 2026',source:'trustpilot',trip:'💼 Business',helpful:211,avatar:'JK',color:'#3B5068',featured:false},
-  {id:5,name:'Amira T.',city:'Dubai',title:'Multi-day planning is flawless',body:'Used the multi-day planner for 5 days in Kyoto. Hotel suggestions were well-priced and perfectly located. Must-use for any Japan trip.',stars:5,date:'Feb 14, 2026',source:'afya',trip:'🎒 Solo',helpful:94,avatar:'AT',color:'#4A9E6F',featured:true},
-  {id:6,name:'Lucas P.',city:'São Paulo',title:'Good but sometimes generic',body:'Really love the concept and the UI is beautiful. 4 stars because some activity suggestions felt more touristy than I hoped. But the planning engine is genuinely useful.',stars:4,date:'Feb 10, 2026',source:'google',trip:'🎒 Solo',helpful:38,avatar:'LP',color:'#7A5C8A',featured:false},
-  {id:7,name:'Chloe M.',city:'Amsterdam',title:'Perfect for weekend plans',body:'Saturday morning, no plans. Opened AFYA, set parameters. Had a full day itinerary in 3 seconds. We followed it and had one of the best days ever.',stars:5,date:'Feb 5, 2026',source:'trustpilot',trip:'👫 Friends',helpful:178,avatar:'CM',color:'#6D8F82',featured:false},
-  {id:8,name:'Ryo N.',city:'Tokyo',title:'Departure feature is genius',body:'The "leave by X:XX" notice between activities is the best feature. I used to always lose track of time. Now every transition is perfectly planned.',stars:5,date:'Jan 30, 2026',source:'afya',trip:'👫 Friends',helpful:55,avatar:'RN',color:'#C94F3A',featured:false},
-  {id:9,name:'Fatima A.',city:'Casablanca',title:'Budget filters actually work',body:'Set max $60 per person for Paris. AFYA found real quality activities within budget — free museums on Sunday, market picnic, cheap excellent bistro.',stars:5,date:'Jan 24, 2026',source:'trustpilot',trip:'👫 Friends',helpful:73,avatar:'FA',color:'#D4A843',featured:false},
-  {id:10,name:'Tom B.',city:'Sydney',title:'Needs more local gems',body:'Obvious tourist spots are great but I want hidden gems. Restaurant suggestions leaned heavily towards chains rather than independent spots.',stars:3,date:'Jan 18, 2026',source:'google',trip:'🎒 Solo',helpful:22,avatar:'TB',color:'#4A7AB5',featured:false},
-  {id:11,name:'Yuki S.',city:'Osaka',title:'Used it every day',body:'10 days in Japan with 4 friends and different interests. AFYA handled everything — temples, street food, shopping. Each day had something for everyone.',stars:5,date:'Jan 12, 2026',source:'afya',trip:'👫 Friends',helpful:130,avatar:'YS',color:'#4A9E6F',featured:true},
-  {id:12,name:'Isabella C.',city:'Rome',title:'Couple mode is pure magic',body:'Surprise trip to Amalfi using couple mode. The AI summary made us both emotional — it described our trip as if it had already happened. Then we went and it matched perfectly.',stars:5,date:'Jan 8, 2026',source:'trustpilot',trip:'❤️ Couple',helpful:98,avatar:'IC',color:'#C94F3A',featured:true},
+
+// Avis simulés Trustpilot/Google (fallback tant qu'on n'a pas 20 avis AFYA)
+const simulatedReviews = [
+  {id:'sim1',name:'Sophie L.',city:'Paris',title:'Transformed how I travel',body:'AFYA planned our 3-day Barcelona trip from scratch. Every activity was perfectly timed, the budget was spot on. The departure time alerts saved us multiple times.',stars:5,date:'March 12, 2026',source:'trustpilot',trip:'👫 Friends',helpful:142,avatar:'SL',color:'#6D8F82',featured:true,is_approved:true,is_verified:false,replies:[]},
+  {id:'sim2',name:'Marco V.',city:'Milan',title:'The AI summary was surprisingly accurate',body:'Planned a romantic weekend in Lisbon. The AI summary genuinely captured the mood — poetic, warm, and spot on. My girlfriend cried reading it.',stars:5,date:'March 8, 2026',source:'google',trip:'❤️ Couple',helpful:89,avatar:'MV',color:'#C94F3A',featured:true,is_approved:true,is_verified:false,replies:[]},
+  {id:'sim3',name:'Emma R.',city:'London',title:'Great for families',body:'Three kids and a husband who hates museums. AFYA somehow satisfied everyone. The Family mode really understands what works for mixed age groups.',stars:5,date:'Feb 28, 2026',source:'google',trip:'🏠 Family',helpful:67,avatar:'ER',color:'#D4A843',featured:false,is_approved:true,is_verified:false,replies:[]},
+  {id:'sim4',name:'James K.',city:'New York',title:'Used it for a client day',body:'Business mode is surprisingly refined. The restaurant choices were Michelin-level and the pacing was perfect for a full day of client entertainment.',stars:5,date:'Feb 20, 2026',source:'trustpilot',trip:'💼 Business',helpful:211,avatar:'JK',color:'#3B5068',featured:false,is_approved:true,is_verified:false,replies:[]},
+  {id:'sim5',name:'Amira T.',city:'Dubai',title:'Multi-day planning is flawless',body:'Used the multi-day planner for 5 days in Kyoto. Hotel suggestions were well-priced and perfectly located. Must-use for any Japan trip.',stars:5,date:'Feb 14, 2026',source:'trustpilot',trip:'🎒 Solo',helpful:94,avatar:'AT',color:'#4A9E6F',featured:true,is_approved:true,is_verified:false,replies:[]},
+  {id:'sim6',name:'Lucas P.',city:'São Paulo',title:'Good but sometimes generic',body:'Really love the concept and the UI is beautiful. 4 stars because some activity suggestions felt more touristy than I hoped. But the planning engine is genuinely useful.',stars:4,date:'Feb 10, 2026',source:'google',trip:'🎒 Solo',helpful:38,avatar:'LP',color:'#7A5C8A',featured:false,is_approved:true,is_verified:false,replies:[]},
+  {id:'sim7',name:'Chloe M.',city:'Amsterdam',title:'Perfect for weekend plans',body:'Saturday morning, no plans. Opened AFYA, set parameters. Had a full day itinerary in 3 seconds. We followed it and had one of the best days ever.',stars:5,date:'Feb 5, 2026',source:'trustpilot',trip:'👫 Friends',helpful:178,avatar:'CM',color:'#6D8F82',featured:false,is_approved:true,is_verified:false,replies:[]},
+  {id:'sim8',name:'Ryo N.',city:'Tokyo',title:'Departure feature is genius',body:'The "leave by X:XX" notice between activities is the best feature. I used to always lose track of time. Now every transition is perfectly planned.',stars:5,date:'Jan 30, 2026',source:'trustpilot',trip:'👫 Friends',helpful:55,avatar:'RN',color:'#C94F3A',featured:false,is_approved:true,is_verified:false,replies:[]},
+  {id:'sim9',name:'Fatima A.',city:'Casablanca',title:'Budget filters actually work',body:'Set max $60 per person for Paris. AFYA found real quality activities within budget — free museums on Sunday, market picnic, cheap excellent bistro.',stars:5,date:'Jan 24, 2026',source:'trustpilot',trip:'👫 Friends',helpful:73,avatar:'FA',color:'#D4A843',featured:false,is_approved:true,is_verified:false,replies:[]},
+  {id:'sim10',name:'Tom B.',city:'Sydney',title:'Needs more local gems',body:'Obvious tourist spots are great but I want hidden gems. Restaurant suggestions leaned heavily towards chains rather than independent spots.',stars:3,date:'Jan 18, 2026',source:'google',trip:'🎒 Solo',helpful:22,avatar:'TB',color:'#4A7AB5',featured:false,is_approved:true,is_verified:false,replies:[]},
+  {id:'sim11',name:'Yuki S.',city:'Osaka',title:'Used it every day',body:'10 days in Japan with 4 friends and different interests. AFYA handled everything — temples, street food, shopping. Each day had something for everyone.',stars:5,date:'Jan 12, 2026',source:'trustpilot',trip:'👫 Friends',helpful:130,avatar:'YS',color:'#4A9E6F',featured:true,is_approved:true,is_verified:false,replies:[]},
+  {id:'sim12',name:'Isabella C.',city:'Rome',title:'Couple mode is pure magic',body:'Surprise trip to Amalfi using couple mode. The AI summary made us both emotional — it described our trip as if it had already happened. Then we went and it matched perfectly.',stars:5,date:'Jan 8, 2026',source:'trustpilot',trip:'❤️ Couple',helpful:98,avatar:'IC',color:'#C94F3A',featured:true,is_approved:true,is_verified:false,replies:[]},
 ];
+
+// allReviews est dynamique : combine Supabase + simulés selon la règle des 20 avis
+let allReviews = [...simulatedReviews];
+let currentUserData = null; // user connecté
+let currentUserProfile = null; // son profil (avec rôle)
+let allRestosForReviews = []; // pour le dropdown du formulaire
+let allActivitiesForReviews = []; // pour le dropdown du formulaire
+
+// ═════════ Chargement depuis Supabase ═════════
+async function loadReviewsFromSupabase() {
+  try {
+    // 1) Charger les avis approuvés (visibles par tous)
+    const { data: approvedData, error: approvedErr } = await sb
+      .from('reviews')
+      .select('*')
+      .eq('source', 'afya')
+      .eq('is_approved', true)
+      .order('created_at', { ascending: false });
+    
+    if (approvedErr) {
+      console.error('❌ Error loading approved reviews:', approvedErr);
+    }
+    
+    // 2) Charger les avis pending de l'utilisateur actuel (si connecté)
+    let pendingData = [];
+    if (currentUserData) {
+      const { data: pData } = await sb
+        .from('reviews')
+        .select('*')
+        .eq('user_id', currentUserData.id)
+        .eq('is_approved', false)
+        .order('created_at', { ascending: false });
+      pendingData = pData || [];
+    }
+    
+    const allSupabaseReviews = [...(approvedData || []), ...pendingData];
+    
+    // 3) Charger les profils des auteurs
+    const userIds = [...new Set(allSupabaseReviews.map(r => r.user_id).filter(Boolean))];
+    let profilesMap = {};
+    if (userIds.length > 0) {
+      const { data: profiles } = await sb
+        .from('profiles')
+        .select('id, first_name, email, avatar_url')
+        .in('id', userIds);
+      (profiles || []).forEach(p => { profilesMap[p.id] = p; });
+    }
+    
+    // 4) Charger toutes les replies des avis chargés
+    const reviewIds = allSupabaseReviews.map(r => r.id);
+    let allRepliesData = [];
+    if (reviewIds.length > 0) {
+      const { data: replies } = await sb
+        .from('review_replies')
+        .select('*, profiles:author_id(id, first_name, email, role, avatar_url)')
+        .in('review_id', reviewIds);
+      allRepliesData = replies || [];
+    }
+    
+    // 5) Transformer en format compatible avec le rendu existant
+    const afyaReviews = allSupabaseReviews.map(r => {
+      const profile = profilesMap[r.user_id];
+      const name = profile?.first_name || profile?.email?.split('@')[0] || 'Anonymous';
+      const reviewReplies = allRepliesData.filter(rep => rep.review_id === r.id);
+      return {
+        id: r.id,
+        name: name,
+        city: '', // pas dans la table, optionnel
+        title: r.title,
+        body: r.body,
+        stars: r.stars,
+        date: new Date(r.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }),
+        source: 'afya',
+        trip: r.trip_type || '🌍 Traveller',
+        helpful: r.helpful_count || 0,
+        avatar: name.substring(0,2).toUpperCase(),
+        avatarUrl: profile?.avatar_url,
+        color: avatarColors[Math.floor(Math.random()*avatarColors.length)],
+        featured: r.is_featured,
+        is_approved: r.is_approved,
+        is_verified: r.is_verified,
+        is_mine: currentUserData && r.user_id === currentUserData.id,
+        replies_closed: r.replies_closed_by_author || r.replies_closed_by_staff,
+        user_id: r.user_id,
+        replies: reviewReplies.sort((a,b) => {
+          const order = { super_admin:0, admin:1, moderator:2, user:3 };
+          const aR = order[a.profiles?.role] ?? 4;
+          const bR = order[b.profiles?.role] ?? 4;
+          if (aR !== bR) return aR - bR;
+          return new Date(b.created_at) - new Date(a.created_at);
+        })
+      };
+    });
+    
+    // 6) Compter les avis AFYA approuvés
+    const approvedAfyaCount = afyaReviews.filter(r => r.is_approved).length;
+    
+    // 7) Switch automatique
+    if (approvedAfyaCount >= 20) {
+      console.log(`✅ ${approvedAfyaCount} avis AFYA approuvés — affichage AFYA only`);
+      allReviews = afyaReviews;
+    } else {
+      console.log(`📊 ${approvedAfyaCount}/20 avis AFYA — affichage mixte (AFYA + simulés)`);
+      // Avis AFYA d'abord, puis simulés
+      allReviews = [...afyaReviews, ...simulatedReviews];
+    }
+    
+    // Mise à jour du compteur total
+    const realTotal = approvedAfyaCount + (approvedAfyaCount < 20 ? simulatedReviews.length : 0);
+    if (document.getElementById('totalReviewCount')) {
+      document.getElementById('totalReviewCount').textContent = realTotal.toLocaleString();
+    }
+    if (document.getElementById('mainCount')) {
+      document.getElementById('mainCount').textContent = `Based on ${realTotal.toLocaleString()} reviews`;
+    }
+  } catch (e) {
+    console.error('❌ Exception loading reviews:', e);
+  }
+}
+
+// ═════════ Helpers pour le formulaire d'avis ═════════
+async function loadRestosAndActsForReviewForm() {
+  const [restos, activs] = await Promise.all([
+    sb.from('restaurants').select('id, name, emoji').order('name'),
+    sb.from('activities').select('id, name, emoji').order('name')
+  ]);
+  allRestosForReviews = restos.data || [];
+  allActivitiesForReviews = activs.data || [];
+  
+  const select = document.getElementById('revRelated');
+  if (!select) return;
+  
+  let html = '<option value="">— Select (optional) —</option>';
+  if (allRestosForReviews.length > 0) {
+    html += '<optgroup label="🍽️ Restaurants">';
+    allRestosForReviews.forEach(r => {
+      html += `<option value="resto:${r.id}">${r.emoji||'🍽️'} ${r.name}</option>`;
+    });
+    html += '</optgroup>';
+  }
+  if (allActivitiesForReviews.length > 0) {
+    html += '<optgroup label="🎯 Activities">';
+    allActivitiesForReviews.forEach(a => {
+      html += `<option value="act:${a.id}">${a.emoji||'🎯'} ${a.name}</option>`;
+    });
+    html += '</optgroup>';
+  }
+  select.innerHTML = html;
+}
+
+// ═════════ Système de réponses publiques ═════════
+async function toggleReplies(reviewId) {
+  const el = document.getElementById(`replies-content-${reviewId}`);
+  const btn = document.getElementById(`replies-btn-${reviewId}`);
+  if (!el) return;
+  if (el.style.display === 'block') {
+    el.style.display = 'none';
+    btn.innerHTML = btn.innerHTML.replace('▾', '▸');
+  } else {
+    el.style.display = 'block';
+    btn.innerHTML = btn.innerHTML.replace('▸', '▾');
+  }
+}
+
+async function submitPublicReply(reviewId) {
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) {
+    toast('🔒 Please sign in to reply');
+    openAuthModal('signin');
+    return;
+  }
+  
+  const textarea = document.getElementById(`reply-textarea-${reviewId}`);
+  const body = textarea.value.trim();
+  if (!body) { toast('⚠️ Please write a reply'); return; }
+  
+  textarea.disabled = true;
+  const { error } = await sb.from('review_replies').insert({
+    review_id: reviewId,
+    author_id: user.id,
+    body: body
+  });
+  
+  if (error) {
+    toast(`❌ Error: ${error.message}`);
+    textarea.disabled = false;
+    return;
+  }
+  
+  toast('✅ Reply posted');
+  textarea.value = '';
+  textarea.disabled = false;
+  await loadReviewsFromSupabase();
+  renderReviews(currentFilter);
+}
+
+// ═════════ Système de notifications ═════════
+let allNotifications = [];
+
+async function loadNotifications() {
+  if (!currentUserData) return;
+  
+  const { data, error } = await sb
+    .from('notifications')
+    .select('*')
+    .eq('user_id', currentUserData.id)
+    .order('created_at', { ascending: false })
+    .limit(20);
+  
+  if (error) {
+    console.error('❌ Error loading notifications:', error);
+    return;
+  }
+  
+  allNotifications = data || [];
+  renderNotifications();
+}
+
+function renderNotifications() {
+  const unread = allNotifications.filter(n => !n.is_read).length;
+  const badge = document.getElementById('notifBadge');
+  if (badge) {
+    badge.textContent = unread > 9 ? '9+' : unread;
+    badge.classList.toggle('show', unread > 0);
+  }
+  
+  const list = document.getElementById('notifList');
+  if (!list) return;
+  
+  if (allNotifications.length === 0) {
+    list.innerHTML = `<div class="notif-empty"><div class="notif-empty-icon">🔔</div><div>No notifications yet</div></div>`;
+    return;
+  }
+  
+  const iconMap = {
+    reply_to_review: '💬',
+    reply_to_reply: '↩️',
+    review_approved: '✅',
+    review_rejected: '❌',
+    review_featured: '⭐',
+    review_reported: '🚨',
+    replies_closed: '🔒',
+    replies_reopened: '🔓',
+    suggestion_approved: '✅',
+    suggestion_rejected: '❌',
+    report_resolved: '✅',
+    report_dismissed: '❌'
+  };
+  
+  list.innerHTML = allNotifications.map(n => {
+    const icon = iconMap[n.type] || '🔔';
+    const timeAgo = getTimeAgo(new Date(n.created_at));
+    return `
+      <div class="notif-item ${n.is_read ? '' : 'unread'}" onclick="markNotificationRead('${n.id}')">
+        <div class="notif-item-icon">${icon}</div>
+        <div class="notif-item-content">
+          <div class="notif-item-title">${escapeHtml(n.title || '')}</div>
+          <div class="notif-item-msg">${escapeHtml(n.message || '')}</div>
+          <div class="notif-item-time">${timeAgo}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function getTimeAgo(date) {
+  const now = new Date();
+  const diffMs = now - date;
+  const diffMin = Math.floor(diffMs / 60000);
+  const diffHr = Math.floor(diffMin / 60);
+  const diffDay = Math.floor(diffHr / 24);
+  if (diffMin < 1) return 'just now';
+  if (diffMin < 60) return `${diffMin}m ago`;
+  if (diffHr < 24) return `${diffHr}h ago`;
+  if (diffDay < 7) return `${diffDay}d ago`;
+  return date.toLocaleDateString('en-US', { month:'short', day:'numeric' });
+}
+
+function toggleNotifDropdown() {
+  const dd = document.getElementById('notifDropdown');
+  if (!dd) return;
+  dd.classList.toggle('open');
+  if (dd.classList.contains('open')) {
+    loadNotifications();
+  }
+}
+
+async function markNotificationRead(notifId) {
+  await sb.from('notifications').update({ is_read: true, read_at: new Date().toISOString() }).eq('id', notifId);
+  await loadNotifications();
+}
+
+async function markAllNotificationsRead() {
+  if (!currentUserData) return;
+  await sb.from('notifications')
+    .update({ is_read: true, read_at: new Date().toISOString() })
+    .eq('user_id', currentUserData.id)
+    .eq('is_read', false);
+  await loadNotifications();
+  toast('✅ All notifications marked as read');
+}
+
+function escapeHtml(text) {
+  if (!text && text !== 0) return '';
+  const div = document.createElement('div');
+  div.textContent = String(text);
+  return div.innerHTML;
+}
+
+// Click outside pour fermer le dropdown de notifications
+document.addEventListener('click', (e) => {
+  const dd = document.getElementById('notifDropdown');
+  const btn = document.getElementById('notifBellBtn');
+  if (!dd || !btn) return;
+  if (dd.classList.contains('open') && !dd.contains(e.target) && !btn.contains(e.target)) {
+    dd.classList.remove('open');
+  }
+});
 const ratingDist = {5:71,4:18,3:6,2:3,1:2};
 function renderRatingBars(){
   document.getElementById('ratingBars').innerHTML = [5,4,3,2,1].map(n=>`
@@ -1866,15 +2379,93 @@ function renderReviews(filter='all', page=1){
   else if(filter==='friends') list = list.filter(r=>r.trip.includes('Friend'));
   else if(filter==='couple') list = list.filter(r=>r.trip.includes('Couple'));
   else if(filter==='family') list = list.filter(r=>r.trip.includes('Family'));
-  const autoTp = list.filter(r=>r.source==='afya').length<3 && !['trustpilot','google'].includes(filter);
+  const afyaApprovedCount = allReviews.filter(r=>r.source==='afya' && r.is_approved).length;
+  const autoTp = afyaApprovedCount < 20 && !['trustpilot','google'].includes(filter);
   const perPage = 9;
   const shown = list.slice(0, page*perPage);
   const hasMore = list.length > page*perPage;
   const labels = {afya:'<span class="source-afya">AFYA</span>',trustpilot:'<span class="source-tp">Trustpilot</span>',google:'<span class="source-g">Google</span>'};
-  document.getElementById('reviewsGrid').innerHTML = shown.map(r=>`
-    <div class="review-card ${r.source==='trustpilot'?'tp-card':''} ${r.featured?'featured':''}">
+  
+  document.getElementById('reviewsGrid').innerHTML = shown.map(r=>{
+    // Badges
+    let badges = '';
+    if (r.is_approved === false) badges += '<span class="rc-badge rc-badge-pending">⏳ Pending</span>';
+    if (r.is_mine) badges += '<span class="rc-badge rc-badge-yours">YOU</span>';
+    if (r.is_verified) badges += '<span class="rc-badge rc-badge-verified">✓ Verified visit</span>';
+    
+    // Avatar
+    const avatarStyle = r.avatarUrl 
+      ? `background-image:url('${r.avatarUrl}');background-size:cover;background-position:center` 
+      : `background:${r.color}`;
+    const avatarContent = r.avatarUrl ? '' : r.avatar;
+    
+    // Replies (uniquement pour les avis AFYA Supabase)
+    let repliesHtml = '';
+    if (r.source === 'afya' && r.id && typeof r.id === 'string') {
+      const replies = r.replies || [];
+      const replyCount = replies.length;
+      const closed = r.replies_closed;
+      
+      let repliesContent = '';
+      if (replies.length > 0) {
+        repliesContent = '<div class="rc-replies-list">' + replies.map(rep => {
+          const role = rep.profiles?.role;
+          const name = rep.profiles?.first_name || rep.profiles?.email?.split('@')[0] || 'User';
+          const repDate = new Date(rep.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric' });
+          let roleClass = '';
+          let roleLabel = '';
+          if (role === 'super_admin') { roleClass = 'role-super'; roleLabel = '<span class="rc-reply-role super">👑 SUPER ADMIN</span>'; }
+          else if (role === 'admin') { roleClass = 'role-admin'; roleLabel = '<span class="rc-reply-role admin">ADMIN</span>'; }
+          else if (role === 'moderator') { roleClass = 'role-mod'; roleLabel = '<span class="rc-reply-role mod">MOD</span>'; }
+          return `
+            <div class="rc-reply ${roleClass}">
+              <div class="rc-reply-head">
+                <span class="rc-reply-author">${escapeHtml(name)}</span>
+                ${roleLabel}
+                <span class="rc-reply-time">${repDate}</span>
+              </div>
+              <div class="rc-reply-body">${escapeHtml(rep.body)}</div>
+            </div>
+          `;
+        }).join('') + '</div>';
+      }
+      
+      // Formulaire de réponse
+      let replyFormHtml = '';
+      if (closed) {
+        replyFormHtml = '<div class="rc-reply-closed">🔒 Replies are closed on this review.</div>';
+      } else {
+        replyFormHtml = `
+          <div class="rc-reply-form">
+            <textarea class="rc-reply-textarea" id="reply-textarea-${r.id}" placeholder="Write a reply..."></textarea>
+            <button class="rc-reply-submit" onclick="submitPublicReply('${r.id}')">Reply</button>
+          </div>
+        `;
+      }
+      
+      repliesHtml = `
+        <div class="rc-replies-section">
+          <button class="rc-replies-toggle" id="replies-btn-${r.id}" onclick="toggleReplies('${r.id}')">
+            ▸ ${replyCount > 0 ? `Show ${replyCount} repl${replyCount > 1 ? 'ies' : 'y'}` : '+ Add a reply'}
+          </button>
+          <div id="replies-content-${r.id}" style="display:none">
+            ${repliesContent}
+            ${replyFormHtml}
+          </div>
+        </div>
+      `;
+    }
+    
+    return `
+    <div class="review-card ${r.source==='trustpilot'?'tp-card':''} ${r.featured?'featured':''}" style="${r.is_approved===false ? 'opacity:.75;border-style:dashed' : ''}">
       <div class="rc-top">
-        <div class="rc-user"><div class="rc-avatar" style="background:${r.color}">${r.avatar}</div><div><div class="rc-name">${r.name}</div><div class="rc-meta">${r.city} · ${r.trip}</div></div></div>
+        <div class="rc-user">
+          <div class="rc-avatar" style="${avatarStyle}">${avatarContent}</div>
+          <div>
+            <div class="rc-name">${r.name}${badges}</div>
+            <div class="rc-meta">${r.city || ''} ${r.city ? '·' : ''} ${r.trip}</div>
+          </div>
+        </div>
         <div>${labels[r.source]||''}</div>
       </div>
       <div class="rc-stars">${starsHtml(r.stars)}</div>
@@ -1884,10 +2475,12 @@ function renderReviews(filter='all', page=1){
         <div class="rc-date">${r.date}</div>
         <div style="display:flex;align-items:center;gap:8px">
           <span class="rc-trip">${r.trip}</span>
-          <button class="rc-helpful" onclick="markHelpful(${r.id},this)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3H14z"/></svg>Helpful (${r.helpful})</button>
+          <button class="rc-helpful" onclick="markHelpful('${r.id}',this)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3H14z"/></svg>Helpful (${r.helpful})</button>
         </div>
       </div>
-    </div>`).join('') + (autoTp?'<div style="grid-column:1/-1;text-align:center;padding:12px;font-size:12px;color:var(--ink3);font-family:var(--ui)">Showing Trustpilot reviews to supplement community reviews. <a href="https://trustpilot.com" target="_blank" style="color:var(--sage)">See all on Trustpilot →</a></div>':'');
+      ${repliesHtml}
+    </div>`;
+  }).join('') + (autoTp?`<div style="grid-column:1/-1;text-align:center;padding:12px;font-size:12px;color:var(--ink3);font-family:var(--ui)">Showing Trustpilot/Google reviews while AFYA grows (${afyaApprovedCount}/20 AFYA reviews).</div>`:'');
   document.getElementById('loadMoreBtn').style.display = hasMore?'':'none';
 }
 function markHelpful(id, btn){
@@ -1904,6 +2497,14 @@ renderRatingBars();
 renderReviews('all',1);
 renderActivities();
 filterRestos();
+
+// Charge les avis depuis Supabase au démarrage (de manière async)
+loadReviewsFromSupabase().then(() => {
+  renderReviews(currentFilter, 1);
+});
+
+// Charge les restos/activités pour le dropdown du formulaire d'avis
+loadRestosAndActsForReviewForm();
 </script>
 </body>
 </html>
