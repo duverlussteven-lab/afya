@@ -597,10 +597,10 @@ footer{background:var(--ink);padding:60px 52px 32px}
 
 <!-- ═══ NAV ═══ -->
 <nav id="nav">
-  <<a href="#top" style="line-height:0">
-<img src="LogositeAFYA.png" alt="AFYA" class="logo-light" style="height: 50px;px;width:auto">
-<img src="LogositeAFYAdark.png" alt="AFYA" class="logo-dark" style="height:50px;width:auto;display:none">
-</a>
+ <a href="#top" style="line-height:0">
+    <img src="LogositeAFYA.png" alt="AFYA" class="logo-light" style="height:50px;width:auto">
+    <img src="LogositeAFYAdark.png" alt="AFYA" class="logo-dark" style="height:50px;width:auto;display:none">
+  </a>
   <ul class="nav-links">
     <li><a href="#planner">Plan</a></li>
     <li><a href="#activities">Activities</a></li>
@@ -954,7 +954,7 @@ footer{background:var(--ink);padding:60px 52px 32px}
 <script>
   // ═════════════════════ SUPABASE CONFIG ═════════════════════
 const SUPABASE_URL = 'https://zryfceystyipimniarst.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_uI4dQX6KFlLcxtxqw52ewA_ujacVkch';
+const SUPABASE_KEY = 'sb_publishable_XXXXXXXXXXXXXXXXXXX';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 console.log('✅ Supabase connected');
 // ═════════════════════ AUTHENTICATION ═════════════════════
@@ -1269,36 +1269,8 @@ async function loadActivitiesFromSupabase() {
 }
 
 loadActivitiesFromSupabase();
-  const { data, error } = await sb.from('activities').select('*');
-
-  if (error) {
-    console.error('❌ Error loading activities:', error);
-    return;
-  }
-
-  console.log('✅ Activities loaded from Supabase:', data);
-
-  if (data && data.length > 0) {
-    activities.length = 0;
-    data.forEach(a => {
-      activities.push({
-        id: a.id,
-        emoji: a.emoji,
-        name: a.name,
-        desc: a.description,
-        tag: a.tag,
-        price: parseFloat(a.price),
-        rating: parseFloat(a.rating),
-        reviews: a.reviews_count,
-        bg: a.bg_color || '#E8E0D4'
-      });
-    });
-    renderActivities();
-  }
-}
-
-loadActivitiesFromSupabase();
 loadRestosFromSupabase();
+
 // ═════════════════════ LOGO MOUNT ═════════════════════
 function mountLogos(){
   const tpl = document.getElementById('logoTemplate');
@@ -1758,7 +1730,10 @@ function filterActs(tag, btn){
   btn.classList.add('active');
   renderActivities();
 }
-document.getElementById('actGrid').innerHTML = list.map(x=>`
+function renderActivities(){
+  const sel = [...document.querySelectorAll('#actFilters .filter-btn.active')].map(c=>c.dataset.tag);
+  const list = (sel.length===0 || sel.includes('all') || actFilter==='all') ? activities : activities.filter(a=>sel.includes(a.tag) || a.tag.toLowerCase()===actFilter.toLowerCase());
+  document.getElementById('actGrid').innerHTML = list.map(x=>`
     <div class="act-card">
       ${x.photoUrl
         ? `<div class="act-img" style="background-image:url(${x.photoUrl});background-size:cover;background-position:center"></div>`
@@ -1782,6 +1757,9 @@ document.getElementById('actGrid').innerHTML = list.map(x=>`
       </div>
     </div>`).join('');
 }
+
+// Initialise l'affichage des activités
+renderActivities();
 function addAct(btn,name){ btn.textContent='✓ Added'; btn.classList.add('added'); btn.disabled=true; toast(`"${name}" added!`); }
 
 // ═════════════════════ RESTAURANTS ═════════════════════
