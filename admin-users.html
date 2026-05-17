@@ -2,460 +2,548 @@
 <html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Users — AFYA Admin</title>
+<title>AFYA Admin — Users</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{
   --bg:#FDFCF9; --bg2:#F6F3EE; --bg3:#EEEAE2; --sur:#FFFFFF;
   --ink:#1D2B3A; --ink2:#3B5068; --ink3:#7A93A8;
-  --sage:#6D8F82; --sage-l:#8BAD9E; --sage-p:#C8D8D2;
-  --gold:#D4A843; --green:#4A9E6F; --red:#C94F3A;
-  --border:rgba(109,143,130,.18); --border2:rgba(109,143,130,.3);
-  --shadow:rgba(29,43,58,.07); --shadow2:rgba(29,43,58,.14);
+  --sage:#6D8F82; --sage-l:#8BAD9E;
+  --green:#4A9E6F; --red:#C94F3A; --gold:#D4A843;
+  --purple:#9D4FCC; --blue:#3B5068;
+  --border:rgba(109,143,130,.18);
+  --shadow:rgba(29,43,58,.07);
   --disp:'Cormorant Garamond',serif; --ui:'Syne',sans-serif; --body:'DM Sans',sans-serif;
-  --r:16px; --r-sm:8px; --r-lg:20px;
-  --sidebar-w:260px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg2);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.65;min-height:100vh}
-a{color:inherit;text-decoration:none}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.6;min-height:100vh;display:flex}
 
-/* SIDEBAR */
-.sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);background:var(--ink);padding:24px 16px;overflow-y:auto;z-index:100}
-.sidebar-brand{display:flex;align-items:center;gap:10px;padding:8px 12px 24px;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:16px}
-.sidebar-brand-text{font-family:var(--ui);font-size:12px;font-weight:800;letter-spacing:.18em;color:white}
-.sidebar-brand-badge{font-family:var(--ui);font-size:8px;font-weight:700;letter-spacing:.14em;color:var(--sage-l);background:rgba(139,173,158,.12);padding:3px 8px;border-radius:4px;margin-left:auto}
-.sidebar-section-title{font-family:var(--ui);font-size:9px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.3);padding:14px 12px 8px}
-.sidebar-link{display:flex;align-items:center;gap:11px;padding:11px 14px;border-radius:8px;cursor:pointer;font-family:var(--ui);font-size:12px;font-weight:600;color:rgba(255,255,255,.55);margin-bottom:2px;transition:all .15s}
-.sidebar-link:hover{background:rgba(255,255,255,.05);color:white}
-.sidebar-link.active{background:rgba(109,143,130,.15);color:white}
-.sidebar-icon{font-size:14px;width:18px;text-align:center}
-
-/* BURGER */
-.burger-btn{display:none;position:fixed;top:16px;left:16px;z-index:200;width:44px;height:44px;background:var(--ink);border:none;border-radius:10px;color:white;cursor:pointer;align-items:center;justify-content:center;box-shadow:0 4px 16px var(--shadow2)}
-.burger-icon{display:flex;flex-direction:column;gap:4px}
-.burger-icon span{display:block;width:18px;height:2px;background:white;border-radius:2px}
-.sidebar-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:90;backdrop-filter:blur(2px)}
-.sidebar-backdrop.show{display:block}
-
-/* MAIN */
-.main{margin-left:var(--sidebar-w);min-height:100vh;padding:32px 40px}
-.page-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:32px;flex-wrap:wrap;gap:16px}
-.admin-eye{display:inline-flex;align-items:center;gap:10px;font-family:var(--ui);font-size:9px;font-weight:700;letter-spacing:.32em;text-transform:uppercase;color:var(--sage);margin-bottom:10px}
-.admin-eye::before{content:'';display:block;width:20px;height:1px;background:var(--sage)}
-.admin-title{font-family:var(--disp);font-size:42px;font-weight:300;color:var(--ink)}
-.admin-title em{font-style:italic;color:var(--sage)}
-
-/* STATS RAPIDES */
-.quickstats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:28px}
-.qs-card{background:var(--sur);border:1px solid var(--border);border-radius:12px;padding:18px 20px}
-.qs-value{font-family:var(--disp);font-size:30px;font-weight:600;color:var(--ink);line-height:1}
-.qs-label{font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin-top:6px}
-
-/* TOOLBAR */
-.toolbar{display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap}
-.search-input{flex:1;min-width:200px;background:var(--sur);border:1.5px solid var(--border);border-radius:8px;padding:11px 16px;font-family:var(--body);font-size:14px;color:var(--ink);outline:none}
-.search-input:focus{border-color:var(--sage)}
-
-/* TABLE */
-.table-wrap{background:var(--sur);border-radius:var(--r-lg);border:1px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch}
-table{width:100%;min-width:760px;border-collapse:collapse}
-thead{background:var(--bg2);border-bottom:1px solid var(--border)}
-th{text-align:left;padding:14px 16px;font-family:var(--ui);font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--ink3)}
-td{padding:14px 16px;font-size:13px;color:var(--ink2);border-bottom:1px solid var(--border)}
-tr:last-child td{border-bottom:none}
-tr:hover td{background:rgba(109,143,130,.03)}
-
-.user-cell{display:flex;align-items:center;gap:12px}
-.user-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--sage),var(--sage-l));display:flex;align-items:center;justify-content:center;color:white;font-family:var(--ui);font-size:13px;font-weight:800;flex-shrink:0;background-size:cover;background-position:center}
-.user-name{font-family:var(--ui);font-weight:700;color:var(--ink);font-size:13px}
-.user-email{font-size:11px;color:var(--ink3);margin-top:2px}
-
-.role-badge{display:inline-block;padding:4px 10px;border-radius:100px;font-family:var(--ui);font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
-.role-admin{background:rgba(212,168,67,.12);color:#A07F2A}
-.role-user{background:rgba(109,143,130,.12);color:var(--sage)}
-
-.you-badge{display:inline-block;background:var(--sage);color:white;padding:2px 8px;border-radius:100px;font-family:var(--ui);font-size:8px;font-weight:800;letter-spacing:.1em;margin-left:6px}
-
-/* ACTIONS MENU */
-.cell-actions{position:relative;display:flex;justify-content:flex-end}
-.actions-btn{width:32px;height:32px;border:1px solid var(--border);background:transparent;border-radius:8px;cursor:pointer;font-size:18px;font-weight:700;color:var(--ink2);line-height:1;letter-spacing:1px;display:flex;align-items:center;justify-content:center;transition:all .15s}
-.actions-btn:hover{background:var(--bg2);border-color:var(--ink3);color:var(--ink)}
-.actions-btn:disabled{opacity:.3;cursor:not-allowed}
-.actions-menu{position:absolute;top:calc(100% + 6px);right:0;background:var(--sur);border:1px solid var(--border);border-radius:10px;padding:6px;box-shadow:0 12px 32px rgba(29,43,58,.16);z-index:50;min-width:200px;display:none}
-.actions-menu.open{display:block;animation:fadeUp .15s ease}
-.actions-menu-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:6px;cursor:pointer;font-family:var(--ui);font-size:12px;font-weight:600;color:var(--ink2);background:none;border:none;width:100%;text-align:left;transition:background .15s}
-.actions-menu-item:hover{background:rgba(109,143,130,.08);color:var(--sage)}
-.actions-menu-icon{font-size:13px;width:16px;text-align:center}
-.actions-menu-item.danger{color:var(--red)}
-.actions-menu-item.danger:hover{background:rgba(201,79,58,.08);color:var(--red)}
-@keyframes fadeUp{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
-
-.empty{text-align:center;padding:80px 24px;color:var(--ink3)}
-.empty-icon{font-size:48px;margin-bottom:16px;opacity:.5}
-
-/* MODAL DETAILS */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
-.modal-overlay.open{display:flex}
-.modal{background:var(--sur);border-radius:var(--r-lg);padding:32px;max-width:520px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.2)}
-.modal-title{font-family:var(--disp);font-size:28px;font-weight:400;color:var(--ink);margin-bottom:6px}
-.modal-title em{font-style:italic;color:var(--sage)}
-.modal-sub{font-size:13px;color:var(--ink2);margin-bottom:24px}
-
-.detail-row{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);font-size:13px}
-.detail-label{color:var(--ink3);font-family:var(--ui);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
-.detail-value{color:var(--ink);font-weight:600;text-align:right}
-
-.btn-primary{background:var(--ink);color:white;padding:11px 22px;border:none;border-radius:8px;cursor:pointer;font-family:var(--ui);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
-.btn-ghost{background:transparent;color:var(--ink2);padding:11px 22px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-family:var(--ui);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
-.btn-danger{background:var(--red);color:white;padding:11px 22px;border:none;border-radius:8px;cursor:pointer;font-family:var(--ui);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
-.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:24px;padding-top:20px;border-top:1px solid var(--border)}
-
-.loading{text-align:center;padding:80px;color:var(--ink3);font-family:var(--ui);font-size:13px}
-
-@media(max-width:900px){
-  .sidebar{transform:translateX(-100%);transition:transform .25s ease;box-shadow:0 0 40px rgba(0,0,0,.3)}
-  .sidebar.open{transform:translateX(0)}
-  .main{margin-left:0;padding:20px;padding-top:72px}
-  .burger-btn{display:flex}
-  .quickstats{grid-template-columns:1fr 1fr}
+/* ═══ SIDEBAR ═══ */
+/* ═══ SIDEBAR ═══ */
+.sidebar{
+  position:fixed;
+  top:0;left:0;bottom:0;
+  width:260px;
+  background:var(--ink);
+  padding:24px 16px;
+  overflow-y:auto;
+  z-index:100;
+  display:flex;
+  flex-direction:column;
 }
-@media(max-width:560px){
-  .quickstats{grid-template-columns:1fr}
+
+.sidebar-brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:8px 12px 24px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+  margin-bottom:16px;
+}
+.sidebar-brand-text{
+  font-family:var(--ui);
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:.18em;
+  color:white;
+}
+.sidebar-brand-badge{
+  font-family:var(--ui);
+  font-size:8px;
+  font-weight:700;
+  letter-spacing:.14em;
+  color:var(--sage-l);
+  background:rgba(139,173,158,.12);
+  padding:3px 8px;
+  border-radius:4px;
+  margin-left:auto;
+}
+
+.sidebar-section-title{
+  font-family:var(--ui);
+  font-size:9px;
+  font-weight:700;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  color:rgba(255,255,255,.3);
+  padding:14px 12px 8px;
+}
+
+.sidebar-link{
+  display:flex;
+  align-items:center;
+  gap:11px;
+  padding:11px 14px;
+  border-radius:8px;
+  cursor:pointer;
+  font-family:var(--ui);
+  font-size:12px;
+  font-weight:600;
+  color:rgba(255,255,255,.55);
+  margin-bottom:2px;
+  transition:all .15s;
+  text-decoration:none;
+}
+.sidebar-link:hover{
+  background:rgba(255,255,255,.05);
+  color:white;
+}
+.sidebar-link.active{
+  background:rgba(109,143,130,.15);
+  color:white;
+}
+.sidebar-icon{
+  font-size:14px;
+  width:18px;
+  text-align:center;
+}
+
+/* ═══ MAIN ═══ */
+.main{margin-left:260px;flex:1;padding:32px;min-height:100vh}
+.burger-btn{display:none;position:fixed;top:16px;left:16px;z-index:1001;width:42px;height:42px;background:var(--ink);color:white;border:none;border-radius:8px;font-size:20px;cursor:pointer;box-shadow:0 4px 12px var(--shadow)}
+.top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:14px}
+.page-title{font-family:var(--disp);font-size:32px;font-weight:400;color:var(--ink)}
+.page-title em{font-style:italic;color:var(--sage)}
+.page-sub{font-size:13px;color:var(--ink3);font-family:var(--ui);margin-top:4px}
+
+/* ═══ STATS ═══ */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.stat-card{background:var(--sur);border:1px solid var(--border);border-radius:12px;padding:18px 20px}
+.stat-num{font-family:var(--disp);font-size:32px;font-weight:400;color:var(--ink);margin-bottom:4px}
+.stat-label{font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3)}
+
+/* ═══ SEARCH ═══ */
+.search-bar{background:var(--sur);border:1px solid var(--border);border-radius:12px;padding:14px 18px;margin-bottom:18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.search-bar input{flex:1;min-width:200px;border:1.5px solid var(--border);border-radius:8px;padding:8px 12px;font-family:var(--ui);font-size:13px;outline:none}
+.search-bar input:focus{border-color:var(--sage)}
+.role-filter{display:flex;gap:6px;flex-wrap:wrap}
+.role-btn{padding:7px 14px;border:1.5px solid var(--border);border-radius:100px;background:transparent;cursor:pointer;font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--ink2);transition:all .2s}
+.role-btn.active{background:var(--sage);border-color:var(--sage);color:white}
+
+/* ═══ USERS GRID ═══ */
+.users-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+.user-card{background:var(--sur);border:1px solid var(--border);border-radius:12px;padding:18px;position:relative;transition:all .2s}
+.user-card:hover{box-shadow:0 4px 18px var(--shadow);transform:translateY(-2px)}
+.user-top{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
+.user-avatar{width:48px;height:48px;border-radius:50%;background:var(--sage);color:white;display:flex;align-items:center;justify-content:center;font-family:var(--ui);font-weight:700;font-size:18px;flex-shrink:0;background-size:cover;background-position:center}
+.user-info{flex:1;min-width:0}
+.user-name{font-family:var(--ui);font-size:14px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.user-email{font-size:12px;color:var(--ink3);margin-top:2px;word-break:break-all}
+.badge-you{background:var(--sage);color:white;font-family:var(--ui);font-size:8px;font-weight:700;letter-spacing:.12em;padding:2px 7px;border-radius:100px}
+.badge-founder{background:linear-gradient(135deg,#D4A843,#B8862A);color:white;font-family:var(--ui);font-size:8px;font-weight:700;letter-spacing:.12em;padding:2px 7px;border-radius:100px}
+.user-actions-btn{position:absolute;top:14px;right:14px;width:30px;height:30px;background:transparent;border:none;border-radius:6px;cursor:pointer;color:var(--ink3);font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.user-actions-btn:hover{background:var(--bg2);color:var(--ink)}
+.user-meta{display:flex;gap:10px;font-size:11px;color:var(--ink3);font-family:var(--ui);margin-top:4px}
+
+/* Badges de rôle */
+.role-badge{display:inline-block;padding:3px 9px;border-radius:100px;font-family:var(--ui);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:white}
+.role-super_admin{background:var(--purple)}
+.role-admin{background:var(--blue)}
+.role-moderator{background:var(--green)}
+.role-user{background:var(--ink3)}
+
+/* ═══ DROPDOWN MENU ═══ */
+.dropdown{position:absolute;top:50px;right:14px;background:white;border:1px solid var(--border);border-radius:10px;padding:6px;box-shadow:0 8px 24px var(--shadow);z-index:50;display:none;min-width:200px}
+.dropdown.open{display:block}
+.dropdown-item{padding:8px 12px;font-family:var(--ui);font-size:11px;font-weight:600;color:var(--ink2);cursor:pointer;border-radius:6px;display:flex;align-items:center;gap:8px;transition:background .15s}
+.dropdown-item:hover{background:var(--bg2);color:var(--sage)}
+.dropdown-item.danger{color:var(--red)}
+.dropdown-item.danger:hover{background:rgba(201,79,58,.08);color:var(--red)}
+.dropdown-divider{height:1px;background:var(--border);margin:4px 0}
+.dropdown-icon{font-size:12px;width:16px;text-align:center}
+.dropdown-empty{padding:14px;text-align:center;font-size:11px;color:var(--ink3);font-family:var(--ui);font-style:italic}
+
+/* ═══ MODAL ═══ */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal-card{background:var(--sur);border-radius:16px;padding:28px;max-width:440px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.2)}
+.modal-icon{width:54px;height:54px;border-radius:50%;background:rgba(201,79,58,.12);display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 14px}
+.modal-icon.success{background:rgba(74,158,111,.12)}
+.modal-icon.info{background:rgba(109,143,130,.12)}
+.modal-card h3{font-family:var(--disp);font-size:22px;font-weight:400;color:var(--ink);text-align:center;margin-bottom:8px}
+.modal-card p{text-align:center;color:var(--ink2);font-size:13px;margin-bottom:20px;line-height:1.5}
+.modal-actions{display:flex;gap:10px}
+.btn{flex:1;padding:11px;border:none;border-radius:8px;font-family:var(--ui);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.btn-cancel{background:var(--bg2);color:var(--ink2)}
+.btn-cancel:hover{background:var(--bg3)}
+.btn-confirm{background:var(--red);color:white}
+.btn-confirm:hover{background:#A8402F}
+.btn-confirm.success{background:var(--green)}
+.btn-confirm.success:hover{background:#3D8458}
+
+/* ═══ LOADING ═══ */
+.loading{text-align:center;padding:60px;color:var(--ink3);font-family:var(--ui)}
+
+/* ═══ TOAST ═══ */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--ink);color:white;padding:14px 20px;border-radius:10px;font-family:var(--ui);font-size:12px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.2);transform:translateY(100px);opacity:0;transition:all .3s;z-index:300;display:flex;align-items:center;gap:10px;max-width:380px}
+.toast.show{transform:translateY(0);opacity:1}
+
+/* ═══ RESPONSIVE ═══ */
+@media(max-width:900px){
+  .sidebar{transform:translateX(-100%);z-index:1000}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0;padding:64px 16px 24px}
+  .burger-btn{display:flex;align-items:center;justify-content:center}
+  .stats-row{grid-template-columns:1fr 1fr}
 }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="admin-shared.js"></script>
 </head>
 <body>
 
-<!-- BURGER -->
-<button class="burger-btn" onclick="toggleSidebar()" aria-label="Open admin menu">
-  <div class="burger-icon"><span></span><span></span><span></span></div>
-</button>
-<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
+<!-- Burger -->
+<button class="burger-btn" onclick="toggleSidebar()" id="burgerBtn">☰</button>
 
-<!-- SIDEBAR -->
-<aside class="sidebar" id="sidebar">
-  <div class="sidebar-brand">
-    <span class="sidebar-brand-text">AFYA</span>
-    <span class="sidebar-brand-badge">ADMIN</span>
-  </div>
-  <div class="sidebar-section-title">Overview</div>
-  <a href="admin.html" class="sidebar-link"><span class="sidebar-icon">📊</span><span>Dashboard</span></a>
-  <div class="sidebar-section-title">Content</div>
-  <a href="admin-restaurants.html" class="sidebar-link"><span class="sidebar-icon">🍽️</span><span>Restaurants</span></a>
-  <a href="admin-activities.html" class="sidebar-link"><span class="sidebar-icon">🎯</span><span>Activities</span></a>
-  <div class="sidebar-section-title">Community</div>
-  <a href="admin-users.html" class="sidebar-link active"><span class="sidebar-icon">👥</span><span>Users</span></a>
-  <a href="admin-reviews.html" class="sidebar-link"><span class="sidebar-icon">⭐</span><span>Reviews</span></a>
-  <div class="sidebar-section-title">Account</div>
-  <a href="index.html" class="sidebar-link"><span class="sidebar-icon">↩️</span><span>Back to site</span></a>
-  <a href="#" onclick="signOut();return false" class="sidebar-link"><span class="sidebar-icon">🚪</span><span>Sign Out</span></a>
-</aside>
+<!-- Sidebar -->
+<!-- Sidebar (injectée dynamiquement par admin-shared.js) -->
+<div id="sidebarPlaceholder"></div>
 
-<!-- MAIN -->
+<!-- Main -->
 <main class="main">
-  <div id="loading" class="loading">Loading users...</div>
-  <div id="content" style="display:none">
-
-    <div class="page-header">
-      <div>
-        <div class="admin-eye">Community</div>
-        <h1 class="admin-title">Manage <em>Users</em></h1>
-      </div>
+  <div class="top-bar">
+    <div>
+      <h1 class="page-title">User <em>Management</em></h1>
+      <p class="page-sub" id="userCountSub">Loading users...</p>
     </div>
+  </div>
 
-    <!-- STATS -->
-    <div class="quickstats">
-      <div class="qs-card">
-        <div class="qs-value" id="statTotal">0</div>
-        <div class="qs-label">Total users</div>
-      </div>
-      <div class="qs-card">
-        <div class="qs-value" id="statAdmins">0</div>
-        <div class="qs-label">Admins</div>
-      </div>
-      <div class="qs-card">
-        <div class="qs-value" id="statRecent">0</div>
-        <div class="qs-label">New (7 days)</div>
-      </div>
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-num" id="statTotal">0</div><div class="stat-label">Total users</div></div>
+    <div class="stat-card"><div class="stat-num" id="statAdmins">0</div><div class="stat-label">Admins</div></div>
+    <div class="stat-card"><div class="stat-num" id="statMods">0</div><div class="stat-label">Moderators</div></div>
+    <div class="stat-card"><div class="stat-num" id="statNew">0</div><div class="stat-label">New (7 days)</div></div>
+  </div>
+
+  <!-- Search & Filter -->
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="🔍 Search by name or email..." oninput="renderUsers()">
+    <div class="role-filter">
+      <button class="role-btn active" data-role="all" onclick="setRoleFilter('all',this)">All</button>
+      <button class="role-btn" data-role="user" onclick="setRoleFilter('user',this)">👤 Users</button>
+      <button class="role-btn" data-role="moderator" onclick="setRoleFilter('moderator',this)">🟢 Mods</button>
+      <button class="role-btn" data-role="admin" onclick="setRoleFilter('admin',this)">🔵 Admins</button>
+      <button class="role-btn" data-role="super_admin" onclick="setRoleFilter('super_admin',this)">🟣 Supers</button>
     </div>
+  </div>
 
-    <!-- TOOLBAR -->
-    <div class="toolbar">
-      <input type="text" class="search-input" id="searchInput" placeholder="🔍 Search by name or email..." oninput="filterTable()">
-      <select class="search-input" id="roleFilter" onchange="filterTable()" style="flex:0 0 180px">
-        <option value="">All roles</option>
-        <option value="admin">Admins only</option>
-        <option value="user">Users only</option>
-      </select>
-    </div>
-
-    <!-- TABLE -->
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>User</th>
-            <th>Role</th>
-            <th>City</th>
-            <th>Phone</th>
-            <th>Joined</th>
-            <th style="width:60px"></th>
-          </tr>
-        </thead>
-        <tbody id="tableBody"></tbody>
-      </table>
-      <div id="emptyState" class="empty" style="display:none">
-        <div class="empty-icon">👥</div>
-        <div style="font-family:var(--ui);font-size:14px;font-weight:600;color:var(--ink2);margin-bottom:6px">No users found</div>
-        <div style="font-size:13px">Try a different search.</div>
-      </div>
-    </div>
-
+  <!-- Users grid -->
+  <div id="usersContainer">
+    <div class="loading">Loading users…</div>
   </div>
 </main>
 
-<!-- MODAL DETAILS -->
-<div class="modal-overlay" id="detailsModal" onclick="if(event.target===this)closeDetailsModal()">
-  <div class="modal">
-    <h2 class="modal-title">User <em>details</em></h2>
-    <p class="modal-sub" id="detailsSubtitle">Profile information</p>
-    <div id="detailsBody"></div>
+<!-- Modal de confirmation -->
+<div class="modal-overlay" id="confirmModal" onclick="if(event.target===this)closeConfirm()">
+  <div class="modal-card">
+    <div class="modal-icon" id="modalIcon">⚠️</div>
+    <h3 id="modalTitle">Are you sure?</h3>
+    <p id="modalMessage">This action cannot be undone.</p>
     <div class="modal-actions">
-      <button class="btn-ghost" onclick="closeDetailsModal()">Close</button>
+      <button class="btn btn-cancel" onclick="closeConfirm()">Cancel</button>
+      <button class="btn btn-confirm" id="confirmBtn" onclick="executeAction()">Confirm</button>
     </div>
   </div>
 </div>
 
-<!-- MODAL CONFIRM ACTION -->
-<div class="modal-overlay" id="confirmModal" onclick="if(event.target===this)closeConfirmModal()">
-  <div class="modal" style="max-width:420px">
-    <h2 class="modal-title" id="confirmTitle">Confirm</h2>
-    <p class="modal-sub" id="confirmText">Are you sure?</p>
-    <div class="modal-actions">
-      <button class="btn-ghost" onclick="closeConfirmModal()">Cancel</button>
-      <button id="confirmActionBtn" class="btn-primary" onclick="executeConfirmAction()">Confirm</button>
-    </div>
-  </div>
-</div>
+<!-- Toast -->
+<div class="toast" id="toast"><span id="toastMsg"></span></div>
 
 <script>
+// ═══ CONFIG ═══
 const SUPABASE_URL = 'https://zryfceystyipimniarst.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_uI4dQX6KFlLcxtxqw52ewA_ujacVkch';
+const SUPABASE_KEY = 'sb_publishable_uI4dQX6KFlLcxtxqw52ewA_ujacVkch';  // ⚠️ REMETS TA VRAIE CLÉ
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// ID du founder (toi) — seul à pouvoir supprimer un super_admin
+const FOUNDER_ID = '6b687b03-90a6-472b-93c6-fa61ce0b88b6';
+
 let allUsers = [];
-let currentAdminId = null;
+let currentUserId = null;
+let currentUserRole = null;
+let roleFilter = 'all';
 let pendingAction = null;
 
+// ═══ AUTHENTIFICATION ═══
 async function checkAdmin() {
-  const { data: { user } } = await sb.auth.getUser();
-  if (!user) { alert('Access denied'); window.location.href = 'index.html'; return null; }
-  const { data: profile } = await sb.from('profiles').select('*').eq('id', user.id).single();
-  if (!profile || !['admin', 'super_admin'].includes(profile.role)) { alert('Admin only'); window.location.href = 'index.html'; return null; }
-  currentAdminId = user.id;
-  return { user, profile };
+  return await afyaCheckAdminAccess(sb, ['admin', 'super_admin']);
 }
 
+// ═══ LOAD USERS ═══
 async function loadUsers() {
   const { data, error } = await sb.from('profiles').select('*').order('created_at', { ascending: false });
-  if (error) { console.error(error); return; }
+  if (error) {
+    console.error('❌ Error loading users:', error);
+    document.getElementById('usersContainer').innerHTML = `<div class="loading" style="color:var(--red)">Error loading users: ${error.message}</div>`;
+    return;
+  }
   allUsers = data || [];
   updateStats();
-  renderTable(allUsers);
+  renderUsers();
 }
 
+// ═══ STATS ═══
 function updateStats() {
-  document.getElementById('statTotal').textContent = allUsers.length;
-  document.getElementById('statAdmins').textContent = allUsers.filter(u => u.role === 'admin').length;
+  const total = allUsers.length;
+  const admins = allUsers.filter(u => u.role === 'admin' || u.role === 'super_admin').length;
+  const mods = allUsers.filter(u => u.role === 'moderator').length;
   const sevenDaysAgo = new Date(Date.now() - 7*24*60*60*1000);
-  document.getElementById('statRecent').textContent = allUsers.filter(u => new Date(u.created_at) > sevenDaysAgo).length;
+  const newUsers = allUsers.filter(u => new Date(u.created_at) > sevenDaysAgo).length;
+
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statAdmins').textContent = admins;
+  document.getElementById('statMods').textContent = mods;
+  document.getElementById('statNew').textContent = newUsers;
+  document.getElementById('userCountSub').textContent = `${total} user${total !== 1 ? 's' : ''} total`;
 }
 
-function escapeHtml(text) {
-  if (!text) return '';
-  return String(text).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+// ═══ RENDER ═══
+function setRoleFilter(role, btn) {
+  roleFilter = role;
+  document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderUsers();
 }
 
-function formatDate(dateStr) {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+function getRoleLabel(role) {
+  const labels = {
+    super_admin: '🟣 SUPER ADMIN',
+    admin: '🔵 ADMIN',
+    moderator: '🟢 MODERATOR',
+    user: '⚪ USER'
+  };
+  return labels[role] || role;
 }
 
-function renderTable(list) {
-  const tbody = document.getElementById('tableBody');
-  const empty = document.getElementById('emptyState');
-  if (list.length === 0) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
-  empty.style.display = 'none';
-  tbody.innerHTML = list.map(u => {
-    const name = u.first_name || u.email.split('@')[0];
-    const isMe = u.id === currentAdminId;
-    const isAdmin = u.role === 'admin';
-    return `
-      <tr>
-        <td>
-          <div class="user-cell">
-            <div class="user-avatar" ${u.avatar_url ? `style="background-image:url(${u.avatar_url})"` : ''}>
-              ${u.avatar_url ? '' : escapeHtml(name)[0].toUpperCase()}
-            </div>
-            <div>
-              <div class="user-name">${escapeHtml(name)}${isMe ? '<span class="you-badge">YOU</span>' : ''}</div>
-              <div class="user-email">${escapeHtml(u.email)}</div>
-            </div>
+function renderUsers() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  let list = [...allUsers];
+
+  if (roleFilter !== 'all') list = list.filter(u => u.role === roleFilter);
+  if (search) list = list.filter(u =>
+    (u.first_name || '').toLowerCase().includes(search) ||
+    (u.email || '').toLowerCase().includes(search)
+  );
+
+  if (list.length === 0) {
+    document.getElementById('usersContainer').innerHTML = `<div class="loading">No users found.</div>`;
+    return;
+  }
+
+  document.getElementById('usersContainer').innerHTML = `<div class="users-grid">${list.map(u => userCard(u)).join('')}</div>`;
+}
+
+function userCard(u) {
+  const isYou = u.id === currentUserId;
+  const isFounder = u.id === FOUNDER_ID;
+  const avatar = u.avatar_url
+    ? `<div class="user-avatar" style="background-image:url('${u.avatar_url}')"></div>`
+    : `<div class="user-avatar">${(u.first_name || u.email || 'U').charAt(0).toUpperCase()}</div>`;
+  const date = new Date(u.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+  return `
+    <div class="user-card">
+      <div class="user-top">
+        ${avatar}
+        <div class="user-info">
+          <div class="user-name">
+            ${u.first_name || 'No name'}
+            ${isYou ? '<span class="badge-you">YOU</span>' : ''}
+            ${isFounder ? '<span class="badge-founder">👑 FOUNDER</span>' : ''}
           </div>
-        </td>
-        <td><span class="role-badge role-${isAdmin ? 'admin' : 'user'}">${isAdmin ? '⭐ Admin' : 'User'}</span></td>
-        <td>${escapeHtml(u.address_city || '—')}</td>
-        <td>${escapeHtml(u.phone || '—')}</td>
-        <td>${formatDate(u.created_at)}</td>
-        <td>
-          <div class="cell-actions">
-            <button class="actions-btn" onclick="toggleActionsMenu('${u.id}',event)">⋯</button>
-            <div class="actions-menu" id="actions-menu-${u.id}">
-              <button class="actions-menu-item" onclick="openDetailsModal('${u.id}');closeAllActionsMenus()">
-                <span class="actions-menu-icon">👁️</span><span>View details</span>
-              </button>
-              ${isMe ? '' : `
-                <button class="actions-menu-item" onclick="changeRole('${u.id}','${escapeHtml(name).replace(/'/g,"\\'")}','${isAdmin ? 'user' : 'admin'}');closeAllActionsMenus()">
-                  <span class="actions-menu-icon">${isAdmin ? '📉' : '⭐'}</span><span>${isAdmin ? 'Demote to user' : 'Promote to admin'}</span>
-                </button>
-                <button class="actions-menu-item danger" onclick="deleteUserConfirm('${u.id}','${escapeHtml(name).replace(/'/g,"\\'")}');closeAllActionsMenus()">
-                  <span class="actions-menu-icon">🗑️</span><span>Delete account</span>
-                </button>
-              `}
-            </div>
+          <div class="user-email">${u.email || 'No email'}</div>
+          <div class="user-meta">
+            <span class="role-badge role-${u.role}">${getRoleLabel(u.role)}</span>
+            <span>📅 ${date}</span>
           </div>
-        </td>
-      </tr>
-    `;
-  }).join('');
-}
-
-function toggleActionsMenu(id, event) {
-  event.stopPropagation();
-  const menu = document.getElementById('actions-menu-' + id);
-  const wasOpen = menu.classList.contains('open');
-  closeAllActionsMenus();
-  if (!wasOpen) menu.classList.add('open');
-}
-function closeAllActionsMenus() {
-  document.querySelectorAll('.actions-menu').forEach(m => m.classList.remove('open'));
-}
-document.addEventListener('click', () => closeAllActionsMenus());
-
-function filterTable() {
-  const q = document.getElementById('searchInput').value.toLowerCase();
-  const role = document.getElementById('roleFilter').value;
-  const filtered = allUsers.filter(u => {
-    const matchesQ = !q || (u.first_name||'').toLowerCase().includes(q) || (u.email||'').toLowerCase().includes(q);
-    const matchesR = !role || u.role === role;
-    return matchesQ && matchesR;
-  });
-  renderTable(filtered);
-}
-
-function openDetailsModal(id) {
-  const u = allUsers.find(x => x.id === id);
-  if (!u) return;
-  const name = u.first_name || u.email.split('@')[0];
-  document.getElementById('detailsSubtitle').textContent = name;
-  document.getElementById('detailsBody').innerHTML = `
-    <div style="text-align:center;margin-bottom:20px">
-      <div class="user-avatar" style="width:80px;height:80px;font-size:28px;margin:0 auto 12px;${u.avatar_url ? `background-image:url(${u.avatar_url})` : ''}">
-        ${u.avatar_url ? '' : escapeHtml(name)[0].toUpperCase()}
+        </div>
       </div>
-      <div style="font-family:var(--ui);font-size:14px;font-weight:700;color:var(--ink)">${escapeHtml(name)}</div>
-      <span class="role-badge role-${u.role === 'admin' ? 'admin' : 'user'}" style="margin-top:8px">${u.role === 'admin' ? '⭐ Admin' : 'User'}</span>
+      <button class="user-actions-btn" onclick="toggleMenu('${u.id}', event)">⋯</button>
+      <div class="dropdown" id="menu-${u.id}">
+        ${buildMenuItems(u, isYou, isFounder)}
+      </div>
     </div>
-    <div class="detail-row"><span class="detail-label">Email</span><span class="detail-value">${escapeHtml(u.email)}</span></div>
-    <div class="detail-row"><span class="detail-label">Phone</span><span class="detail-value">${escapeHtml(u.phone || '—')}</span></div>
-    <div class="detail-row"><span class="detail-label">Street</span><span class="detail-value">${escapeHtml(u.address_street || '—')}</span></div>
-    <div class="detail-row"><span class="detail-label">Postcode</span><span class="detail-value">${escapeHtml(u.address_postcode || '—')}</span></div>
-    <div class="detail-row"><span class="detail-label">City</span><span class="detail-value">${escapeHtml(u.address_city || '—')}</span></div>
-    <div class="detail-row"><span class="detail-label">Country</span><span class="detail-value">${escapeHtml(u.address_country || '—')}</span></div>
-    <div class="detail-row"><span class="detail-label">Joined</span><span class="detail-value">${formatDate(u.created_at)}</span></div>
   `;
-  document.getElementById('detailsModal').classList.add('open');
-}
-function closeDetailsModal() {
-  document.getElementById('detailsModal').classList.remove('open');
 }
 
-function changeRole(id, name, newRole) {
-  pendingAction = { type: 'role', id, name, newRole };
-  document.getElementById('confirmTitle').innerHTML = newRole === 'admin' ? 'Promote to <em>admin</em>?' : 'Demote to <em>user</em>?';
-  document.getElementById('confirmText').textContent = newRole === 'admin'
-    ? `${name} will get full admin access to manage the site.`
-    : `${name} will lose admin access and become a regular user.`;
-  const btn = document.getElementById('confirmActionBtn');
-  btn.className = 'btn-primary';
-  btn.textContent = newRole === 'admin' ? 'Promote' : 'Demote';
+// ═══ CONSTRUCTION DU MENU CONTEXTUEL ═══
+function buildMenuItems(u, isYou, isFounder) {
+  // Impossible d'agir sur soi-même
+  if (isYou) {
+    return `<div class="dropdown-empty">You cannot modify yourself</div>`;
+  }
+
+  const targetRole = u.role;
+  const items = [];
+
+  // ─── SUPER ADMIN agit ─────────────────────────────────
+  if (currentUserRole === 'super_admin') {
+    if (targetRole === 'user') {
+      items.push(menuItem(u.id, 'moderator', '🟢', 'Promote to Moderator'));
+      items.push(menuItem(u.id, 'admin', '🔵', 'Promote to Admin'));
+      items.push(menuItem(u.id, 'super_admin', '🟣', 'Promote to Super Admin'));
+    } else if (targetRole === 'moderator') {
+      items.push(menuItem(u.id, 'admin', '🔵', 'Promote to Admin'));
+      items.push(menuItem(u.id, 'super_admin', '🟣', 'Promote to Super Admin'));
+      items.push(menuItem(u.id, 'user', '⚪', 'Demote to User'));
+    } else if (targetRole === 'admin') {
+      items.push(menuItem(u.id, 'super_admin', '🟣', 'Promote to Super Admin'));
+      items.push(menuItem(u.id, 'moderator', '🟢', 'Demote to Moderator'));
+      items.push(menuItem(u.id, 'user', '⚪', 'Demote to User'));
+    } else if (targetRole === 'super_admin') {
+      items.push(menuItem(u.id, 'admin', '🔵', 'Demote to Admin'));
+      items.push(menuItem(u.id, 'moderator', '🟢', 'Demote to Moderator'));
+      items.push(menuItem(u.id, 'user', '⚪', 'Demote to User'));
+    }
+
+    // Suppression : super_admin peut tout supprimer, sauf un super_admin (sauf si toi = founder)
+    if (items.length > 0) items.push('<div class="dropdown-divider"></div>');
+    if (targetRole === 'super_admin') {
+      // Seul le founder peut supprimer un autre super_admin
+      if (currentUserId === FOUNDER_ID) {
+        items.push(deleteItem(u.id));
+      }
+    } else {
+      items.push(deleteItem(u.id));
+    }
+  }
+
+  // ─── ADMIN agit ──────────────────────────────────────
+  else if (currentUserRole === 'admin') {
+    if (targetRole === 'user') {
+      items.push(menuItem(u.id, 'moderator', '🟢', 'Promote to Moderator'));
+      items.push('<div class="dropdown-divider"></div>');
+      items.push(deleteItem(u.id));
+    } else if (targetRole === 'moderator') {
+      items.push(menuItem(u.id, 'user', '⚪', 'Demote to User'));
+      items.push('<div class="dropdown-divider"></div>');
+      items.push(deleteItem(u.id));
+    } else {
+      // Pas de pouvoir sur admin et super_admin
+      return `<div class="dropdown-empty">No actions available<br><small style="font-size:9px;color:var(--ink3)">(${targetRole}s are protected)</small></div>`;
+    }
+  }
+
+  return items.length > 0 ? items.join('') : `<div class="dropdown-empty">No actions available</div>`;
+}
+
+function menuItem(userId, newRole, icon, label) {
+  return `<div class="dropdown-item" onclick="confirmAction('promote','${userId}','${newRole}','${label.replace(/'/g,"\\'")}')">
+    <span class="dropdown-icon">${icon}</span><span>${label}</span>
+  </div>`;
+}
+
+function deleteItem(userId) {
+  return `<div class="dropdown-item danger" onclick="confirmAction('delete','${userId}','','Delete user')">
+    <span class="dropdown-icon">🗑️</span><span>Delete User</span>
+  </div>`;
+}
+
+// ═══ DROPDOWN ═══
+function toggleMenu(userId, event) {
+  event.stopPropagation();
+  document.querySelectorAll('.dropdown.open').forEach(d => {
+    if (d.id !== `menu-${userId}`) d.classList.remove('open');
+  });
+  document.getElementById(`menu-${userId}`).classList.toggle('open');
+}
+
+document.addEventListener('click', () => {
+  document.querySelectorAll('.dropdown.open').forEach(d => d.classList.remove('open'));
+});
+
+// ═══ CONFIRMATIONS & ACTIONS ═══
+function confirmAction(type, userId, newRole, label) {
+  const user = allUsers.find(u => u.id === userId);
+  if (!user) return;
+
+  pendingAction = { type, userId, newRole };
+  const icon = document.getElementById('modalIcon');
+  const title = document.getElementById('modalTitle');
+  const message = document.getElementById('modalMessage');
+  const btn = document.getElementById('confirmBtn');
+
+  if (type === 'delete') {
+    icon.textContent = '🗑️';
+    icon.className = 'modal-icon';
+    title.textContent = 'Delete user?';
+    message.innerHTML = `Are you sure you want to delete <strong>${user.first_name || user.email}</strong>?<br><br>This action <strong>cannot be undone</strong>.`;
+    btn.textContent = 'Delete';
+    btn.className = 'btn btn-confirm';
+  } else if (type === 'promote') {
+    const isPromotion = ['super_admin', 'admin', 'moderator'].indexOf(newRole) < ['super_admin', 'admin', 'moderator'].indexOf(user.role);
+    icon.textContent = isPromotion ? '⬇️' : '⬆️';
+    icon.className = 'modal-icon info';
+    title.textContent = label.replace('Promote to', '⬆️ Promote to').replace('Demote to', '⬇️ Demote to');
+    message.innerHTML = `Change <strong>${user.first_name || user.email}</strong>'s role to <strong>${getRoleLabel(newRole)}</strong>?`;
+    btn.textContent = 'Confirm';
+    btn.className = 'btn btn-confirm success';
+  }
+
   document.getElementById('confirmModal').classList.add('open');
 }
 
-function deleteUserConfirm(id, name) {
-  pendingAction = { type: 'delete', id, name };
-  document.getElementById('confirmTitle').innerHTML = 'Delete <em>account</em>?';
-  document.getElementById('confirmText').textContent = `You are about to delete ${name}'s account permanently. All their data will be lost.`;
-  const btn = document.getElementById('confirmActionBtn');
-  btn.className = 'btn-danger';
-  btn.textContent = 'Delete forever';
-  document.getElementById('confirmModal').classList.add('open');
-}
-
-function closeConfirmModal() {
+function closeConfirm() {
   document.getElementById('confirmModal').classList.remove('open');
   pendingAction = null;
 }
 
-async function executeConfirmAction() {
+async function executeAction() {
   if (!pendingAction) return;
-  const btn = document.getElementById('confirmActionBtn');
+  const { type, userId, newRole } = pendingAction;
+  const btn = document.getElementById('confirmBtn');
   btn.disabled = true;
-  const oldText = btn.textContent;
   btn.textContent = 'Processing...';
 
-  if (pendingAction.type === 'role') {
-    const { error } = await sb.from('profiles').update({ role: pendingAction.newRole }).eq('id', pendingAction.id);
-    if (error) { alert(error.message); btn.disabled = false; btn.textContent = oldText; return; }
-  } else if (pendingAction.type === 'delete') {
-    const { error } = await sb.from('profiles').delete().eq('id', pendingAction.id);
-    if (error) { alert(error.message); btn.disabled = false; btn.textContent = oldText; return; }
+  if (type === 'promote') {
+    const { error } = await sb.from('profiles').update({ role: newRole }).eq('id', userId);
+    if (error) {
+      toast(`❌ Error: ${error.message}`);
+    } else {
+      toast(`✅ User role updated to ${getRoleLabel(newRole)}`);
+      await loadUsers();
+    }
+  } else if (type === 'delete') {
+    const { error } = await sb.from('profiles').delete().eq('id', userId);
+    if (error) {
+      toast(`❌ Error: ${error.message}`);
+    } else {
+      toast(`✅ User deleted`);
+      await loadUsers();
+    }
   }
 
   btn.disabled = false;
-  btn.textContent = oldText;
-  closeConfirmModal();
-  await loadUsers();
+  closeConfirm();
 }
 
+// ═══ TOAST ═══
+function toast(msg) {
+  document.getElementById('toastMsg').textContent = msg;
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// ═══ SIDEBAR MOBILE ═══
 function toggleSidebar() {
   document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('sidebarBackdrop').classList.toggle('show');
-}
-document.querySelectorAll('.sidebar-link').forEach(link => {
-  link.addEventListener('click', () => {
-    if (window.innerWidth <= 900) {
-      document.getElementById('sidebar').classList.remove('open');
-      document.getElementById('sidebarBackdrop').classList.remove('show');
-    }
-  });
-});
-
-async function signOut() {
-  await sb.auth.signOut();
-  window.location.href = 'index.html';
 }
 
+// ═══ INIT ═══
 async function init() {
   const auth = await checkAdmin();
   if (!auth) return;
+  
+  // ⚠️ CRUCIAL : on définit ces variables pour que le menu contextuel fonctionne
+  currentUserId = auth.user.id;
+  currentUserRole = auth.profile.role;
+  
+  afyaInjectSidebar(auth.profile, 'users');
+  
   await loadUsers();
-  document.getElementById('loading').style.display = 'none';
-  document.getElementById('content').style.display = 'block';
-  console.log('✅ Users admin loaded');
+  console.log('✅ Users admin loaded as:', currentUserRole);
 }
 
 init();

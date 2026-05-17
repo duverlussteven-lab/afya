@@ -6,6 +6,7 @@
 <title>Activities — AFYA Admin</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="admin-shared.js"></script>
 <style>
 :root{
   --bg:#FDFCF9; --bg2:#F6F3EE; --bg3:#EEEAE2; --sur:#FFFFFF;
@@ -128,23 +129,8 @@ textarea{resize:vertical;min-height:80px}
 <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
 
 <!-- SIDEBAR -->
-<aside class="sidebar" id="sidebar">
-  <div class="sidebar-brand">
-    <span class="sidebar-brand-text">AFYA</span>
-    <span class="sidebar-brand-badge">ADMIN</span>
-  </div>
-  <div class="sidebar-section-title">Overview</div>
-  <a href="admin.html" class="sidebar-link"><span class="sidebar-icon">📊</span><span>Dashboard</span></a>
-  <div class="sidebar-section-title">Content</div>
-  <a href="admin-restaurants.html" class="sidebar-link"><span class="sidebar-icon">🍽️</span><span>Restaurants</span></a>
-  <a href="admin-activities.html" class="sidebar-link active"><span class="sidebar-icon">🎯</span><span>Activities</span></a>
-  <div class="sidebar-section-title">Community</div>
-  <a href="admin-users.html" class="sidebar-link"><span class="sidebar-icon">👥</span><span>Users</span></a>
-  <a href="admin-reviews.html" class="sidebar-link"><span class="sidebar-icon">⭐</span><span>Reviews</span></a>
-  <div class="sidebar-section-title">Account</div>
-  <a href="index.html" class="sidebar-link"><span class="sidebar-icon">↩️</span><span>Back to site</span></a>
-  <a href="#" onclick="signOut();return false" class="sidebar-link"><span class="sidebar-icon">🚪</span><span>Sign Out</span></a>
-</aside>
+<!-- Sidebar (injectée dynamiquement par admin-shared.js) -->
+<div id="sidebarPlaceholder"></div>
 
 <!-- MAIN -->
 <main class="main">
@@ -322,18 +308,14 @@ textarea{resize:vertical;min-height:80px}
 
 <script>
 const SUPABASE_URL = 'https://zryfceystyipimniarst.supabase.co';
-const SUPABASE_KEY = 'TA_PUBLISHABLE_KEY';
+const SUPABASE_KEY = 'sb_publishable_uI4dQX6KFlLcxtxqw52ewA_ujacVkch';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let allActivities = [];
 let deleteTargetId = null;
 
 async function checkAdmin() {
-  const { data: { user } } = await sb.auth.getUser();
-  if (!user) { alert('Access denied'); window.location.href = 'index.html'; return null; }
-  const { data: profile } = await sb.from('profiles').select('*').eq('id', user.id).single();
-  if (!profile || !['admin', 'super_admin'].includes(profile.role)) { alert('Admin only'); window.location.href = 'index.html'; return null; }
-  return { user, profile };
+  return await afyaCheckAdminAccess(sb, ['admin', 'super_admin']);
 }
 
 async function loadActivities() {
@@ -616,14 +598,12 @@ document.querySelectorAll('.sidebar-link').forEach(link => {
   });
 });
 
-async function signOut() {
-  await sb.auth.signOut();
-  window.location.href = 'index.html';
-}
-
 async function init() {
   const auth = await checkAdmin();
   if (!auth) return;
+  
+  afyaInjectSidebar(auth.profile, 'activities');
+  
   await loadActivities();
   document.getElementById('loading').style.display = 'none';
   document.getElementById('content').style.display = 'block';

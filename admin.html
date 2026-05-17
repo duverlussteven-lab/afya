@@ -6,6 +6,7 @@
 <title>Admin Dashboard — AFYA</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="admin-shared.js"></script>
 <style>
 /* ═══ TOKENS ═══ */
 :root{
@@ -341,48 +342,8 @@ a{color:inherit;text-decoration:none}
 <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
 
 <!-- ═══ SIDEBAR ═══ -->
-<aside class="sidebar" id="sidebar">
-  <div class="sidebar-brand">
-    <span class="sidebar-brand-text">AFYA</span>
-    <span class="sidebar-brand-badge">ADMIN</span>
-  </div>
-
-  <div class="sidebar-section-title">Overview</div>
-  <a href="admin.html" class="sidebar-link active">
-    <span class="sidebar-icon">📊</span>
-    <span>Dashboard</span>
-  </a>
-
-  <div class="sidebar-section-title">Content</div>
-  <a href="admin-restaurants.html" class="sidebar-link">
-    <span class="sidebar-icon">🍽️</span>
-    <span>Restaurants</span>
-  </a>
-  <a href="admin-activities.html" class="sidebar-link">
-    <span class="sidebar-icon">🎯</span>
-    <span>Activities</span>
-  </a>
-
-  <div class="sidebar-section-title">Community</div>
-  <a href="admin-users.html" class="sidebar-link">
-    <span class="sidebar-icon">👥</span>
-    <span>Users</span>
-  </a>
-  <a href="admin-reviews.html" class="sidebar-link">
-    <span class="sidebar-icon">⭐</span>
-    <span>Reviews</span>
-  </a>
-
-  <div class="sidebar-section-title">Account</div>
-  <a href="index.html" class="sidebar-link">
-    <span class="sidebar-icon">↩️</span>
-    <span>Back to site</span>
-  </a>
-  <a href="#" onclick="signOut();return false" class="sidebar-link">
-    <span class="sidebar-icon">🚪</span>
-    <span>Sign Out</span>
-  </a>
-</aside>
+<!-- Sidebar (injectée dynamiquement par admin-shared.js) -->
+<div id="sidebarPlaceholder"></div>
 
 <!-- ═══ MAIN CONTENT ═══ -->
 <main class="main">
@@ -487,29 +448,15 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ═══ SÉCURITÉ : Vérifier que l'utilisateur est admin ═══
 async function checkAdmin() {
-  const { data: { user } } = await sb.auth.getUser();
-
-  if (!user) {
-    alert('Access denied. Please sign in.');
-    window.location.href = 'index.html';
-    return null;
-  }
-
-  const { data: profile } = await sb.from('profiles').select('*').eq('id', user.id).single();
-
-  if (!profile || !['admin', 'super_admin', 'moderator'].includes(profile.role)) {
-    alert('Access denied. Admin only.');
-    window.location.href = 'index.html';
-    return null;
-  }
-
-  return { user, profile };
+  return await afyaCheckAdminAccess(sb, ['admin', 'super_admin', 'moderator']);
 }
 
 // ═══ INIT ═══
 async function init() {
   const auth = await checkAdmin();
   if (!auth) return;
+
+  afyaInjectSidebar(auth.profile, 'dashboard');
 
   const { user, profile } = auth;
   const name = profile.first_name || user.email.split('@')[0];
