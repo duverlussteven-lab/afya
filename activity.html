@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Activity — AFYA</title>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="icon" href="favicon.ico">
+<link rel="manifest" href="site.webmanifest">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#FDFCF9;--bg2:#F6F3EE;--bg3:#EEEAE2;--sur:#FFFFFF;--ink:#1D2B3A;--ink2:#3B5068;--ink3:#7A93A8;--sage:#6D8F82;--sage-l:#8BAD9E;--gold:#D4A843;--green:#4A9E6F;--red:#C94F3A;--purple:#9D4FCC;--blue:#3B5068;--border:rgba(109,143,130,.18);--shadow:rgba(29,43,58,.07);--disp:'Cormorant Garamond',serif;--ui:'Syne',sans-serif;--body:'DM Sans',sans-serif}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg2);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.65;min-height:100vh}
+a{color:inherit;text-decoration:none}
+#nav{position:sticky;top:0;background:var(--sur);border-bottom:1px solid var(--border);padding:14px 32px;display:flex;align-items:center;justify-content:space-between;z-index:50}
+.nav-back{display:flex;align-items:center;gap:8px;font-family:var(--ui);font-size:12px;font-weight:600;color:var(--ink2);cursor:pointer;padding:8px 14px;border-radius:8px;transition:all .2s}
+.nav-back:hover{background:var(--bg2);color:var(--ink)}
+.nav-right{display:flex;align-items:center;gap:12px}
+.nav-cta{padding:9px 22px;background:var(--ink);color:white;border:none;border-radius:100px;cursor:pointer;font-family:var(--ui);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;transition:all .2s}
+.nav-cta:hover{background:var(--sage);transform:translateY(-1px)}
+.hero{width:100%;height:480px;background:linear-gradient(to bottom,rgba(0,0,0,.1),rgba(0,0,0,.4));background-size:cover;background-position:center;position:relative}
+.hero-emoji{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:120px}
+.container{max-width:900px;margin:-100px auto 60px;padding:0 24px;position:relative;z-index:10}
+.info-card{background:var(--sur);border-radius:20px;padding:36px;box-shadow:0 16px 48px var(--shadow);margin-bottom:24px}
+.info-top{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:20px;margin-bottom:24px}
+.info-title{font-family:var(--disp);font-size:48px;font-weight:300;color:var(--ink);line-height:1.1;margin-bottom:6px}
+.info-subtitle{font-family:var(--ui);font-size:14px;color:var(--sage);font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:14px}
+.info-rating{display:flex;align-items:center;gap:10px}
+.stars{display:flex;gap:2px}
+.star-f{color:var(--gold);font-size:18px}
+.star-e{color:rgba(109,143,130,.3);font-size:18px}
+.rating-score{font-family:var(--ui);font-size:18px;font-weight:700;color:var(--ink)}
+.rating-count{font-family:var(--ui);font-size:13px;color:var(--ink3)}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;padding:20px;background:var(--bg2);border-radius:12px;margin-bottom:24px}
+.info-item{display:flex;align-items:flex-start;gap:10px}
+.info-item-icon{font-size:18px;flex-shrink:0}
+.info-item-label{font-family:var(--ui);font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin-bottom:2px}
+.info-item-value{font-size:14px;color:var(--ink);font-weight:500}
+.info-actions{display:flex;flex-wrap:wrap;gap:10px}
+.action-btn{display:inline-flex;align-items:center;gap:8px;padding:12px 20px;border-radius:10px;cursor:pointer;font-family:var(--ui);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border:1.5px solid var(--border);background:var(--sur);color:var(--ink2);transition:all .2s}
+.action-btn.primary{background:var(--ink);color:white;border-color:var(--ink)}
+.action-btn.primary:hover{background:var(--sage);border-color:var(--sage);transform:translateY(-2px)}
+.action-btn:hover{transform:translateY(-2px);box-shadow:0 4px 12px var(--shadow)}
+.ext-links-row{display:flex;gap:10px;margin-top:14px;padding-top:14px;border-top:1px dashed var(--border);flex-wrap:wrap}
+.ext-link{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:8px;background:var(--bg2);border:1px solid var(--border);text-decoration:none;font-family:var(--ui);font-size:11px;font-weight:600;color:var(--ink2);transition:all .2s}
+.ext-link:hover{transform:translateY(-2px);box-shadow:0 2px 8px var(--shadow)}
+.ext-link.google:hover{background:#4285F4;color:white;border-color:#4285F4}
+.ext-link.trustpilot:hover{background:#00B67A;color:white;border-color:#00B67A}
+.ext-link.tripadvisor:hover{background:#34E0A1;color:white;border-color:#34E0A1}
+.section{background:var(--sur);border-radius:20px;padding:32px;margin-bottom:24px}
+.section-title{font-family:var(--disp);font-size:28px;font-weight:400;color:var(--ink);margin-bottom:16px}
+.section-title em{font-style:italic;color:var(--sage)}
+.about-text{font-size:15px;color:var(--ink2);line-height:1.8}
+.reviews-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:14px}
+.review-filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px}
+.filter-btn{padding:7px 14px;border:1.5px solid var(--border);border-radius:100px;background:transparent;cursor:pointer;font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--ink2);transition:all .2s}
+.filter-btn.active{background:var(--sage);border-color:var(--sage);color:white}
+.write-review-btn{padding:11px 22px;background:var(--ink);color:white;border:none;border-radius:100px;cursor:pointer;font-family:var(--ui);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;transition:all .2s}
+.write-review-btn:hover{background:var(--sage);transform:translateY(-1px)}
+.reviews-list{display:flex;flex-direction:column;gap:18px}
+.review-card{padding:20px;background:var(--bg2);border-radius:12px;border:1px solid var(--border)}
+.review-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px}
+.review-user{display:flex;align-items:center;gap:10px}
+.review-avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-family:var(--ui);font-weight:700;font-size:14px;flex-shrink:0;background-size:cover;background-position:center}
+.review-name{font-family:var(--ui);font-size:13px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.review-meta{font-size:11px;color:var(--ink3);font-family:var(--ui)}
+.rc-badge{display:inline-block;font-family:var(--ui);font-size:8px;font-weight:700;letter-spacing:.1em;padding:2px 7px;border-radius:4px;text-transform:uppercase}
+.rc-badge-verified{background:rgba(74,158,111,.15);color:var(--green)}
+.rc-badge-yours{background:rgba(109,143,130,.15);color:var(--sage)}
+.review-stars{display:flex;gap:2px;margin:6px 0}
+.review-stars .star-f,.review-stars .star-e{font-size:14px}
+.review-title{font-family:var(--ui);font-size:14px;font-weight:700;color:var(--ink);margin:4px 0}
+.review-body{font-size:13px;color:var(--ink2);line-height:1.6}
+.replies-section{margin-top:14px;padding-top:14px;border-top:1px dashed var(--border)}
+.replies-toggle{background:none;border:none;font-family:var(--ui);font-size:11px;color:var(--sage);cursor:pointer;font-weight:600;padding:4px 0}
+.replies-toggle:hover{text-decoration:underline}
+.replies-list{margin-top:10px;display:flex;flex-direction:column;gap:8px}
+.reply{background:var(--sur);border-radius:10px;padding:10px 12px;border-left:3px solid var(--ink3);font-size:12px}
+.reply.role-super{border-left-color:var(--purple);background:rgba(157,79,204,.04)}
+.reply.role-admin{border-left-color:var(--blue);background:rgba(59,80,104,.04)}
+.reply.role-mod{border-left-color:var(--green);background:rgba(74,158,111,.04)}
+.reply-head{display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:wrap}
+.reply-author{font-family:var(--ui);font-weight:700;font-size:11px;color:var(--ink)}
+.reply-role{font-family:var(--ui);font-size:8px;font-weight:700;padding:1px 5px;border-radius:4px;color:white;letter-spacing:.06em}
+.reply-role.super{background:var(--purple)}
+.reply-role.admin{background:var(--blue)}
+.reply-role.mod{background:var(--green)}
+.reply-time{font-family:var(--ui);font-size:9px;color:var(--ink3);margin-left:auto}
+.reply-body{color:var(--ink2);line-height:1.5;font-size:11px}
+.reply-form{margin-top:10px;display:flex;gap:8px;align-items:flex-start}
+.reply-textarea{flex:1;border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--body);font-size:12px;resize:vertical;min-height:50px;outline:none;background:var(--sur)}
+.reply-textarea:focus{border-color:var(--sage)}
+.reply-submit{padding:8px 14px;background:var(--ink);color:white;border:none;border-radius:8px;cursor:pointer;font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.reply-submit:hover{background:var(--sage)}
+.loading{text-align:center;padding:80px;color:var(--ink3);font-family:var(--ui);font-size:13px}
+.empty{text-align:center;padding:60px 20px;color:var(--ink3);font-family:var(--ui);font-size:13px}
+.empty-icon{font-size:48px;margin-bottom:12px;opacity:.4}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--ink);color:white;padding:14px 20px;border-radius:10px;font-family:var(--ui);font-size:12px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.2);transform:translateY(100px);opacity:0;transition:all .3s;z-index:300}
+.toast.show{transform:translateY(0);opacity:1}
+@media(max-width:768px){.info-card{padding:24px}.info-title{font-size:36px}.info-grid{grid-template-columns:1fr}.container{margin-top:-60px}.hero{height:340px}.hero-emoji{font-size:80px}}
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <a href="index.html#activities" class="nav-back">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+    Back to activities
+  </a>
+  <div class="nav-right">
+    <button class="nav-cta" id="authBtn" onclick="handleAuthClick()">Sign In</button>
+  </div>
+</nav>
+
+<div class="hero" id="hero">
+  <div class="hero-emoji" id="heroEmoji"></div>
+</div>
+
+<div class="container">
+  <div id="activityContent">
+    <div class="loading">Loading activity details…</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><span id="toastMsg"></span></div>
+
+<script>
+const SUPABASE_URL = 'https://zryfceystyipimniarst.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_uI4dQX6KFlLcxtxqw52ewA_ujacVkch';  // REMETS TA CLE
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let activity = null;
+let allReviews = [];
+let allReplies = [];
+let currentUser = null;
+let starFilter = 'all';
+const avatarColors = ['#6D8F82','#3B5068','#C94F3A','#D4A843','#4A9E6F','#7A5C8A','#4A7AB5'];
+
+function getActivityId() {
+  return new URLSearchParams(window.location.search).get('id');
+}
+
+async function checkAuth() {
+  const { data: { user } } = await sb.auth.getUser();
+  if (user) {
+    currentUser = user;
+    const { data: profile } = await sb.from('profiles').select('first_name,email').eq('id', user.id).single();
+    document.getElementById('authBtn').textContent = '👋 ' + (profile?.first_name || user.email.split('@')[0]);
+  }
+}
+
+function handleAuthClick() {
+  window.location.href = currentUser ? 'mon-espace.html' : 'index.html';
+}
+
+async function loadActivity() {
+  const id = getActivityId();
+  if (!id) {
+    document.getElementById('activityContent').innerHTML = '<div class="empty"><div class="empty-icon">❌</div><div>No activity ID provided.</div><a href="index.html#activities" style="color:var(--sage);margin-top:12px;display:inline-block">← Back</a></div>';
+    return;
+  }
+  const { data, error } = await sb.from('activities').select('*').eq('id', id).single();
+  if (error || !data) {
+    document.getElementById('activityContent').innerHTML = '<div class="empty"><div class="empty-icon">🔍</div><div>Activity not found.</div><a href="index.html#activities" style="color:var(--sage);margin-top:12px;display:inline-block">← Back</a></div>';
+    return;
+  }
+  activity = data;
+  document.title = activity.name + ' — AFYA';
+  if (activity.photo_url) {
+    document.getElementById('hero').style.backgroundImage = 'linear-gradient(to bottom,rgba(0,0,0,.1),rgba(0,0,0,.4)),url(' + activity.photo_url + ')';
+    document.getElementById('heroEmoji').style.display = 'none';
+  } else {
+    document.getElementById('hero').style.background = activity.bg_color || '#E8E0D4';
+    document.getElementById('heroEmoji').textContent = activity.emoji || '🎯';
+  }
+  await loadReviews();
+  renderActivity();
+}
+
+async function loadReviews() {
+  const id = getActivityId();
+  const { data: approved } = await sb.from('reviews').select('*').eq('related_activity_id', id).eq('is_approved', true).order('created_at', { ascending: false });
+  let pending = [];
+  if (currentUser) {
+    const { data: p } = await sb.from('reviews').select('*').eq('related_activity_id', id).eq('user_id', currentUser.id).eq('is_approved', false);
+    pending = p || [];
+  }
+  const all = [...(approved || []), ...pending];
+  const userIds = [...new Set(all.map(r => r.user_id).filter(Boolean))];
+  let profilesMap = {};
+  if (userIds.length > 0) {
+    const { data: profiles } = await sb.from('profiles').select('id,first_name,email,avatar_url').in('id', userIds);
+    (profiles || []).forEach(p => profilesMap[p.id] = p);
+  }
+  const reviewIds = all.map(r => r.id);
+  if (reviewIds.length > 0) {
+    const { data: replies } = await sb.from('review_replies').select('*,profiles:author_id(id,first_name,email,role,avatar_url)').in('review_id', reviewIds).order('created_at', { ascending: false });
+    allReplies = replies || [];
+  }
+  allReviews = all.map(r => {
+    const p = profilesMap[r.user_id];
+    const name = p?.first_name || p?.email?.split('@')[0] || 'Anonymous';
+    return {...r, authorName: name, authorAvatar: p?.avatar_url, avatarColor: avatarColors[Math.floor(Math.random()*avatarColors.length)], is_mine: currentUser && r.user_id === currentUser.id};
+  });
+}
+
+function renderActivity() {
+  const a = activity;
+  const hasReviews = a.reviews_count > 0;
+  const stars = hasReviews ? [1,2,3,4,5].map(n => '<span class="' + (n<=Math.floor(a.rating)?'star-f':'star-e') + '">★</span>').join('') : '';
+  const addressParts = [a.address, a.postal_code, a.city, a.country].filter(Boolean);
+  const fullAddress = addressParts.join(', ');
+  const hasExtLinks = a.show_external_links && (a.google_maps_url || a.trustpilot_url || a.tripadvisor_url);
+
+  document.getElementById('activityContent').innerHTML = `
+    <div class="info-card">
+      <div class="info-top">
+        <div>
+          <div class="info-subtitle">${escapeHtml(a.tag || 'Activity')}</div>
+          <h1 class="info-title">${escapeHtml(a.name)}</h1>
+          ${hasReviews ? `<div class="info-rating"><div class="stars">${stars}</div><span class="rating-score">${a.rating}</span><span class="rating-count">(${a.reviews_count} AFYA reviews)</span></div>` : `<div style="color:var(--ink3);font-family:var(--ui);font-size:13px;font-style:italic">Be the first to review</div>`}
+        </div>
+      </div>
+      <div class="info-grid">
+        ${fullAddress ? `<div class="info-item"><span class="info-item-icon">📍</span><div><div class="info-item-label">Address</div><div class="info-item-value">${escapeHtml(fullAddress)}</div></div></div>` : ''}
+        <div class="info-item"><span class="info-item-icon">💰</span><div><div class="info-item-label">Price</div><div class="info-item-value">$${a.price || 0}${a.price_source_url ? ' <span style="color:var(--green);font-size:11px">✓ verified</span>' : ''}</div></div></div>
+        ${a.duration_min ? `<div class="info-item"><span class="info-item-icon">⏱️</span><div><div class="info-item-label">Duration</div><div class="info-item-value">${a.duration_min} min</div></div></div>` : ''}
+        <div class="info-item"><span class="info-item-icon">🎯</span><div><div class="info-item-label">Category</div><div class="info-item-value">${escapeHtml(a.tag || 'Other')}</div></div></div>
+      </div>
+      <div class="info-actions">
+        ${a.website_url ? `<a href="${a.website_url}" target="_blank" rel="noopener" class="action-btn primary">🌐 Book / Visit site ↗</a>` : ''}
+        <button class="action-btn" onclick="addToSchedule()">+ Add to schedule</button>
+      </div>
+      ${hasExtLinks ? `<div class="ext-links-row">${a.google_maps_url ? `<a href="${a.google_maps_url}" target="_blank" rel="noopener" class="ext-link google">🗺️ Google</a>` : ''}${a.trustpilot_url ? `<a href="${a.trustpilot_url}" target="_blank" rel="noopener" class="ext-link trustpilot">⭐ Trustpilot</a>` : ''}${a.tripadvisor_url ? `<a href="${a.tripadvisor_url}" target="_blank" rel="noopener" class="ext-link tripadvisor">📋 Tripadvisor</a>` : ''}</div>` : ''}
+    </div>
+    ${a.description ? `<div class="section"><h2 class="section-title">About this <em>activity</em></h2><p class="about-text">${escapeHtml(a.description)}</p></div>` : ''}
+    <div class="section">
+      <div class="reviews-header">
+        <h2 class="section-title">Reviews <em>(${allReviews.filter(x => x.is_approved !== false).length})</em></h2>
+        <button class="write-review-btn" onclick="goWriteReview()">✏️ Write a review</button>
+      </div>
+      ${allReviews.length > 0 ? `
+        <div class="review-filters">
+          <button class="filter-btn active" onclick="filterReviews('all', this)">All</button>
+          <button class="filter-btn" onclick="filterReviews('5', this)">★★★★★</button>
+          <button class="filter-btn" onclick="filterReviews('4', this)">★★★★</button>
+          <button class="filter-btn" onclick="filterReviews('3', this)">★★★</button>
+          <button class="filter-btn" onclick="filterReviews('2', this)">★★</button>
+          <button class="filter-btn" onclick="filterReviews('1', this)">★</button>
+        </div>
+        <div id="reviewsList" class="reviews-list"></div>
+      ` : `<div class="empty"><div class="empty-icon">⭐</div><div>No reviews yet.</div><div style="margin-top:6px;font-size:11px;opacity:.7">Be the first to share your experience!</div></div>`}
+    </div>
+  `;
+  if (allReviews.length > 0) renderReviewsList();
+}
+
+function filterReviews(filter, btn) {
+  starFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderReviewsList();
+}
+
+function renderReviewsList() {
+  let list = [...allReviews];
+  if (starFilter !== 'all') list = list.filter(r => r.stars === parseInt(starFilter));
+  if (list.length === 0) {
+    document.getElementById('reviewsList').innerHTML = '<div class="empty">No reviews matching this filter.</div>';
+    return;
+  }
+  document.getElementById('reviewsList').innerHTML = list.map(r => {
+    const avatar = r.authorAvatar ? `<div class="review-avatar" style="background-image:url('${r.authorAvatar}')"></div>` : `<div class="review-avatar" style="background:${r.avatarColor}">${r.authorName.charAt(0).toUpperCase()}</div>`;
+    const date = new Date(r.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const stars = [1,2,3,4,5].map(n => '<span class="' + (n<=r.stars?'star-f':'star-e') + '">★</span>').join('');
+    let badges = '';
+    if (r.is_approved === false) badges += '<span class="rc-badge rc-badge-yours">⏳ Pending</span>';
+    if (r.is_mine) badges += '<span class="rc-badge rc-badge-yours">YOU</span>';
+    if (r.is_verified) badges += '<span class="rc-badge rc-badge-verified">✓ Verified visit</span>';
+    const replies = allReplies.filter(rep => rep.review_id === r.id);
+    const replyCount = replies.length;
+    const sortedReplies = [...replies].sort((a,b) => {
+      const order = { super_admin: 0, admin: 1, moderator: 2, user: 3 };
+      const aR = order[a.profiles?.role] ?? 4;
+      const bR = order[b.profiles?.role] ?? 4;
+      if (aR !== bR) return aR - bR;
+      return new Date(b.created_at) - new Date(a.created_at);
+    });
+    const closed = r.replies_closed_by_author || r.replies_closed_by_staff;
+    return `
+      <div class="review-card" style="${r.is_approved === false ? 'opacity:.75;border-style:dashed' : ''}">
+        <div class="review-top">
+          <div class="review-user">
+            ${avatar}
+            <div>
+              <div class="review-name">${escapeHtml(r.authorName)} ${badges}</div>
+              <div class="review-meta">${escapeHtml(r.trip_type || '')} · ${date}</div>
+            </div>
+          </div>
+        </div>
+        <div class="review-stars">${stars}</div>
+        <div class="review-title">${escapeHtml(r.title || '')}</div>
+        <div class="review-body">${escapeHtml(r.body || '')}</div>
+        <div class="replies-section">
+          <button class="replies-toggle" onclick="toggleReplies('${r.id}', this)">▸ ${replyCount > 0 ? 'Show ' + replyCount + ' repl' + (replyCount > 1 ? 'ies' : 'y') : '+ Add a reply'}</button>
+          <div id="replies-${r.id}" style="display:none">
+            ${sortedReplies.length > 0 ? `<div class="replies-list">${sortedReplies.map(rep => replyHtml(rep)).join('')}</div>` : ''}
+            ${closed ? `<div style="text-align:center;padding:10px;color:var(--ink3);font-style:italic;font-family:var(--ui);font-size:11px">🔒 Replies are closed.</div>` : `<div class="reply-form"><textarea class="reply-textarea" id="reply-textarea-${r.id}" placeholder="Write a reply..."></textarea><button class="reply-submit" onclick="submitReply('${r.id}')">Reply</button></div>`}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function replyHtml(rep) {
+  const role = rep.profiles?.role;
+  const name = rep.profiles?.first_name || rep.profiles?.email?.split('@')[0] || 'User';
+  const date = new Date(rep.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  let roleClass = '', roleLabel = '';
+  if (role === 'super_admin') { roleClass = 'role-super'; roleLabel = '<span class="reply-role super">👑 SUPER ADMIN</span>'; }
+  else if (role === 'admin') { roleClass = 'role-admin'; roleLabel = '<span class="reply-role admin">ADMIN</span>'; }
+  else if (role === 'moderator') { roleClass = 'role-mod'; roleLabel = '<span class="reply-role mod">MOD</span>'; }
+  return `<div class="reply ${roleClass}"><div class="reply-head"><span class="reply-author">${escapeHtml(name)}</span>${roleLabel}<span class="reply-time">${date}</span></div><div class="reply-body">${escapeHtml(rep.body)}</div></div>`;
+}
+
+function toggleReplies(reviewId, btn) {
+  const el = document.getElementById('replies-' + reviewId);
+  if (!el) return;
+  if (el.style.display === 'block') { el.style.display = 'none'; btn.innerHTML = btn.innerHTML.replace('▾', '▸'); }
+  else { el.style.display = 'block'; btn.innerHTML = btn.innerHTML.replace('▸', '▾'); }
+}
+
+async function submitReply(reviewId) {
+  if (!currentUser) { toast('🔒 Please sign in'); setTimeout(() => window.location.href = 'index.html', 800); return; }
+  const textarea = document.getElementById('reply-textarea-' + reviewId);
+  const body = textarea.value.trim();
+  if (!body) { toast('⚠️ Please write a reply'); return; }
+  textarea.disabled = true;
+  const { error } = await sb.from('review_replies').insert({ review_id: reviewId, author_id: currentUser.id, body: body });
+  if (error) { toast('❌ Error: ' + error.message); textarea.disabled = false; return; }
+  toast('✅ Reply posted');
+  textarea.value = '';
+  textarea.disabled = false;
+  await loadReviews();
+  renderActivity();
+}
+
+function goWriteReview() {
+  if (!currentUser) { toast('🔒 Please sign in first'); setTimeout(() => window.location.href = 'index.html', 800); return; }
+  window.location.href = 'index.html?write_review=1&activity_id=' + activity.id;
+}
+
+function addToSchedule() { toast('"' + activity.name + '" added to your schedule!'); }
+
+function escapeHtml(text) {
+  if (!text && text !== 0) return '';
+  const div = document.createElement('div');
+  div.textContent = String(text);
+  return div.innerHTML;
+}
+
+function toast(msg) {
+  document.getElementById('toastMsg').textContent = msg;
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+async function init() {
+  await checkAuth();
+  await loadActivity();
+}
+init();
+</script>
+</body>
+</html>
