@@ -979,11 +979,11 @@ footer{background:var(--ink);padding:60px 52px 32px}
       <div class="rating-bars" id="ratingBars"></div>
       <div class="rating-actions">
         <button class="write-btn" onclick="openModal()">✏️ Write a Review</button>
-        <a href="https://www.trustpilot.com" target="_blank" rel="noopener" class="ext-link">
+        <a href="https://www.trustpilot.com" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="ext-link">
           <div class="tp-mini-stars"><div class="tp-mini-star">★</div><div class="tp-mini-star">★</div><div class="tp-mini-star">★</div><div class="tp-mini-star">★</div><div class="tp-mini-star">★</div></div>
           <span>See on Trustpilot</span>
         </a>
-        <a href="https://www.google.com/maps" target="_blank" rel="noopener" class="ext-link">
+        <a href="https://www.google.com/maps" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="ext-link">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="#4285F4"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
           <span>See on Google Maps</span>
         </a>
@@ -1920,7 +1920,7 @@ function renderActivities(){
   const sel = [...document.querySelectorAll('#actFilters .filter-btn.active')].map(c=>c.dataset.tag);
   const list = (sel.length===0 || sel.includes('all') || actFilter==='all') ? activities : activities.filter(a=>sel.includes(a.tag) || a.tag.toLowerCase()===actFilter.toLowerCase());
   document.getElementById('actGrid').innerHTML = list.map(x=>`
-    <div class="act-card">
+    <a href="activity.html?id=${x.id}" style="text-decoration:none;color:inherit;display:block"><div class="act-card">
       ${x.photoUrl
         ? `<div class="act-img" style="background-image:url(${x.photoUrl});background-size:cover;background-position:center"></div>`
         : `<div class="act-img" style="background:${x.bg}">${x.emoji}</div>`
@@ -1937,21 +1937,21 @@ function renderActivities(){
           <div class="act-price">${x.price===0?'Free':'$'+x.price}${x.priceVerified ? ' <span style="color:var(--green);font-size:9px;margin-left:2px">✓</span>' : ''}</div>
         </div>
         <div style="display:flex;gap:8px;margin-top:10px">
-          <button class="act-add-btn" onclick="addActivity(this,'${x.name.replace(/'/g,"\\'")}')" style="flex:1">+ Add to schedule</button>
+          <button class="act-add-btn" onclick="event.stopPropagation();addActivity(this,'${x.name.replace(/'/g,"\\'")}')" style="flex:1">+ Add to schedule</button>
           ${x.websiteUrl
-            ? `<a href="${x.websiteUrl}" target="_blank" rel="noopener" style="padding:10px 14px;background:var(--bg2);color:var(--ink);border:1px solid var(--border);border-radius:var(--r-sm);font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;display:flex;align-items:center;gap:4px;transition:all .2s" onmouseover="this.style.background='var(--sage)';this.style.color='white';this.style.borderColor='var(--sage)'" onmouseout="this.style.background='var(--bg2)';this.style.color='var(--ink)';this.style.borderColor='var(--border)'">Visit ↗</a>`
+            ? `<a href="${x.websiteUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="padding:10px 14px;background:var(--bg2);color:var(--ink);border:1px solid var(--border);border-radius:var(--r-sm);font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;display:flex;align-items:center;gap:4px;transition:all .2s" onmouseover="this.style.background='var(--sage)';this.style.color='white';this.style.borderColor='var(--sage)'" onmouseout="this.style.background='var(--bg2)';this.style.color='var(--ink)';this.style.borderColor='var(--border)'">Visit ↗</a>`
             : ''
           }
         </div>
         ${x.showExternalLinks && (x.googleMapsUrl || x.trustpilotUrl || x.tripadvisorUrl) ? `
           <div class="external-links">
-            ${x.googleMapsUrl ? `<a href="${x.googleMapsUrl}" target="_blank" rel="noopener" class="ext-link google" title="View on Google Maps">🗺️</a>` : ''}
-            ${x.trustpilotUrl ? `<a href="${x.trustpilotUrl}" target="_blank" rel="noopener" class="ext-link trustpilot" title="View on Trustpilot">⭐</a>` : ''}
-            ${x.tripadvisorUrl ? `<a href="${x.tripadvisorUrl}" target="_blank" rel="noopener" class="ext-link tripadvisor" title="View on Tripadvisor">📋</a>` : ''}
+            ${x.googleMapsUrl ? `<a href="${x.googleMapsUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="ext-link google" title="View on Google Maps">🗺️</a>` : ''}
+            ${x.trustpilotUrl ? `<a href="${x.trustpilotUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="ext-link trustpilot" title="View on Trustpilot">⭐</a>` : ''}
+            ${x.tripadvisorUrl ? `<a href="${x.tripadvisorUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="ext-link tripadvisor" title="View on Tripadvisor">📋</a>` : ''}
           </div>
         ` : ''}
       </div>
-    </div>`).join('');
+    </div></a>`).join('');
 }
 
 // Initialise l'affichage des activités
@@ -1994,7 +1994,7 @@ function filterRestos(){
   });
   document.getElementById('restoCountLabel').textContent = `Showing ${list.length} restaurant${list.length!==1?'s':''}`;
   document.getElementById('restoGrid').innerHTML = list.map(x=>`
-    <div class="resto-card">
+    <a href="restaurant.html?id=${x.id}" style="text-decoration:none;color:inherit;display:block"><div class="resto-card">
       ${x.photoUrl
         ? `<div class="resto-img" style="background-image:url(${x.photoUrl});background-size:cover;background-position:center"></div>`
         : `<div class="resto-img" style="background:${x.bg}">${x.emoji}</div>`
@@ -2012,21 +2012,21 @@ function filterRestos(){
         </div>
         <div class="resto-review-snip"><div class="resto-review-snip-text">"${x.topReview.text}"</div><div class="resto-review-snip-by">— ${x.topReview.by}</div></div>
         <div style="display:flex;gap:8px;margin-top:12px">
-          <button class="resto-add-btn" onclick="addResto(this,'${x.name.replace(/'/g,"\\'")}')" style="flex:1">+ Add to schedule</button>
+          <button class="resto-add-btn" onclick="event.stopPropagation();addResto(this,'${x.name.replace(/'/g,"\\'")}')" style="flex:1">+ Add to schedule</button>
           ${x.websiteUrl
-            ? `<a href="${x.websiteUrl}" target="_blank" rel="noopener" style="padding:10px 14px;background:var(--bg2);color:var(--ink);border:1px solid var(--border);border-radius:var(--r-sm);font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;display:flex;align-items:center;gap:4px;transition:all .2s" onmouseover="this.style.background='var(--sage)';this.style.color='white';this.style.borderColor='var(--sage)'" onmouseout="this.style.background='var(--bg2)';this.style.color='var(--ink)';this.style.borderColor='var(--border)'">Visit ↗</a>`
+            ? `<a href="${x.websiteUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="padding:10px 14px;background:var(--bg2);color:var(--ink);border:1px solid var(--border);border-radius:var(--r-sm);font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;display:flex;align-items:center;gap:4px;transition:all .2s" onmouseover="this.style.background='var(--sage)';this.style.color='white';this.style.borderColor='var(--sage)'" onmouseout="this.style.background='var(--bg2)';this.style.color='var(--ink)';this.style.borderColor='var(--border)'">Visit ↗</a>`
             : ''
           }
         </div>
         ${x.showExternalLinks && (x.googleMapsUrl || x.trustpilotUrl || x.tripadvisorUrl) ? `
           <div class="external-links">
-            ${x.googleMapsUrl ? `<a href="${x.googleMapsUrl}" target="_blank" rel="noopener" class="ext-link google" title="View on Google Maps">🗺️</a>` : ''}
-            ${x.trustpilotUrl ? `<a href="${x.trustpilotUrl}" target="_blank" rel="noopener" class="ext-link trustpilot" title="View on Trustpilot">⭐</a>` : ''}
-            ${x.tripadvisorUrl ? `<a href="${x.tripadvisorUrl}" target="_blank" rel="noopener" class="ext-link tripadvisor" title="View on Tripadvisor">📋</a>` : ''}
+            ${x.googleMapsUrl ? `<a href="${x.googleMapsUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="ext-link google" title="View on Google Maps">🗺️</a>` : ''}
+            ${x.trustpilotUrl ? `<a href="${x.trustpilotUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="ext-link trustpilot" title="View on Trustpilot">⭐</a>` : ''}
+            ${x.tripadvisorUrl ? `<a href="${x.tripadvisorUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="ext-link tripadvisor" title="View on Tripadvisor">📋</a>` : ''}
           </div>
         ` : ''}
       </div>
-    </div>`).join('');
+    </div></a>`).join('');
 }
 function addResto(btn,name){ btn.textContent='✓ Added'; btn.classList.add('added'); btn.disabled=true; toast(`"${name}" added!`); }
 
@@ -2518,6 +2518,44 @@ loadReviewsFromSupabase().then(() => {
 
 // Charge les restos/activités pour le dropdown du formulaire d'avis
 loadRestosAndActsForReviewForm();
+// ═════════ Gestion des URL params ?write_review=1&restaurant_id=XXX ═════════
+(async () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('write_review') !== '1') return;
+  
+  const restaurantId = urlParams.get('restaurant_id');
+  const activityId = urlParams.get('activity_id');
+  
+  // Attendre que tout soit chargé
+  setTimeout(async () => {
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) {
+      toast('🔒 Please sign in to write a review');
+      setTimeout(() => openAuthModal('signin'), 300);
+      return;
+    }
+    
+    // S'assurer que le dropdown est rempli
+    await loadRestosAndActsForReviewForm();
+    
+    // Pré-sélectionner le resto/activité dans le dropdown
+    const select = document.getElementById('revRelated');
+    if (select) {
+      if (restaurantId) select.value = `resto:${restaurantId}`;
+      else if (activityId) select.value = `act:${activityId}`;
+    }
+    
+    // Scroller vers la section Reviews
+    const reviewsSection = document.getElementById('reviews');
+    if (reviewsSection) reviewsSection.scrollIntoView({ behavior: 'smooth' });
+    
+    // Ouvrir la modal
+    setTimeout(() => {
+      document.getElementById('reviewModal').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }, 600);
+  }, 1000);
+})();
 </script>
 </body>
 </html>
