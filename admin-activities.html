@@ -233,15 +233,13 @@ textarea{resize:vertical;min-height:80px}
       </div>
     </div>
 
-    <div class="form-row-3">
-      <div class="form-group">
-        <label>Rating (0-5)</label>
-        <input type="number" id="inputRating" step="0.1" min="0" max="5" placeholder="4.5">
-      </div>
-      <div class="form-group">
-        <label>Nb reviews</label>
-        <input type="number" id="inputReviewsCount" min="0" placeholder="0">
-      </div>
+    <!-- Rating auto-calculated info -->
+    <div style="padding:12px 14px;background:rgba(109,143,130,.05);border-radius:8px;margin-bottom:14px;border-left:3px solid var(--sage)">
+      <div style="font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--sage);margin-bottom:4px">📊 Rating & Reviews</div>
+      <div style="font-size:12px;color:var(--ink2)">The rating and reviews count are <strong>automatically calculated</strong> from approved AFYA user reviews.</div>
+    </div>
+
+    <div class="form-row">
       <div class="form-group">
         <label>Duration (min)</label>
         <input type="number" id="inputDuration" min="0" placeholder="60">
@@ -315,9 +313,16 @@ textarea{resize:vertical;min-height:80px}
         </div>
       </div>
     </div>
+
     <!-- ═══ EXTERNAL REVIEW PLATFORMS ═══ -->
     <div style="padding:14px;background:rgba(109,143,130,.05);border-radius:10px;border-left:3px solid var(--sage);margin-bottom:16px">
       <div style="font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--sage);margin-bottom:10px">🔗 External review platforms (optional)</div>
+      <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:white;border:1px solid var(--border);border-radius:8px;margin-bottom:14px">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-family:var(--ui);font-size:12px;font-weight:600;color:var(--ink);user-select:none">
+          <input type="checkbox" id="inputShowExternalLinks" style="width:18px;height:18px;cursor:pointer;accent-color:var(--sage)">
+          Show external review icons (🗺️ ⭐ 📋) on the public site
+        </label>
+      </div>
       <div class="form-row">
         <div class="form-group">
           <label>🗺️ Google Maps URL</label>
@@ -458,8 +463,6 @@ function openAddModal() {
   document.getElementById('inputDescription').value = '';
   document.getElementById('inputTag').value = '';
   document.getElementById('inputCity').value = '';
-  document.getElementById('inputRating').value = '';
-  document.getElementById('inputReviewsCount').value = '0';
   document.getElementById('inputDuration').value = '60';
   document.getElementById('inputPrice').value = '0';
   document.getElementById('inputBgColor').value = '#E8E0D4';
@@ -473,6 +476,7 @@ function openAddModal() {
   document.getElementById('inputCountry').value = '';
   document.getElementById('inputLatitude').value = '';
   document.getElementById('inputLongitude').value = '';
+  document.getElementById('inputShowExternalLinks').checked = false;
   document.getElementById('currentPhotoUrl').value = '';
   resetPhotoPreview();
   document.getElementById('formAlert').className = 'alert';
@@ -491,8 +495,6 @@ function openEditModal(id) {
   document.getElementById('inputDescription').value = a.description || '';
   document.getElementById('inputTag').value = a.tag || '';
   document.getElementById('inputCity').value = a.city || '';
-  document.getElementById('inputRating').value = a.rating || '';
-  document.getElementById('inputReviewsCount').value = a.reviews_count || 0;
   document.getElementById('inputDuration').value = a.duration_min || 60;
   document.getElementById('inputPrice').value = a.price || 0;
   document.getElementById('inputBgColor').value = a.bg_color || '#E8E0D4';
@@ -506,6 +508,7 @@ function openEditModal(id) {
   document.getElementById('inputCountry').value = a.country || '';
   document.getElementById('inputLatitude').value = a.latitude || '';
   document.getElementById('inputLongitude').value = a.longitude || '';
+  document.getElementById('inputShowExternalLinks').checked = a.show_external_links === true;
   document.getElementById('currentPhotoUrl').value = a.photo_url || '';
 
   const preview = document.getElementById('photoPreview');
@@ -600,8 +603,6 @@ async function saveActivity() {
     description: document.getElementById('inputDescription').value.trim() || null,
     tag: tag,
     city: document.getElementById('inputCity').value.trim() || null,
-    rating: parseFloat(document.getElementById('inputRating').value) || 0,
-    reviews_count: parseInt(document.getElementById('inputReviewsCount').value) || 0,
     duration_min: parseInt(document.getElementById('inputDuration').value) || 60,
     price: parseFloat(document.getElementById('inputPrice').value) || 0,
     bg_color: document.getElementById('inputBgColor').value.trim() || '#E8E0D4',
@@ -615,6 +616,7 @@ async function saveActivity() {
     country: document.getElementById('inputCountry').value.trim() || null,
     latitude: parseFloat(document.getElementById('inputLatitude').value) || null,
     longitude: parseFloat(document.getElementById('inputLongitude').value) || null,
+    show_external_links: document.getElementById('inputShowExternalLinks').checked,
     photo_url: photoUrl,
     updated_at: new Date().toISOString()
   };

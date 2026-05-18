@@ -509,7 +509,7 @@ footer{background:var(--ink);padding:60px 52px 32px}
 
 /* ═══ RESPONSIVE ═══ */
 @media(max-width:900px){
-  nav{padding:0 20px}.nav-links{display:none}
+  nav{padding:0 20px}.nav-links{display:flex !important;overflow-x:auto;flex-wrap:nowrap;white-space:nowrap;padding:0 8px;gap:18px;mask-image:linear-gradient(to right,transparent 0,#000 16px,#000 calc(100% - 24px),transparent 100%);-webkit-mask-image:linear-gradient(to right,transparent 0,#000 16px,#000 calc(100% - 24px),transparent 100%);scrollbar-width:none}.nav-links::-webkit-scrollbar{display:none}.nav-links li{flex-shrink:0}
   section{padding:64px 20px}
   .form-grid-3,.form-grid-2,.date-grid,.resto-filters{grid-template-columns:1fr 1fr}
   .act-grid,.resto-grid,.reviews-grid,.feat-grid{grid-template-columns:1fr}
@@ -1346,6 +1346,7 @@ async function loadRestosFromSupabase() {
         country: r.country || null,
         latitude: r.latitude ? parseFloat(r.latitude) : null,
         longitude: r.longitude ? parseFloat(r.longitude) : null,
+        showExternalLinks: r.show_external_links === true,
         priceVerified: !!r.price_source_url,
         topReview: {
           text: r.top_review_text || 'Great place!',
@@ -1392,6 +1393,7 @@ async function loadActivitiesFromSupabase() {
         country: a.country || null,
         latitude: a.latitude ? parseFloat(a.latitude) : null,
         longitude: a.longitude ? parseFloat(a.longitude) : null,
+        showExternalLinks: a.show_external_links === true,
         priceVerified: !!a.price_source_url
       });
     });
@@ -1923,7 +1925,10 @@ function renderActivities(){
         <div class="act-name">${x.name}</div>
         <div class="act-desc">${x.desc}</div>
         <div class="act-meta">
-          <div class="r-stars-row">${[1,2,3,4,5].map(n=>`<span class="r-star-${n<=Math.floor(x.rating)?'f':'e'}">★</span>`).join('')}<span class="r-score">${x.rating}</span><span class="r-count">(${x.reviews.toLocaleString()})</span></div>
+          ${x.reviews > 0
+  ? `<div class="r-stars-row">${[1,2,3,4,5].map(n=>`<span class="r-star-${n<=Math.floor(x.rating)?'f':'e'}">★</span>`).join('')}<span class="r-score">${x.rating}</span><span class="r-count">(${x.reviews.toLocaleString()})</span></div>`
+  : `<div class="r-stars-row" style="opacity:.5;font-family:var(--ui);font-size:11px;color:var(--ink3);font-style:italic">Be the first to review</div>`
+}
           <div class="act-price">${x.price===0?'Free':'$'+x.price}${x.priceVerified ? ' <span style="color:var(--green);font-size:9px;margin-left:2px">✓</span>' : ''}</div>
         </div>
         <div style="display:flex;gap:8px;margin-top:10px">
@@ -1933,7 +1938,7 @@ function renderActivities(){
             : ''
           }
         </div>
-        ${(x.googleMapsUrl || x.trustpilotUrl || x.tripadvisorUrl) ? `
+        ${x.showExternalLinks && (x.googleMapsUrl || x.trustpilotUrl || x.tripadvisorUrl) ? `
           <div class="external-links">
             ${x.googleMapsUrl ? `<a href="${x.googleMapsUrl}" target="_blank" rel="noopener" class="ext-link google" title="View on Google Maps">🗺️</a>` : ''}
             ${x.trustpilotUrl ? `<a href="${x.trustpilotUrl}" target="_blank" rel="noopener" class="ext-link trustpilot" title="View on Trustpilot">⭐</a>` : ''}
@@ -1992,7 +1997,10 @@ function filterRestos(){
       <div class="resto-body">
         <div class="resto-name">${x.name}</div>
         <div class="resto-cuisine">${x.cuisine}</div>
-        <div class="r-stars-row">${[1,2,3,4,5].map(n=>`<span class="r-star-${n<=Math.floor(x.rating)?'f':'e'}">★</span>`).join('')}<span class="r-score">${x.rating}</span><span class="r-count">(${x.reviews.toLocaleString()})</span></div>
+        ${x.reviews > 0
+  ? `<div class="r-stars-row">${[1,2,3,4,5].map(n=>`<span class="r-star-${n<=Math.floor(x.rating)?'f':'e'}">★</span>`).join('')}<span class="r-score">${x.rating}</span><span class="r-count">(${x.reviews.toLocaleString()})</span></div>`
+  : `<div class="r-stars-row" style="opacity:.5;font-family:var(--ui);font-size:11px;color:var(--ink3);font-style:italic">Be the first to review</div>`
+}
         <div class="resto-meta">
           <span class="resto-dist" title="${x.address ? escapeHtml(x.address + (x.postalCode ? ', ' + x.postalCode : '') + (x.city ? ', ' + x.city : '') + (x.country ? ', ' + x.country : '')) : 'No address'}">📍 ${x.address ? (x.address.length > 25 ? x.address.substring(0, 25) + '...' : x.address) : x.dist + 'km'}</span>
           <span class="resto-price">$${x.priceMin}–$${x.priceMax}${x.priceVerified ? ' <span style="color:var(--green);font-size:9px;margin-left:2px">✓</span>' : ''}</span>
@@ -2005,7 +2013,7 @@ function filterRestos(){
             : ''
           }
         </div>
-        ${(x.googleMapsUrl || x.trustpilotUrl || x.tripadvisorUrl) ? `
+        ${x.showExternalLinks && (x.googleMapsUrl || x.trustpilotUrl || x.tripadvisorUrl) ? `
           <div class="external-links">
             ${x.googleMapsUrl ? `<a href="${x.googleMapsUrl}" target="_blank" rel="noopener" class="ext-link google" title="View on Google Maps">🗺️</a>` : ''}
             ${x.trustpilotUrl ? `<a href="${x.trustpilotUrl}" target="_blank" rel="noopener" class="ext-link trustpilot" title="View on Trustpilot">⭐</a>` : ''}
