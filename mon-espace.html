@@ -11,216 +11,421 @@
 <link rel="manifest" href="site.webmanifest">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="add-to-modal.js" defer></script>
 <style>
-/* ═══ TOKENS ═══ */
-:root{
-  --bg:#FDFCF9; --bg2:#F6F3EE; --bg3:#EEEAE2; --sur:#FFFFFF;
-  --ink:#1D2B3A; --ink2:#3B5068; --ink3:#7A93A8;
-  --sage:#6D8F82; --sage-l:#8BAD9E; --sage-p:#C8D8D2;
-  --gold:#D4A843; --green:#4A9E6F; --red:#C94F3A;
-  --border:rgba(109,143,130,.18); --border2:rgba(109,143,130,.3);
-  --shadow:rgba(29,43,58,.07); --shadow2:rgba(29,43,58,.14);
-  --disp:'Cormorant Garamond',serif; --ui:'Syne',sans-serif; --body:'DM Sans',sans-serif;
-  --r:16px; --r-sm:8px; --r-lg:20px;
-}
-[data-theme="dark"]{
-  --bg:#111A22; --bg2:#162028; --bg3:#1D2B3A; --sur:#1E2C3A;
-  --ink:#F0EDE8; --ink2:#A8BDC8; --ink3:#6B8A9A;
-  --border:rgba(139,173,158,.14); --border2:rgba(139,173,158,.24);
-  --shadow:rgba(0,0,0,.22); --shadow2:rgba(0,0,0,.38);
-}
+:root{--bg:#FDFCF9;--bg2:#F6F3EE;--bg3:#EEEAE2;--sur:#FFFFFF;--ink:#1D2B3A;--ink2:#3B5068;--ink3:#7A93A8;--sage:#6D8F82;--sage-l:#8BAD9E;--gold:#D4A843;--green:#4A9E6F;--red:#C94F3A;--purple:#9D4FCC;--blue:#3B5068;--border:rgba(109,143,130,.18);--shadow:rgba(29,43,58,.07);--disp:'Cormorant Garamond',serif;--ui:'Syne',sans-serif;--body:'DM Sans',sans-serif}
+[data-theme="dark"]{--bg:#111A22;--bg2:#162028;--bg3:#1D2B3A;--sur:#1E2C3A;--ink:#F0EDE8;--ink2:#A8BDC8;--ink3:#6B8A9A;--border:rgba(139,173,158,.14)}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.65;overflow-x:hidden;transition:background .3s,color .3s}
+body{background:var(--bg2);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.65;min-height:100vh}
 a{color:inherit;text-decoration:none}
-
-/* ═══ NAV SIMPLIFIÉE ═══ */
-nav{position:fixed;top:0;left:0;right:0;z-index:300;height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 52px;background:rgba(255,255,255,.97);border-bottom:1px solid var(--border);backdrop-filter:blur(12px)}
-[data-theme="dark"] nav{background:rgba(255,255,255,.97)}
-.back-link{font-family:var(--ui);font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--ink2);display:flex;align-items:center;gap:6px;transition:color .2s}
-.back-link:hover{color:var(--sage)}
-
-/* ═══ MAIN CONTENT ═══ */
-.page{padding:120px 48px 80px;max-width:1140px;margin:0 auto}
-.page-header{margin-bottom:48px}
-.page-eye{display:inline-flex;align-items:center;gap:10px;font-family:var(--ui);font-size:9px;font-weight:700;letter-spacing:.32em;text-transform:uppercase;color:var(--sage);margin-bottom:16px}
-.page-eye::before{content:'';display:block;width:20px;height:1px;background:var(--sage)}
-.page-title{font-family:var(--disp);font-size:clamp(40px,5vw,64px);font-weight:300;line-height:1.05;color:var(--ink);margin-bottom:12px}
+#nav{position:sticky;top:0;background:var(--sur);border-bottom:1px solid var(--border);padding:14px 32px;display:flex;align-items:center;justify-content:space-between;z-index:50}
+.nav-back{display:flex;align-items:center;gap:8px;font-family:var(--ui);font-size:12px;font-weight:600;color:var(--ink2);cursor:pointer;padding:8px 14px;border-radius:8px;transition:all .2s}
+.nav-back:hover{background:var(--bg2);color:var(--ink)}
+.nav-cta{padding:9px 22px;background:var(--ink);color:white;border:none;border-radius:100px;cursor:pointer;font-family:var(--ui);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;transition:all .2s}
+.nav-cta:hover{background:var(--sage);transform:translateY(-1px)}
+.container{max-width:1100px;margin:40px auto;padding:0 24px}
+.page-header{margin-bottom:40px}
+.page-title{font-family:var(--disp);font-size:54px;font-weight:300;color:var(--ink);line-height:1.1;margin-bottom:10px}
 .page-title em{font-style:italic;color:var(--sage)}
-.page-lead{font-size:15px;color:var(--ink2);line-height:1.8;max-width:600px}
-
-/* ═══ STATS GRID ═══ */
-.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:48px}
-.stat-card{background:var(--sur);border-radius:var(--r);padding:24px;border:1px solid var(--border);transition:transform .25s,box-shadow .25s}
-.stat-card:hover{transform:translateY(-3px);box-shadow:0 12px 36px var(--shadow2)}
-.stat-icon{width:44px;height:44px;border-radius:10px;background:rgba(109,143,130,.1);display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:16px}
-.stat-value{font-family:var(--disp);font-size:36px;font-weight:600;color:var(--ink);line-height:1;margin-bottom:4px}
-.stat-label{font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3)}
-
-/* ═══ SECTIONS ═══ */
-.section-block{background:var(--sur);border-radius:var(--r-lg);padding:32px;border:1px solid var(--border);margin-bottom:24px}
-.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
-.section-title{font-family:var(--disp);font-size:24px;font-weight:400;color:var(--ink)}
-.section-title em{font-style:italic;color:var(--sage)}
-.section-action{font-family:var(--ui);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--sage);cursor:pointer}
-.section-action:hover{text-decoration:underline}
-
-/* ═══ EMPTY STATE ═══ */
-.empty-state{text-align:center;padding:48px 24px;color:var(--ink3)}
-.empty-icon{font-size:48px;margin-bottom:16px;opacity:.5}
-.empty-title{font-family:var(--ui);font-size:14px;font-weight:600;color:var(--ink2);margin-bottom:6px}
-.empty-text{font-size:13px;line-height:1.7;max-width:360px;margin:0 auto}
-.empty-cta{display:inline-block;margin-top:18px;background:var(--ink);color:white;padding:12px 24px;border-radius:8px;border:none;cursor:pointer;font-family:var(--ui);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;transition:background .2s}
+.page-subtitle{font-size:15px;color:var(--ink2)}
+.tabs{display:flex;gap:6px;margin-bottom:30px;border-bottom:1px solid var(--border);overflow-x:auto;padding-bottom:0}
+.tab{padding:14px 24px;border:none;background:none;cursor:pointer;font-family:var(--ui);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);border-bottom:3px solid transparent;transition:all .2s;white-space:nowrap;display:flex;align-items:center;gap:8px}
+.tab:hover{color:var(--ink2)}
+.tab.active{color:var(--ink);border-bottom-color:var(--sage)}
+.tab-count{background:var(--bg2);color:var(--ink2);padding:2px 8px;border-radius:100px;font-size:10px}
+.tab.active .tab-count{background:var(--sage);color:white}
+.tab-content{display:none}
+.tab-content.active{display:block}
+.section-actions{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:14px}
+.section-info{font-size:13px;color:var(--ink2)}
+.btn-primary{padding:11px 22px;background:var(--ink);color:white;border:none;border-radius:100px;cursor:pointer;font-family:var(--ui);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;transition:all .2s}
+.btn-primary:hover{background:var(--sage);transform:translateY(-1px)}
+.empty{text-align:center;padding:80px 20px;color:var(--ink3);font-family:var(--ui)}
+.empty-icon{font-size:64px;margin-bottom:16px;opacity:.3}
+.empty-title{font-size:14px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;color:var(--ink2)}
+.empty-desc{font-size:13px;color:var(--ink3);font-family:var(--body)}
+.empty-cta{display:inline-block;margin-top:20px;padding:11px 22px;background:var(--ink);color:white;border-radius:100px;font-family:var(--ui);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
 .empty-cta:hover{background:var(--sage)}
-
-/* ═══ LOADING ═══ */
-.loading{text-align:center;padding:80px;color:var(--ink3);font-family:var(--ui);font-size:13px}
-
-/* ═══ RESPONSIVE ═══ */
-@media(max-width:900px){
-  nav{padding:0 20px}
-  .page{padding:100px 20px 60px}
-  .stats-grid{grid-template-columns:repeat(2,1fr)}
-}
-@media(max-width:560px){
-  .stats-grid{grid-template-columns:1fr}
-  .section-block{padding:24px}
+/* Cards grid */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}
+.item-card{background:var(--sur);border-radius:16px;overflow:hidden;border:1px solid var(--border);transition:all .2s;cursor:pointer;position:relative}
+.item-card:hover{transform:translateY(-2px);box-shadow:0 12px 24px var(--shadow)}
+.item-img{width:100%;height:180px;background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;font-size:60px}
+.item-body{padding:18px}
+.item-tag{font-family:var(--ui);font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--sage);margin-bottom:6px}
+.item-name{font-family:var(--disp);font-size:22px;font-weight:400;color:var(--ink);line-height:1.2;margin-bottom:6px}
+.item-meta{font-size:11px;color:var(--ink3);font-family:var(--ui)}
+.item-remove{position:absolute;top:12px;right:12px;background:rgba(255,255,255,.9);backdrop-filter:blur(8px);border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--red);transition:all .15s;font-size:14px;opacity:0;z-index:5}
+.item-card:hover .item-remove{opacity:1}
+.item-remove:hover{background:var(--red);color:white;transform:scale(1.1)}
+/* Programs */
+.programs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px}
+.program-card{background:var(--sur);border-radius:16px;padding:24px;border:1px solid var(--border);transition:all .2s;cursor:pointer;position:relative;display:flex;flex-direction:column;gap:14px}
+.program-card:hover{transform:translateY(-2px);box-shadow:0 12px 24px var(--shadow);border-color:var(--sage)}
+.program-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.program-icon{font-size:32px}
+.program-name{font-family:var(--disp);font-size:24px;font-weight:400;color:var(--ink);line-height:1.2;flex:1}
+.program-meta{display:flex;flex-direction:column;gap:6px;font-family:var(--ui);font-size:11px}
+.program-meta-item{display:flex;align-items:center;gap:6px;color:var(--ink2)}
+.program-meta-icon{font-size:13px}
+.program-stats{display:flex;gap:14px;padding-top:14px;border-top:1px solid var(--border)}
+.program-stat{font-family:var(--ui);font-size:11px;color:var(--ink3)}
+.program-stat strong{display:block;font-size:18px;color:var(--ink);font-weight:700;margin-bottom:2px;font-family:var(--ui)}
+.program-actions{position:absolute;top:14px;right:14px;display:flex;gap:6px}
+.program-action-btn{background:rgba(255,255,255,.9);backdrop-filter:blur(8px);border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink2);transition:all .15s;font-size:13px;opacity:0}
+.program-card:hover .program-action-btn{opacity:1}
+.program-action-btn:hover{background:var(--ink);color:white}
+.program-action-btn.danger:hover{background:var(--red);color:white}
+/* Toast */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--ink);color:white;padding:14px 20px;border-radius:10px;font-family:var(--ui);font-size:12px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.2);transform:translateY(100px);opacity:0;transition:all .3s;z-index:9999}
+.toast.show{transform:translateY(0);opacity:1}
+.loading{text-align:center;padding:60px;color:var(--ink3);font-family:var(--ui);font-size:13px}
+/* Auth required */
+.auth-required{max-width:480px;margin:80px auto;background:var(--sur);border-radius:20px;padding:50px 30px;text-align:center;box-shadow:0 12px 36px var(--shadow)}
+.auth-required-icon{font-size:64px;margin-bottom:20px;opacity:.5}
+.auth-required-title{font-family:var(--disp);font-size:32px;font-weight:400;color:var(--ink);margin-bottom:12px}
+.auth-required-desc{font-size:14px;color:var(--ink2);margin-bottom:24px}
+@media(max-width:768px){
+  .page-title{font-size:38px}
+  .container{padding:0 16px;margin:24px auto}
+  .cards-grid,.programs-grid{grid-template-columns:1fr}
 }
 </style>
 </head>
 <body>
 
-<!-- NAV -->
-<nav>
-  <a href="index.html" class="back-link">
+<nav id="nav">
+  <a href="index.html" class="nav-back">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
-    Back to AFYA
+    Back to home
   </a>
-  <div style="font-family:var(--ui);font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--ink2)">🏠 My Space</div>
+  <button class="nav-cta" id="authBtn" onclick="handleAuthClick()">Sign In</button>
 </nav>
 
-<!-- CONTENU -->
-<div class="page">
-
-  <!-- Loading -->
-  <div id="loading" class="loading">Loading your space...</div>
-
-  <!-- Page principale (cachée par défaut) -->
-  <div id="pageContent" style="display:none">
-
-    <!-- Header -->
-    <div class="page-header">
-      <div class="page-eye">Welcome back</div>
-      <h1 class="page-title">Hello <em id="userFirstName">Steven</em></h1>
-      <p class="page-lead">Your AFYA journey at a glance. Track activities, restaurants, planned trips and savings.</p>
-    </div>
-
-    <!-- Stats Grid -->
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-icon">🎯</div>
-        <div class="stat-value" id="statActivities">0</div>
-        <div class="stat-label">Activities Done</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon">🍽️</div>
-        <div class="stat-value" id="statRestaurants">0</div>
-        <div class="stat-label">Restaurants Visited</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon">📅</div>
-        <div class="stat-value" id="statTrips">0</div>
-        <div class="stat-label">Trips Planned</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon">💰</div>
-        <div class="stat-value" id="statSavings">$0</div>
-        <div class="stat-label">Total Savings</div>
-      </div>
-    </div>
-
-    <!-- Recent Activities -->
-    <div class="section-block">
-      <div class="section-head">
-        <h2 class="section-title">Recent <em>Activities</em></h2>
-        <a href="index.html#activities" class="section-action">Browse all →</a>
-      </div>
-      <div class="empty-state">
-        <div class="empty-icon">🎯</div>
-        <div class="empty-title">No activities yet</div>
-        <div class="empty-text">Start exploring AFYA to track your favourite activities and build your personal collection.</div>
-        <a href="index.html#activities" class="empty-cta">Discover Activities</a>
-      </div>
-    </div>
-
-    <!-- Planned Trips -->
-    <div class="section-block">
-      <div class="section-head">
-        <h2 class="section-title">Your <em>Trips</em></h2>
-        <a href="index.html#planner" class="section-action">Plan a new trip →</a>
-      </div>
-      <div class="empty-state">
-        <div class="empty-icon">📅</div>
-        <div class="empty-title">No trips planned yet</div>
-        <div class="empty-text">Use our AI Day Planner to design your perfect day or multi-day adventure.</div>
-        <a href="index.html#planner" class="empty-cta">Plan My First Day</a>
-      </div>
-    </div>
-
-    <!-- Restaurants -->
-    <div class="section-block">
-      <div class="section-head">
-        <h2 class="section-title">Favourite <em>Restaurants</em></h2>
-        <a href="index.html#restaurants" class="section-action">Browse all →</a>
-      </div>
-      <div class="empty-state">
-        <div class="empty-icon">🍽️</div>
-        <div class="empty-title">No favourites yet</div>
-        <div class="empty-text">Discover restaurants curated by our community and add them to your favourites.</div>
-        <a href="index.html#restaurants" class="empty-cta">Explore Restaurants</a>
-      </div>
-    </div>
-
-    <!-- Savings -->
-    <div class="section-block">
-      <div class="section-head">
-        <h2 class="section-title">Your <em>Savings</em></h2>
-        <span style="font-family:var(--ui);font-size:11px;color:var(--ink3)">Coming soon — powered by partner bookings</span>
-      </div>
-      <div class="empty-state">
-        <div class="empty-icon">💰</div>
-        <div class="empty-title">Start saving with AFYA</div>
-        <div class="empty-text">Every reservation made through AFYA earns you exclusive discounts and tracks your savings here.</div>
-      </div>
-    </div>
-
-  </div>
+<div class="container" id="mainContent">
+  <div class="loading">Loading your space…</div>
 </div>
+
+<div class="toast" id="toast"><span id="toastMsg"></span></div>
 
 <script>
 const SUPABASE_URL = 'https://zryfceystyipimniarst.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_uI4dQX6KFlLcxtxqw52ewA_ujacVkch';
+const SUPABASE_KEY = 'sb_publishable_uI4dQX6KFlLcxtxqw52ewA_ujacVkch';  // REMETS TA CLE
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+window.sb = sb;
+
+let currentUser = null;
+let currentProfile = null;
+let wishlistItems = [];
+let userPrograms = [];
+let currentTab = 'wishlist';
 
 async function init() {
   const { data: { user } } = await sb.auth.getUser();
-
   if (!user) {
-    // Pas connecté → redirige vers accueil
-    alert('Please sign in to access your space');
-    window.location.href = 'index.html';
+    document.getElementById('mainContent').innerHTML = `
+      <div class="auth-required">
+        <div class="auth-required-icon">🔒</div>
+        <h2 class="auth-required-title">Please sign in</h2>
+        <p class="auth-required-desc">You need to be signed in to access your space.</p>
+        <a href="index.html" class="btn-primary">Go to homepage</a>
+      </div>
+    `;
     return;
   }
 
-  // Récupère le prénom
-  const { data: profile } = await sb.from('profiles').select('first_name').eq('id', user.id).single();
-  const displayName = profile?.first_name || user.email.split('@')[0];
+  currentUser = user;
+  const { data: profile } = await sb.from('profiles').select('first_name,email,avatar_url').eq('id', user.id).single();
+  currentProfile = profile;
+  document.getElementById('authBtn').textContent = '👋 ' + (profile?.first_name || user.email.split('@')[0]);
 
-  document.getElementById('userFirstName').textContent = displayName;
-  document.getElementById('loading').style.display = 'none';
-  document.getElementById('pageContent').style.display = 'block';
+  await loadWishlist();
+  await loadPrograms();
+  renderPage();
+}
 
-  console.log('✅ My Space loaded for:', user.email);
+window.toast = function(msg) {
+  document.getElementById('toastMsg').textContent = msg;
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+};
+
+function handleAuthClick() {
+  window.location.href = currentUser ? 'parametres.html' : 'index.html';
+}
+
+async function loadWishlist() {
+  const { data, error } = await sb
+    .from('user_wishlist')
+    .select(`
+      id,
+      added_at,
+      notes,
+      restaurant_id,
+      activity_id,
+      restaurants:restaurant_id(id, name, cuisine, emoji, bg_color, photo_url, city),
+      activities:activity_id(id, name, tag, emoji, bg_color, photo_url, city)
+    `)
+    .eq('user_id', currentUser.id)
+    .order('added_at', { ascending: false });
+  if (error) { console.error('Error loading wishlist:', error); return; }
+  wishlistItems = data || [];
+}
+
+async function loadPrograms() {
+  const { data, error } = await sb
+    .from('programs')
+    .select('*')
+    .eq('user_id', currentUser.id)
+    .order('created_at', { ascending: false });
+  if (error) { console.error('Error loading programs:', error); return; }
+  userPrograms = data || [];
+
+  // Pour chaque programme, charger le nombre d'items
+  await Promise.all(userPrograms.map(async (p) => {
+    const { count } = await sb
+      .from('program_items')
+      .select('*', { count: 'exact', head: true })
+      .eq('program_id', p.id);
+    p.itemCount = count || 0;
+  }));
+}
+
+function renderPage() {
+  const wishlistCount = wishlistItems.length;
+  const programsCount = userPrograms.length;
+
+  document.getElementById('mainContent').innerHTML = `
+    <div class="page-header">
+      <h1 class="page-title">Welcome back, <em>${escapeHtml(currentProfile?.first_name || 'Traveler')}</em></h1>
+      <p class="page-subtitle">Your saved places, your trips, your memories.</p>
+    </div>
+
+    <div class="tabs">
+      <button class="tab ${currentTab === 'wishlist' ? 'active' : ''}" onclick="switchTab('wishlist')">
+        ❤️ Wishlist <span class="tab-count">${wishlistCount}</span>
+      </button>
+      <button class="tab ${currentTab === 'programs' ? 'active' : ''}" onclick="switchTab('programs')">
+        📅 My Programs <span class="tab-count">${programsCount}</span>
+      </button>
+    </div>
+
+    <div class="tab-content ${currentTab === 'wishlist' ? 'active' : ''}" id="tabWishlist">
+      ${renderWishlistTab()}
+    </div>
+    <div class="tab-content ${currentTab === 'programs' ? 'active' : ''}" id="tabPrograms">
+      ${renderProgramsTab()}
+    </div>
+  `;
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  renderPage();
+}
+
+function renderWishlistTab() {
+  if (wishlistItems.length === 0) {
+    return `
+      <div class="empty">
+        <div class="empty-icon">❤️</div>
+        <div class="empty-title">Your wishlist is empty</div>
+        <div class="empty-desc">Save restaurants and activities you want to explore later</div>
+        <a href="index.html#restaurants" class="empty-cta">Discover places →</a>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="section-actions">
+      <div class="section-info">${wishlistItems.length} item${wishlistItems.length > 1 ? 's' : ''} saved</div>
+    </div>
+    <div class="cards-grid">
+      ${wishlistItems.map(item => {
+        const r = item.restaurants;
+        const a = item.activities;
+        const data = r || a;
+        if (!data) return '';
+        const type = r ? 'restaurant' : 'activity';
+        const link = r ? `restaurant.html?id=${data.id}` : `activity.html?id=${data.id}`;
+        const label = r ? data.cuisine : data.tag;
+        const cityLabel = data.city ? data.city : '';
+        const addedDate = new Date(item.added_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        return `
+          <div class="item-card" onclick="window.location.href='${link}'">
+            <button class="item-remove" onclick="event.stopPropagation();removeFromWishlist('${item.id}', '${escapeAttr(data.name)}')" title="Remove">×</button>
+            <div class="item-img" style="${data.photo_url ? `background-image:url('${data.photo_url}')` : `background:${data.bg_color || '#E8DDD4'}`}">
+              ${!data.photo_url ? (data.emoji || (type === 'restaurant' ? '🍽️' : '🎯')) : ''}
+            </div>
+            <div class="item-body">
+              <div class="item-tag">${escapeHtml(label || type)}</div>
+              <div class="item-name">${escapeHtml(data.name)}</div>
+              <div class="item-meta">${cityLabel ? cityLabel + ' · ' : ''}Saved ${addedDate}</div>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+function renderProgramsTab() {
+  if (userPrograms.length === 0) {
+    return `
+      <div class="empty">
+        <div class="empty-icon">📅</div>
+        <div class="empty-title">No programs yet</div>
+        <div class="empty-desc">Create a program to plan your trip day by day</div>
+        <a href="index.html#restaurants" class="empty-cta">Browse places →</a>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="section-actions">
+      <div class="section-info">${userPrograms.length} program${userPrograms.length > 1 ? 's' : ''}</div>
+      <button class="btn-primary" onclick="createNewProgram()">+ New Program</button>
+    </div>
+    <div class="programs-grid">
+      ${userPrograms.map(p => {
+        const dateRange = p.start_date 
+          ? `${formatDate(p.start_date)}${p.end_date ? ' → ' + formatDate(p.end_date) : ''}`
+          : 'No dates set';
+        const days = (p.start_date && p.end_date) 
+          ? Math.ceil((new Date(p.end_date) - new Date(p.start_date)) / (1000*60*60*24)) + 1
+          : 1;
+        return `
+          <div class="program-card" onclick="window.location.href='program.html?id=${p.id}'">
+            <div class="program-actions">
+              <button class="program-action-btn danger" onclick="event.stopPropagation();deleteProgram('${p.id}', '${escapeAttr(p.name)}')" title="Delete">🗑️</button>
+            </div>
+            <div class="program-header">
+              <div class="program-icon">📅</div>
+              <div class="program-name">${escapeHtml(p.name)}</div>
+            </div>
+            <div class="program-meta">
+              ${p.city ? `<div class="program-meta-item"><span class="program-meta-icon">📍</span> ${escapeHtml(p.city)}</div>` : ''}
+              <div class="program-meta-item"><span class="program-meta-icon">📆</span> ${dateRange}</div>
+            </div>
+            <div class="program-stats">
+              <div class="program-stat"><strong>${days}</strong>day${days > 1 ? 's' : ''}</div>
+              <div class="program-stat"><strong>${p.itemCount || 0}</strong>item${(p.itemCount || 0) > 1 ? 's' : ''}</div>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+async function removeFromWishlist(itemId, name) {
+  if (!confirm(`Remove "${name}" from your wishlist?`)) return;
+  const { error } = await sb.from('user_wishlist').delete().eq('id', itemId);
+  if (error) { window.toast('❌ Error: ' + error.message); return; }
+  window.toast(`"${name}" removed from wishlist`);
+  await loadWishlist();
+  renderPage();
+}
+
+async function deleteProgram(programId, name) {
+  if (!confirm(`Delete program "${name}"? This will also remove all items in this program. This cannot be undone.`)) return;
+  const { error } = await sb.from('programs').delete().eq('id', programId);
+  if (error) { window.toast('❌ Error: ' + error.message); return; }
+  window.toast(`Program "${name}" deleted`);
+  await loadPrograms();
+  renderPage();
+}
+
+function createNewProgram() {
+  // Réutilise la modal du add-to-modal.js
+  // On simule un "item" générique pour ouvrir la modal de création
+  // En réalité on appelle directement showCreateProgramForm
+  // Trick : on déclenche openAddToModal avec un dummy puis on ouvre direct
+  // Plus simple : on copie le formulaire ici
+  
+  const modalHtml = `
+    <div class="ato-overlay open" id="newProgramOverlay" onclick="if(event.target===this)closeNewProgramModal()">
+      <div class="ato-modal">
+        <div class="ato-header">
+          <div>
+            <h3 class="ato-title">Create new program</h3>
+            <p class="ato-subtitle">Plan a new trip</p>
+          </div>
+          <button class="ato-close" onclick="closeNewProgramModal()">×</button>
+        </div>
+        <div class="ato-content">
+          <div class="ato-form-group">
+            <label class="ato-form-label">Program name *</label>
+            <input type="text" class="ato-form-input" id="newPName" placeholder="Weekend in Paris" maxlength="100">
+          </div>
+          <div class="ato-form-group">
+            <label class="ato-form-label">City</label>
+            <input type="text" class="ato-form-input" id="newPCity" placeholder="Paris" maxlength="80">
+          </div>
+          <div class="ato-form-row">
+            <div class="ato-form-group">
+              <label class="ato-form-label">Start date</label>
+              <input type="date" class="ato-form-input" id="newPStart">
+            </div>
+            <div class="ato-form-group">
+              <label class="ato-form-label">End date</label>
+              <input type="date" class="ato-form-input" id="newPEnd">
+            </div>
+          </div>
+          <div class="ato-form-actions">
+            <button class="ato-btn ato-btn-ghost" onclick="closeNewProgramModal()">Cancel</button>
+            <button class="ato-btn ato-btn-primary" onclick="submitNewProgram()">Create</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => document.getElementById('newPName').focus(), 100);
+}
+
+function closeNewProgramModal() {
+  const modal = document.getElementById('newProgramOverlay');
+  if (modal) modal.remove();
+  document.body.style.overflow = '';
+}
+
+async function submitNewProgram() {
+  const name = document.getElementById('newPName').value.trim();
+  const city = document.getElementById('newPCity').value.trim();
+  const startDate = document.getElementById('newPStart').value;
+  const endDate = document.getElementById('newPEnd').value;
+  if (!name) { window.toast('⚠️ Please enter a program name'); return; }
+  const { error } = await sb.from('programs').insert({
+    user_id: currentUser.id,
+    name: name,
+    city: city || null,
+    start_date: startDate || null,
+    end_date: endDate || null
+  });
+  if (error) { window.toast('❌ Error: ' + error.message); return; }
+  window.toast(`✅ Program "${name}" created!`);
+  closeNewProgramModal();
+  await loadPrograms();
+  renderPage();
+}
+
+function escapeHtml(text) {
+  if (!text && text !== 0) return '';
+  const div = document.createElement('div');
+  div.textContent = String(text);
+  return div.innerHTML;
+}
+
+function escapeAttr(text) {
+  return String(text || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+}
+
+function formatDate(d) {
+  if (!d) return '';
+  return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
 init();

@@ -11,6 +11,7 @@
 <link rel="manifest" href="site.webmanifest">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="add-to-modal.js" defer></script>
 <style>
 :root{--bg:#FDFCF9;--bg2:#F6F3EE;--bg3:#EEEAE2;--sur:#FFFFFF;--ink:#1D2B3A;--ink2:#3B5068;--ink3:#7A93A8;--sage:#6D8F82;--sage-l:#8BAD9E;--gold:#D4A843;--green:#4A9E6F;--red:#C94F3A;--purple:#9D4FCC;--blue:#3B5068;--border:rgba(109,143,130,.18);--shadow:rgba(29,43,58,.07);--disp:'Cormorant Garamond',serif;--ui:'Syne',sans-serif;--body:'DM Sans',sans-serif}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -355,7 +356,10 @@ function goWriteReview() {
   window.location.href = 'index.html?write_review=1&activity_id=' + activity.id;
 }
 
-function addToSchedule() { toast('"' + activity.name + '" added to your schedule!'); }
+function addToSchedule() {
+  if (!activity) return;
+  openAddToModal('activity', activity.id, activity.name);
+}
 
 function escapeHtml(text) {
   if (!text && text !== 0) return '';

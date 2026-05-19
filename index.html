@@ -532,6 +532,7 @@ footer{background:var(--ink);padding:60px 52px 32px}
 }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="add-to-modal.js" defer></script>
 </head>
 <body>
 
@@ -1058,6 +1059,7 @@ footer{background:var(--ink);padding:60px 52px 32px}
 const SUPABASE_URL = 'https://zryfceystyipimniarst.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_uI4dQX6KFlLcxtxqw52ewA_ujacVkch';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+window.sb = sb;
 console.log('✅ Supabase connected');
 // ═════════════════════ AUTHENTICATION ═════════════════════
 
@@ -1506,6 +1508,7 @@ function toast(msg){
   t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),3000);
 }
+window.toast = toast;
 
 // ═════════════════════ MODAL ═════════════════════
 let selectedStar = 0, selectedTrip = '';
@@ -1937,7 +1940,7 @@ function renderActivities(){
           <div class="act-price">${x.price===0?'Free':'$'+x.price}${x.priceVerified ? ' <span style="color:var(--green);font-size:9px;margin-left:2px">✓</span>' : ''}</div>
         </div>
         <div style="display:flex;gap:8px;margin-top:10px">
-          <button class="act-add-btn" onclick="event.stopPropagation();addActivity(this,'${x.name.replace(/'/g,"\\'")}')" style="flex:1">+ Add to schedule</button>
+          <button class="act-add-btn" onclick="event.stopPropagation();openAddToModal('activity', '${x.id}', '${x.name.replace(/'/g,"\\'")}');return false" style="flex:1">+ Add to schedule</button>
           ${x.websiteUrl
             ? `<a href="${x.websiteUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="padding:10px 14px;background:var(--bg2);color:var(--ink);border:1px solid var(--border);border-radius:var(--r-sm);font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;display:flex;align-items:center;gap:4px;transition:all .2s" onmouseover="this.style.background='var(--sage)';this.style.color='white';this.style.borderColor='var(--sage)'" onmouseout="this.style.background='var(--bg2)';this.style.color='var(--ink)';this.style.borderColor='var(--border)'">Visit ↗</a>`
             : ''
@@ -2012,7 +2015,7 @@ function filterRestos(){
         </div>
         <div class="resto-review-snip"><div class="resto-review-snip-text">"${x.topReview.text}"</div><div class="resto-review-snip-by">— ${x.topReview.by}</div></div>
         <div style="display:flex;gap:8px;margin-top:12px">
-          <button class="resto-add-btn" onclick="event.stopPropagation();addResto(this,'${x.name.replace(/'/g,"\\'")}')" style="flex:1">+ Add to schedule</button>
+          <button class="resto-add-btn" onclick="event.stopPropagation();openAddToModal('restaurant', '${x.id}', '${x.name.replace(/'/g,"\\'")}');return false" style="flex:1">+ Add to schedule</button>
           ${x.websiteUrl
             ? `<a href="${x.websiteUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="padding:10px 14px;background:var(--bg2);color:var(--ink);border:1px solid var(--border);border-radius:var(--r-sm);font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;display:flex;align-items:center;gap:4px;transition:all .2s" onmouseover="this.style.background='var(--sage)';this.style.color='white';this.style.borderColor='var(--sage)'" onmouseout="this.style.background='var(--bg2)';this.style.color='var(--ink)';this.style.borderColor='var(--border)'">Visit ↗</a>`
             : ''

@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Program — AFYA</title>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="icon" href="favicon.ico">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#FDFCF9;--bg2:#F6F3EE;--bg3:#EEEAE2;--sur:#FFFFFF;--ink:#1D2B3A;--ink2:#3B5068;--ink3:#7A93A8;--sage:#6D8F82;--sage-l:#8BAD9E;--gold:#D4A843;--green:#4A9E6F;--red:#C94F3A;--purple:#9D4FCC;--blue:#3B5068;--border:rgba(109,143,130,.18);--shadow:rgba(29,43,58,.07);--disp:'Cormorant Garamond',serif;--ui:'Syne',sans-serif;--body:'DM Sans',sans-serif}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg2);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.65;min-height:100vh}
+a{color:inherit;text-decoration:none}
+#nav{position:sticky;top:0;background:var(--sur);border-bottom:1px solid var(--border);padding:14px 32px;display:flex;align-items:center;justify-content:space-between;z-index:50}
+.nav-back{display:flex;align-items:center;gap:8px;font-family:var(--ui);font-size:12px;font-weight:600;color:var(--ink2);cursor:pointer;padding:8px 14px;border-radius:8px;transition:all .2s}
+.nav-back:hover{background:var(--bg2);color:var(--ink)}
+.nav-cta{padding:9px 22px;background:var(--ink);color:white;border:none;border-radius:100px;cursor:pointer;font-family:var(--ui);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;transition:all .2s}
+.nav-cta:hover{background:var(--sage)}
+.container{max-width:900px;margin:40px auto;padding:0 24px}
+.program-header{background:var(--sur);border-radius:20px;padding:36px;margin-bottom:24px;box-shadow:0 8px 24px var(--shadow);position:relative}
+.program-title{font-family:var(--disp);font-size:54px;font-weight:300;color:var(--ink);line-height:1.1;margin-bottom:14px}
+.program-info{display:flex;flex-wrap:wrap;gap:24px;font-family:var(--ui);font-size:13px;color:var(--ink2)}
+.program-info-item{display:flex;align-items:center;gap:8px}
+.program-info-icon{font-size:16px}
+.program-edit-btn{position:absolute;top:24px;right:24px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 14px;cursor:pointer;font-family:var(--ui);font-size:11px;font-weight:600;color:var(--ink2);transition:all .15s}
+.program-edit-btn:hover{background:var(--sage);color:white;border-color:var(--sage)}
+.day-section{background:var(--sur);border-radius:16px;padding:28px;margin-bottom:18px;border:1px solid var(--border)}
+.day-header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.day-title{font-family:var(--disp);font-size:30px;font-weight:400;color:var(--ink)}
+.day-title em{font-style:italic;color:var(--sage)}
+.day-date{font-family:var(--ui);font-size:12px;color:var(--ink3);font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.day-items{display:flex;flex-direction:column;gap:12px}
+.day-item{display:flex;gap:14px;align-items:flex-start;padding:14px;background:var(--bg2);border-radius:12px;border:1px solid var(--border);transition:all .15s;cursor:pointer;position:relative}
+.day-item:hover{transform:translateX(4px);border-color:var(--sage)}
+.day-item-time{font-family:var(--ui);font-size:12px;font-weight:700;color:var(--ink);background:white;padding:6px 10px;border-radius:8px;border:1px solid var(--border);flex-shrink:0;min-width:60px;text-align:center}
+.day-item-time.empty{color:var(--ink3);font-style:italic;font-weight:400}
+.day-item-icon{font-size:28px;flex-shrink:0;width:50px;height:50px;display:flex;align-items:center;justify-content:center;background-size:cover;background-position:center;border-radius:10px}
+.day-item-content{flex:1;min-width:0}
+.day-item-type{font-family:var(--ui);font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--sage);margin-bottom:2px}
+.day-item-name{font-family:var(--ui);font-size:14px;font-weight:700;color:var(--ink);margin-bottom:4px}
+.day-item-meta{font-size:11px;color:var(--ink3);font-family:var(--ui)}
+.day-item-actions{display:flex;gap:6px;align-items:center;opacity:0;transition:opacity .15s}
+.day-item:hover .day-item-actions{opacity:1}
+.day-item-btn{background:white;border:1px solid var(--border);width:30px;height:30px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink2);transition:all .15s;font-size:12px}
+.day-item-btn:hover{background:var(--ink);color:white}
+.day-item-btn.danger:hover{background:var(--red);color:white}
+.empty-day{padding:30px;text-align:center;color:var(--ink3);font-family:var(--ui);font-size:12px;font-style:italic;background:var(--bg2);border-radius:10px;border:1px dashed var(--border)}
+.danger-zone{margin-top:40px;padding:20px;background:rgba(201,79,58,.05);border-radius:12px;border:1px dashed rgba(201,79,58,.3);text-align:center}
+.danger-zone-text{font-family:var(--ui);font-size:11px;color:var(--red);margin-bottom:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:600}
+.btn-danger{padding:9px 20px;background:transparent;color:var(--red);border:1.5px solid var(--red);border-radius:100px;cursor:pointer;font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;transition:all .15s}
+.btn-danger:hover{background:var(--red);color:white}
+.loading,.empty{text-align:center;padding:80px 20px;color:var(--ink3);font-family:var(--ui);font-size:13px}
+.empty-icon{font-size:64px;margin-bottom:16px;opacity:.3}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--ink);color:white;padding:14px 20px;border-radius:10px;font-family:var(--ui);font-size:12px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.2);transform:translateY(100px);opacity:0;transition:all .3s;z-index:9999}
+.toast.show{transform:translateY(0);opacity:1}
+/* Modal edit */
+.modal-overlay{position:fixed;inset:0;background:rgba(29,43,58,.6);backdrop-filter:blur(8px);z-index:9000;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--sur);border-radius:18px;max-width:480px;width:100%;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.modal-title{font-family:var(--disp);font-size:24px;font-weight:400;color:var(--ink);margin-bottom:16px}
+.form-group{margin-bottom:14px}
+.form-label{font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2);margin-bottom:6px;display:block}
+.form-input{width:100%;border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;font-family:var(--body);font-size:13px;background:var(--sur);color:var(--ink);outline:none}
+.form-input:focus{border-color:var(--sage)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
+.btn{padding:10px 18px;border-radius:100px;cursor:pointer;font-family:var(--ui);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border:1.5px solid var(--border);transition:all .15s}
+.btn-ghost{background:transparent;color:var(--ink2)}
+.btn-ghost:hover{background:var(--bg2)}
+.btn-primary{background:var(--ink);color:white;border-color:var(--ink)}
+.btn-primary:hover{background:var(--sage);border-color:var(--sage)}
+@media(max-width:768px){
+  .program-title{font-size:38px}
+  .program-header{padding:24px}
+  .day-section{padding:20px}
+  .container{padding:0 16px}
+}
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <a href="mon-espace.html" class="nav-back">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+    Back to my space
+  </a>
+  <button class="nav-cta" id="authBtn">My Space</button>
+</nav>
+
+<div class="container" id="programContent">
+  <div class="loading">Loading your program…</div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="editModal" onclick="if(event.target===this)closeEditModal()">
+  <div class="modal">
+    <h3 class="modal-title">Edit program</h3>
+    <div class="form-group">
+      <label class="form-label">Name *</label>
+      <input type="text" class="form-input" id="editName" maxlength="100">
+    </div>
+    <div class="form-group">
+      <label class="form-label">City</label>
+      <input type="text" class="form-input" id="editCity" maxlength="80">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Start date</label>
+        <input type="date" class="form-input" id="editStart">
+      </div>
+      <div class="form-group">
+        <label class="form-label">End date</label>
+        <input type="date" class="form-input" id="editEnd">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Description</label>
+      <textarea class="form-input" id="editDesc" rows="3" style="resize:vertical"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeEditModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveProgramEdit()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Item time/notes modal -->
+<div class="modal-overlay" id="itemModal" onclick="if(event.target===this)closeItemModal()">
+  <div class="modal">
+    <h3 class="modal-title">Edit item</h3>
+    <p style="font-size:12px;color:var(--ink2);margin-bottom:14px" id="itemModalName"></p>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Day</label>
+        <input type="number" min="1" class="form-input" id="itemDay">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Time</label>
+        <input type="time" class="form-input" id="itemTime">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <textarea class="form-input" id="itemNotes" rows="2" style="resize:vertical" placeholder="Reservation at 7pm, table for 4..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeItemModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveItemEdit()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><span id="toastMsg"></span></div>
+
+<script>
+const SUPABASE_URL = 'https://zryfceystyipimniarst.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_uI4dQX6KFlLcxtxqw52ewA_ujacVkch';  // REMETS TA CLE
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null;
+let program = null;
+let items = [];
+let editingItem = null;
+
+function getProgramId() {
+  return new URLSearchParams(window.location.search).get('id');
+}
+
+window.toast = function(msg) {
+  document.getElementById('toastMsg').textContent = msg;
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+};
+
+async function init() {
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) { window.location.href = 'index.html'; return; }
+  currentUser = user;
+
+  const id = getProgramId();
+  if (!id) {
+    document.getElementById('programContent').innerHTML = '<div class="empty"><div class="empty-icon">❌</div><div>No program ID provided.</div><a href="mon-espace.html" style="color:var(--sage);margin-top:12px;display:inline-block">← Back</a></div>';
+    return;
+  }
+
+  await loadProgram();
+  await loadItems();
+  renderProgram();
+}
+
+async function loadProgram() {
+  const id = getProgramId();
+  const { data, error } = await sb.from('programs').select('*').eq('id', id).single();
+  if (error || !data) {
+    document.getElementById('programContent').innerHTML = '<div class="empty"><div class="empty-icon">🔍</div><div>Program not found.</div><a href="mon-espace.html" style="color:var(--sage);margin-top:12px;display:inline-block">← Back</a></div>';
+    return;
+  }
+  program = data;
+  document.title = program.name + ' — AFYA';
+}
+
+async function loadItems() {
+  if (!program) return;
+  const { data, error } = await sb
+    .from('program_items')
+    .select(`
+      *,
+      restaurants:restaurant_id(id, name, cuisine, emoji, bg_color, photo_url, city),
+      activities:activity_id(id, name, tag, emoji, bg_color, photo_url, city)
+    `)
+    .eq('program_id', program.id)
+    .order('day_number', { ascending: true })
+    .order('time_slot', { ascending: true, nullsLast: true })
+    .order('position', { ascending: true });
+  if (error) { console.error(error); return; }
+  items = data || [];
+}
+
+function renderProgram() {
+  if (!program) return;
+
+  const dateRange = program.start_date 
+    ? `${formatDate(program.start_date)}${program.end_date ? ' → ' + formatDate(program.end_date) : ''}`
+    : 'No dates set';
+
+  let totalDays = 1;
+  if (program.start_date && program.end_date) {
+    totalDays = Math.ceil((new Date(program.end_date) - new Date(program.start_date)) / (1000*60*60*24)) + 1;
+  }
+  // Make sure we show at least as many days as items reference
+  const maxDayInItems = items.reduce((max, i) => Math.max(max, i.day_number || 1), 1);
+  totalDays = Math.max(totalDays, maxDayInItems);
+
+  let html = `
+    <div class="program-header">
+      <button class="program-edit-btn" onclick="openEditModal()">✏️ Edit</button>
+      <h1 class="program-title">${escapeHtml(program.name)}</h1>
+      <div class="program-info">
+        ${program.city ? `<div class="program-info-item"><span class="program-info-icon">📍</span> ${escapeHtml(program.city)}</div>` : ''}
+        <div class="program-info-item"><span class="program-info-icon">📆</span> ${dateRange}</div>
+        <div class="program-info-item"><span class="program-info-icon">📋</span> ${items.length} item${items.length > 1 ? 's' : ''}</div>
+      </div>
+      ${program.description ? `<p style="margin-top:14px;font-size:14px;color:var(--ink2);line-height:1.6">${escapeHtml(program.description)}</p>` : ''}
+    </div>
+  `;
+
+  for (let d = 1; d <= totalDays; d++) {
+    const dayItems = items.filter(i => (i.day_number || 1) === d);
+    let dayLabel = '';
+    if (program.start_date) {
+      const date = new Date(program.start_date);
+      date.setDate(date.getDate() + (d - 1));
+      dayLabel = date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+    }
+    html += `
+      <div class="day-section">
+        <div class="day-header">
+          <h2 class="day-title">Day <em>${d}</em></h2>
+          ${dayLabel ? `<div class="day-date">${dayLabel}</div>` : ''}
+        </div>
+        ${dayItems.length === 0 ? `
+          <div class="empty-day">No items planned for this day yet.<br>Browse <a href="index.html" style="color:var(--sage);text-decoration:underline">restaurants and activities</a> to add some.</div>
+        ` : `
+          <div class="day-items">
+            ${dayItems.map(item => renderItem(item)).join('')}
+          </div>
+        `}
+      </div>
+    `;
+  }
+
+  html += `
+    <div class="danger-zone">
+      <div class="danger-zone-text">⚠️ Danger zone</div>
+      <button class="btn-danger" onclick="deleteProgram()">Delete this program</button>
+    </div>
+  `;
+
+  document.getElementById('programContent').innerHTML = html;
+}
+
+function renderItem(item) {
+  const r = item.restaurants;
+  const a = item.activities;
+  const data = r || a;
+  if (!data) return '';
+  const type = r ? 'restaurant' : 'activity';
+  const label = r ? data.cuisine : data.tag;
+  const link = r ? `restaurant.html?id=${data.id}` : `activity.html?id=${data.id}`;
+  const timeStr = item.time_slot ? formatTime(item.time_slot) : '—';
+  const iconStyle = data.photo_url 
+    ? `background-image:url('${data.photo_url}')` 
+    : `background:${data.bg_color || '#E8DDD4'}`;
+  const iconContent = data.photo_url ? '' : (data.emoji || (type === 'restaurant' ? '🍽️' : '🎯'));
+  return `
+    <div class="day-item" onclick="window.location.href='${link}'">
+      <div class="day-item-time ${!item.time_slot ? 'empty' : ''}">${timeStr}</div>
+      <div class="day-item-icon" style="${iconStyle}">${iconContent}</div>
+      <div class="day-item-content">
+        <div class="day-item-type">${escapeHtml(label || type)}</div>
+        <div class="day-item-name">${escapeHtml(data.name)}</div>
+        ${item.notes ? `<div class="day-item-meta">📝 ${escapeHtml(item.notes)}</div>` : (data.city ? `<div class="day-item-meta">${escapeHtml(data.city)}</div>` : '')}
+      </div>
+      <div class="day-item-actions">
+        <button class="day-item-btn" onclick="event.stopPropagation();openItemModal('${item.id}')" title="Edit">✏️</button>
+        <button class="day-item-btn danger" onclick="event.stopPropagation();removeItem('${item.id}', '${escapeAttr(data.name)}')" title="Remove">×</button>
+      </div>
+    </div>
+  `;
+}
+
+// ═══ Edit program ═══
+function openEditModal() {
+  document.getElementById('editName').value = program.name;
+  document.getElementById('editCity').value = program.city || '';
+  document.getElementById('editStart').value = program.start_date || '';
+  document.getElementById('editEnd').value = program.end_date || '';
+  document.getElementById('editDesc').value = program.description || '';
+  document.getElementById('editModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeEditModal() {
+  document.getElementById('editModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+async function saveProgramEdit() {
+  const name = document.getElementById('editName').value.trim();
+  if (!name) { window.toast('⚠️ Name is required'); return; }
+  const update = {
+    name: name,
+    city: document.getElementById('editCity').value.trim() || null,
+    start_date: document.getElementById('editStart').value || null,
+    end_date: document.getElementById('editEnd').value || null,
+    description: document.getElementById('editDesc').value.trim() || null,
+    updated_at: new Date().toISOString()
+  };
+  const { error } = await sb.from('programs').update(update).eq('id', program.id);
+  if (error) { window.toast('❌ Error: ' + error.message); return; }
+  window.toast('✅ Program updated');
+  closeEditModal();
+  await loadProgram();
+  renderProgram();
+}
+
+// ═══ Edit item ═══
+function openItemModal(itemId) {
+  const item = items.find(i => i.id === itemId);
+  if (!item) return;
+  editingItem = item;
+  const data = item.restaurants || item.activities;
+  document.getElementById('itemModalName').textContent = data?.name || '';
+  document.getElementById('itemDay').value = item.day_number || 1;
+  document.getElementById('itemTime').value = item.time_slot ? item.time_slot.substring(0, 5) : '';
+  document.getElementById('itemNotes').value = item.notes || '';
+  document.getElementById('itemModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeItemModal() {
+  document.getElementById('itemModal').classList.remove('open');
+  document.body.style.overflow = '';
+  editingItem = null;
+}
+
+async function saveItemEdit() {
+  if (!editingItem) return;
+  const day = parseInt(document.getElementById('itemDay').value) || 1;
+  const time = document.getElementById('itemTime').value || null;
+  const notes = document.getElementById('itemNotes').value.trim() || null;
+  const { error } = await sb.from('program_items').update({
+    day_number: day,
+    time_slot: time,
+    notes: notes
+  }).eq('id', editingItem.id);
+  if (error) { window.toast('❌ Error: ' + error.message); return; }
+  window.toast('✅ Item updated');
+  closeItemModal();
+  await loadItems();
+  renderProgram();
+}
+
+async function removeItem(itemId, name) {
+  if (!confirm(`Remove "${name}" from this program?`)) return;
+  const { error } = await sb.from('program_items').delete().eq('id', itemId);
+  if (error) { window.toast('❌ Error: ' + error.message); return; }
+  window.toast(`"${name}" removed`);
+  await loadItems();
+  renderProgram();
+}
+
+async function deleteProgram() {
+  if (!confirm(`Delete the program "${program.name}"? This will also remove all items in this program. This cannot be undone.`)) return;
+  const { error } = await sb.from('programs').delete().eq('id', program.id);
+  if (error) { window.toast('❌ Error: ' + error.message); return; }
+  window.toast('Program deleted');
+  setTimeout(() => window.location.href = 'mon-espace.html', 800);
+}
+
+function escapeHtml(text) {
+  if (!text && text !== 0) return '';
+  const div = document.createElement('div');
+  div.textContent = String(text);
+  return div.innerHTML;
+}
+
+function escapeAttr(text) {
+  return String(text || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+}
+
+function formatDate(d) {
+  if (!d) return '';
+  return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function formatTime(t) {
+  if (!t) return '';
+  return t.substring(0, 5);
+}
+
+document.getElementById('authBtn').onclick = () => window.location.href = 'mon-espace.html';
+
+init();
+</script>
+</body>
+</html>
