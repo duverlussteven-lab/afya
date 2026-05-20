@@ -125,6 +125,7 @@ textarea{resize:vertical;min-height:80px}
 }
 </style>
 <script src="i18n.js" defer></script>
+<script src="hours-picker.js" defer></script>
 </head>
 <body>
 
@@ -329,6 +330,9 @@ textarea{resize:vertical;min-height:80px}
           Show external review icons (🗺️ ⭐ 📋) on the public site
         </label>
       </div>
+      <div class="form-group" style="margin-top:20px;border-top:1px solid rgba(0,0,0,.08);padding-top:20px">
+  <div id="hoursPickerContainer"></div>
+</div>
       <div class="form-row">
         <div class="form-group">
           <label>🗺️ Google Maps URL</label>
@@ -370,6 +374,7 @@ const SUPABASE_KEY = 'sb_publishable_uI4dQX6KFlLcxtxqw52ewA_ujacVkch';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let allActivities = [];
+let hoursPicker = null;
 let deleteTargetId = null;
 
 async function checkAdmin() {
@@ -486,6 +491,7 @@ function openAddModal() {
   document.getElementById('currentPhotoUrl').value = '';
   resetPhotoPreview();
   document.getElementById('formAlert').className = 'alert';
+  hoursPicker = AfyaHours.create('hoursPickerContainer', null);
   document.getElementById('formModal').classList.add('open');
 }
 
@@ -528,6 +534,7 @@ function openEditModal(id) {
 
   document.getElementById('formAlert').className = 'alert';
   document.getElementById('formModal').classList.add('open');
+  hoursPicker = AfyaHours.create('hoursPickerContainer', r.opening_hours);
 }
 
 function closeModal() {
@@ -624,6 +631,7 @@ async function saveActivity() {
     longitude: parseFloat(document.getElementById('inputLongitude').value) || null,
     show_external_links: document.getElementById('inputShowExternalLinks').checked,
     photo_url: photoUrl,
+    opening_hours: hoursPicker ? hoursPicker.getValue() : null,
     updated_at: new Date().toISOString()
   };
 
