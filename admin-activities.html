@@ -491,7 +491,10 @@ function openAddModal() {
   document.getElementById('currentPhotoUrl').value = '';
   resetPhotoPreview();
   document.getElementById('formAlert').className = 'alert';
-  hoursPicker = AfyaHours.create('hoursPickerContainer', null);
+  hoursPicker = AfyaHours.create('hoursPickerContainer', null, { 
+  entityType: 'restaurant', 
+  minArrival: 60 
+});
   document.getElementById('formModal').classList.add('open');
 }
 
@@ -534,7 +537,10 @@ function openEditModal(id) {
 
   document.getElementById('formAlert').className = 'alert';
   document.getElementById('formModal').classList.add('open');
-  hoursPicker = AfyaHours.create('hoursPickerContainer', r.opening_hours);
+  hoursPicker = AfyaHours.create('hoursPickerContainer', r.opening_hours, { 
+  entityType: 'restaurant', 
+  minArrival: r.min_arrival_before_close || 60 
+});
 }
 
 function closeModal() {
@@ -632,6 +638,7 @@ async function saveActivity() {
     show_external_links: document.getElementById('inputShowExternalLinks').checked,
     photo_url: photoUrl,
     opening_hours: hoursPicker ? hoursPicker.getValue() : null,
+min_arrival_before_close: hoursPicker ? hoursPicker.getMinArrival() : 60,
     updated_at: new Date().toISOString()
   };
 

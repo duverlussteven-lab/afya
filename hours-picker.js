@@ -49,6 +49,32 @@
       }
       .hours-picker-title { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: #1D2B3A; letter-spacing: .05em; }
       .hours-picker-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+      
+      /* Last admission / Min arrival */
+      .hours-min-arrival {
+        background: rgba(212, 168, 67, 0.08);
+        border: 1px solid rgba(212, 168, 67, 0.3);
+        border-radius: 10px; padding: 14px; margin-bottom: 16px;
+      }
+      .hours-min-arrival-label {
+        display: block; font-family: 'Syne', sans-serif; font-size: 11px;
+        font-weight: 700; color: #1D2B3A; letter-spacing: .08em;
+        text-transform: uppercase; margin-bottom: 4px;
+      }
+      .hours-min-arrival-help {
+        font-size: 11px; color: #7A93A8; margin-bottom: 10px;
+        font-family: 'DM Sans', sans-serif; line-height: 1.5;
+      }
+      .hours-min-arrival-options { display: flex; gap: 6px; flex-wrap: wrap; }
+      .hours-min-arrival-btn {
+        padding: 7px 12px; border: 1.5px solid rgba(109,143,130,.3); background: #FFF;
+        border-radius: 100px; cursor: pointer; font-family: 'Syne', sans-serif;
+        font-size: 11px; font-weight: 600; color: #3B5068; transition: all .15s;
+      }
+      .hours-min-arrival-btn:hover { border-color: #6D8F82; background: #F6F3EE; }
+      .hours-min-arrival-btn.active {
+        background: #D4A843; color: #FFF; border-color: #D4A843;
+      }
       .hours-btn {
         padding: 6px 12px; border: 1px solid rgba(109,143,130,.3); background: #FFF;
         border-radius: 8px; cursor: pointer; font-family: 'Syne', sans-serif;
@@ -163,7 +189,7 @@
   // ═══════════════════════════════════════════════════════════
   
   class HoursPicker {
-    constructor(container, initialValue) {
+    constructor(container, initialValue, options = {}) {
       injectStyles();
       this.container = typeof container === 'string' ? document.getElementById(container) : container;
       if (!this.container) {
@@ -171,6 +197,10 @@
         return;
       }
       this.value = this.normalizeValue(initialValue);
+      // Type d'entité : 'restaurant' ou 'activity' (pour les valeurs par défaut)
+      this.entityType = options.entityType || 'restaurant';
+      // Min arrival before close (en minutes)
+      this.minArrival = options.minArrival || (this.entityType === 'restaurant' ? 60 : 45);
       this.render();
       this.attachEvents();
     }
@@ -191,6 +221,13 @@
 
     render() {
       const daysHtml = DAYS.map(d => renderDay(d.key, d.label_en, this.value[d.key])).join('');
+      const minArrivalOptions = [15, 30, 45, 60, 75, 90, 105, 120];
+      const minArrivalHtml = minArrivalOptions.map(m => 
+        `<button type="button" class="hours-min-arrival-btn ${m === this.minArrival ? 'active' : ''}" data-min-arrival="${m}">${m} min</button>`
+      ).join('');
+      
+      const entityLabel = this.entityType === 'restaurant' ? 'eat and pay' : 'enjoy the activity';
+      
       this.container.innerHTML = `
         <div class="hours-picker">
           <div class="hours-picker-header">
@@ -201,6 +238,15 @@
               <button type="button" class="hours-btn hours-btn-danger" data-action="clear-all">Clear all</button>
             </div>
           </div>
+          
+          <div class="hours-min-arrival">
+            <label class="hours-min-arrival-label">⏰ Minimum arrival before closing</label>
+            <div class="hours-min-arrival-help">
+              How many minutes BEFORE closing must the customer arrive to ${entityLabel}? AFYA AI will avoid suggesting this place too close to closing time.
+            </div>
+            <div class="hours-min-arrival-options">${minArrivalHtml}</div>
+          </div>
+          
           <div class="hours-days">${daysHtml}</div>
         </div>
       `;
@@ -238,6 +284,11 @@
             for (const day of DAYS) this.value[day.key] = [];
             this.render();
           }
+        }
+        // Min arrival button
+        else if (target.dataset.minArrival !== undefined) {
+          this.minArrival = parseInt(target.dataset.minArrival);
+          this.render();
         }
       });
       
@@ -302,9 +353,18 @@
       }
       return result;
     }
+    
+    getMinArrival() {
+      return this.minArrival;
+    }
 
     setValue(newValue) {
       this.value = this.normalizeValue(newValue);
+      this.render();
+    }
+    
+    setMinArrival(minutes) {
+      this.minArrival = parseInt(minutes) || 60;
       this.render();
     }
 
@@ -318,14 +378,15 @@
   // ═══════════════════════════════════════════════════════════
   
   window.AfyaHours = {
-    create: function(container, initialValue) {
-      return new HoursPicker(container, initialValue);
+    create: function(container, initialValue, options) {
+      return new HoursPicker(container, initialValue, options);
     },
     
     // Vérifie si un lieu est ouvert à un moment donné
-    // dateStr: "2026-05-20", timeStr: "14:30"
-    isOpenAt: function(openingHours, dateStr, timeStr) {
+    // Prend en compte min_arrival_before_close pour les restos/activités
+    isOpenAt: function(openingHours, dateStr, timeStr, minArrivalBeforeClose) {
       if (!openingHours) return true; // Pas d'horaires définis = supposé ouvert
+      minArrivalBeforeClose = minArrivalBeforeClose || 0;
       
       const date = new Date(dateStr + 'T00:00:00');
       const dayKeys = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
@@ -345,7 +406,8 @@
         let target = targetMinutes;
         if (target < openMin) target += 24 * 60;
         
-        if (target >= openMin && target <= closeMin) return true;
+        // L'user doit arriver au moins minArrivalBeforeClose minutes avant la fermeture
+        if (target >= openMin && target <= (closeMin - minArrivalBeforeClose)) return true;
       }
       return false;
     },
